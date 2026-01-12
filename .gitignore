@@ -1,0 +1,38 @@
+# PSD3-Repos: Meta-level orchestration repo
+# This repo tracks only the orchestration layer, not the sub-repos
+
+# Ignore everything by default
+/*
+
+# Track meta-level orchestration files
+!.gitignore
+!CLAUDE.md
+!Makefile
+!docker-compose.yml
+
+# Track docs (worklog, context, etc.)
+!docs/
+docs/**/.DS_Store
+
+# Track scripts
+!scripts/
+
+# Ignore common junk
+.DS_Store
+*.swp
+*~
+.psc-ide-port
+erl_crash.dump
+.claude/
+
+# Sub-repos are managed separately (each has its own git)
+# These are explicitly listed for clarity:
+# - visualisation libraries/
+# - showcases/
+# - site/
+# - apps/
+# - _external/
+# - purescript-linear/
+# - purescript-lua/
+# - purescript-lua-package-sets/
+# - purescript-python-new/

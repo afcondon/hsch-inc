@@ -1,0 +1,151 @@
+# Polyglot PureScript - Full Stack
+#
+# Runs all showcases behind the Scuppered Ligature edge layer
+#
+# Usage:
+#   docker-compose up          # Start everything
+#   docker-compose up edge     # Just the edge layer
+#   docker-compose up --scale edge=3  # Multiple edge instances
+
+version: '3.8'
+
+services:
+  # ============================================================
+  # EDGE LAYER (Lua/Nginx)
+  # ============================================================
+  edge:
+    build:
+      context: ./site/scuppered-ligature
+      dockerfile: docker/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - landing
+      - dashboard
+    networks:
+      - polyglot
+
+  # ============================================================
+  # LANDING & DASHBOARD
+  # ============================================================
+  landing:
+    image: python:3-alpine
+    command: python -m http.server 8080
+    working_dir: /app
+    volumes:
+      - ./site/landing/public:/app
+    networks:
+      - polyglot
+
+  dashboard:
+    build:
+      context: ./site/dashboard
+    ports:
+      - "9000:9000"  # Also expose directly for dev
+    networks:
+      - polyglot
+
+  # ============================================================
+  # TILTED RADIO (Erlang)
+  # ============================================================
+  tidal-backend:
+    build:
+      context: ./showcases/psd3-tilted-radio/purerl-tidal
+    ports:
+      - "8083:8083"
+    networks:
+      - polyglot
+
+  tidal-frontend:
+    image: python:3-alpine
+    command: python -m http.server 8084
+    working_dir: /app
+    volumes:
+      - ./showcases/psd3-tilted-radio/purescript-psd3-tidal:/app
+    networks:
+      - polyglot
+
+  # ============================================================
+  # HYPO-PUNTER (Python)
+  # ============================================================
+  ee-backend:
+    build:
+      context: ./showcases/hypo-punter/ee-server
+    ports:
+      - "5081:5081"
+    networks:
+      - polyglot
+
+  ee-frontend:
+    image: python:3-alpine
+    command: python -m http.server 8087
+    working_dir: /app
+    volumes:
+      - ./showcases/hypo-punter/ee-website/public:/app
+    networks:
+      - polyglot
+
+  ge-backend:
+    build:
+      context: ./showcases/hypo-punter/ge-server
+    ports:
+      - "5082:5082"
+    networks:
+      - polyglot
+
+  ge-frontend:
+    image: python:3-alpine
+    command: python -m http.server 8088
+    working_dir: /app
+    volumes:
+      - ./showcases/hypo-punter/ge-website/public:/app
+    networks:
+      - polyglot
+
+  # ============================================================
+  # ARID KEYSTONE (JS only)
+  # ============================================================
+  sankey:
+    image: python:3-alpine
+    command: python -m http.server 8089
+    working_dir: /app
+    volumes:
+      - ./showcases/psd3-arid-keystone/demo:/app
+    networks:
+      - polyglot
+
+  # ============================================================
+  # CORRODE EXPEL (Node.js + JS)
+  # ============================================================
+  ce-backend:
+    build:
+      context: ./showcases/corrode-expel/ce-server
+    ports:
+      - "3000:3000"
+    networks:
+      - polyglot
+
+  ce-frontend:
+    image: python:3-alpine
+    command: python -m http.server 8082
+    working_dir: /app
+    volumes:
+      - ./showcases/corrode-expel/ce2-website/public:/app
+    networks:
+      - polyglot
+
+  # ============================================================
+  # WASM FORCE DEMO (Rust/WASM)
+  # ============================================================
+  wasm-demo:
+    image: python:3-alpine
+    command: python -m http.server 8079
+    working_dir: /app
+    volumes:
+      - ./showcases/wasm-force-demo:/app
+    networks:
+      - polyglot
+
+networks:
+  polyglot:
+    driver: bridge
