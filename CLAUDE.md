@@ -240,13 +240,33 @@ docs/kb/
 └── archive/           # Superseded/completed docs
 ```
 
-**When creating reports**: Use `_TEMPLATE.md` with YAML frontmatter (title, category, status, tags, summary).
+### For Claude: When to Consult the KB
+
+1. **At session start**: If the task involves unfamiliar territory (a showcase you haven't touched, a backend you're unsure about), skim `INDEX.md` for relevant reports.
+
+2. **Before designing**: Check `architecture/` and `plans/` for existing decisions. Don't reinvent what's already been designed.
+
+3. **When stuck**: The `howto/` guides and `reference/` docs often have solutions to common problems.
+
+4. **Key document**: `kb/reference/claude-context.md` is the comprehensive ecosystem reference - consult it for the big picture.
+
+### For Claude: Maintaining the KB
+
+- **After substantive work**: If you produced analysis, design docs, or plans worth preserving, add them to the KB or update `INDEX.md` to point to them.
+
+- **When finding stale docs**: Note in the worklog if a report appears outdated. Don't delete without user confirmation.
+
+- **Promote vs index**: Copy to `kb/` only for key cross-cutting docs. Most reports stay in their source repos and are just indexed.
+
+### For User: Quick Reference
+
+- **Find reports**: `docs/kb/INDEX.md` has everything with status and tags
+- **Add new report**: Copy `_TEMPLATE.md`, fill frontmatter, place in appropriate category
+- **Print for offline**: Reports are designed to be readable as standalone documents
 
 **Categories**: architecture, plan, research, reference, howto
 
 **Status values**: active, implemented, stale, superseded
-
-Reports in sub-repos (showcases/, apps/, etc.) are indexed in `INDEX.md` but remain in their original locations.
 
 ## Related Documentation
 
