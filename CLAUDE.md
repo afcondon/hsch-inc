@@ -224,9 +224,33 @@ Use `docs/worklog/_TEMPLATE.md` as the template. Multiple sessions on the same d
 
 **What makes this valuable**: The "Explored But Not Pursued" and "Parking Lot" sections capture what traditional reports miss - the paths not taken and the ideas that surfaced but weren't addressed.
 
+## Knowledge Base
+
+The `docs/kb/` directory contains classified technical reports:
+
+```
+docs/kb/
+├── INDEX.md           # Master index of all reports
+├── _TEMPLATE.md       # Template for new reports
+├── architecture/      # System design documents
+├── plans/             # Implementation roadmaps
+├── research/          # Analysis and investigations
+├── reference/         # Specifications and status docs
+├── howto/             # Practical guides
+└── archive/           # Superseded/completed docs
+```
+
+**When creating reports**: Use `_TEMPLATE.md` with YAML frontmatter (title, category, status, tags, summary).
+
+**Categories**: architecture, plan, research, reference, howto
+
+**Status values**: active, implemented, stale, superseded
+
+Reports in sub-repos (showcases/, apps/, etc.) are indexed in `INDEX.md` but remain in their original locations.
+
 ## Related Documentation
 
-- `docs/CLAUDE-CONTEXT.md` - Comprehensive ecosystem reference
-- `docs/PUREPY-BUILD-SYSTEM.md` - Python backend details
+- `docs/kb/INDEX.md` - Knowledge base index (38 reports)
+- `docs/kb/reference/claude-context.md` - Comprehensive ecosystem reference
 - `docs/worklog/` - Session logs and work-in-progress context
 - Purerl Cookbook: https://purerl-cookbook.readthedocs.io/
