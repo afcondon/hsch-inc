@@ -78,6 +78,15 @@ type EngineAdapter node =
 ## Migration Path
 
 - Phase 1: Extract Core ✅
-- Phase 2: Separate Packages (pending)
+- Phase 2: Separate Packages (pending) → See [detailed plan](../plans/kernel-separation-phase2.md)
 - Phase 3: Expand Kernels
 - Phase 4: Build Tooling
+
+## Phase 2 Summary
+
+The detailed Phase 2 plan covers:
+1. **psd3-simulation-core**: Kernel-agnostic types, EngineAdapter interface, tick-based animation
+2. **psd3-d3-kernel**: D3.js force implementation with all FFI bindings
+3. **psd3-wasm-kernel**: Rust/WASM force implementation
+
+Key insight: `EngineAdapter` provides the abstraction boundary. Code written against `EngineAdapter` works with any kernel.

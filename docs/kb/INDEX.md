@@ -20,10 +20,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (15 documents)
+## Plans (16 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Kernel Separation Phase 2 | active | `docs/kb/plans/kernel-separation-phase2.md` | WASM, D3, kernel, separation |
 | Formula Analysis Module Plan | implemented | `apps/shaped-steer/docs/ANALYSIS-MODULE-PLAN.md` | analysis, spreadsheet, formulas |
 | Excel Compiler Implementation | implemented | `apps/shaped-steer/docs/EXCEL-COMPILER-IMPLEMENTATION-PLAN.md` | Excel, compiler, FFI |
 | Excel-to-PS Scope Assessment | implemented | `apps/shaped-steer/docs/EXCEL-TO-PURESCRIPT-SCOPE.md` | Excel, scope, Python |
@@ -86,8 +87,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 38 documents
-- **Active**: 32
+- **Total**: 39 documents
+- **Active**: 33
 - **Implemented**: 5
 - **Superseded/Stale**: 1
 

@@ -291,7 +291,7 @@ ps-tidal: lib-layout lib-selection lib-simulation lib-showcase-shell
 .PHONY: serve-wasm serve-ee serve-ee-backend serve-ge serve-ge-backend
 .PHONY: serve-sankey serve-code-explorer serve-code-explorer-backend
 .PHONY: serve-tidal serve-tidal-backend serve-astar serve-landing
-.PHONY: serve-dashboard
+.PHONY: serve-website serve-dashboard
 
 # Default ports (can be overridden: make serve-ee PORT=9087)
 PORT ?= 8080
@@ -358,6 +358,14 @@ serve-tidal-backend: purerl-tidal
 serve-astar: lib-astar-demo
 	@echo "Serving A* Demo on port $(PORT)..."
 	cd "$(VIS_LIBS)/psd3-astar-demo" && python3 -m http.server $(PORT)
+
+# Demo Website
+serve-website:
+	@echo "Serving Demo Website on port $(PORT)..."
+	@echo "Building and bundling demo-website..."
+	cd "$(SITE)/website" && spago bundle
+	@echo "Starting server at http://localhost:$(PORT)/#/home"
+	cd "$(SITE)/website/public" && python3 -m http.server $(PORT)
 
 # ============================================================================
 # CLEAN
@@ -647,6 +655,7 @@ help:
 	@echo ""
 	@echo "Serve targets (run dev servers):"
 	@echo "  make dashboard    - Dev dashboard (:9000)"
+	@echo "  make serve-website - Demo website"
 	@echo "  make serve-wasm   - WASM demo"
 	@echo "  make serve-ee     - Embedding Explorer frontend"
 	@echo "  make serve-ge     - Grid Explorer frontend"
