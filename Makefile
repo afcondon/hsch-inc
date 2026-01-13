@@ -49,6 +49,12 @@ endif
 CARGO_BIN := $(HOME)/.cargo/bin
 RUST_PATH := $(CARGO_BIN):$(PATH)
 
+# pslua (PureScript → Lua)
+PSLUA := $(shell find $(CURDIR)/purescript-lua/.stack-work -name pslua -type f 2>/dev/null | grep "/bin/" | head -1)
+ifeq ($(PSLUA),)
+PSLUA := pslua
+endif
+
 # ============================================================================
 # DIRECTORIES
 # ============================================================================
@@ -67,6 +73,7 @@ APPS := apps
 .PHONY: lib-tree lib-graph lib-layout lib-selection lib-music lib-simulation
 .PHONY: lib-showcase-shell lib-simulation-halogen lib-astar-demo
 .PHONY: app-wasm app-embedding-explorer app-sankey app-code-explorer app-tilted-radio
+.PHONY: app-edge
 .PHONY: wasm-kernel
 .PHONY: npm-install npm-install-embedding-explorer npm-install-code-explorer
 .PHONY: ee-server ge-server ee-website ge-website landing
@@ -138,7 +145,7 @@ lib-astar-demo: lib-simulation lib-graph
 # SHOWCASE APPLICATIONS
 # ============================================================================
 
-apps: app-wasm app-embedding-explorer app-sankey app-code-explorer app-tilted-radio
+apps: app-wasm app-embedding-explorer app-sankey app-code-explorer app-tilted-radio app-edge
 	@echo "All applications built successfully"
 
 # ----------------------------------------------------------------------------
@@ -274,8 +281,10 @@ purerl-tidal:
 	cd "$(SHOWCASES)/psd3-tilted-radio/purerl-tidal" && spago build
 	@echo "Transpiling to Erlang..."
 	cd "$(SHOWCASES)/psd3-tilted-radio/purerl-tidal" && $(PURERL)
-	@echo "Compiling Erlang..."
+	@echo "Compiling Erlang (rebar3 deps)..."
 	cd "$(SHOWCASES)/psd3-tilted-radio/purerl-tidal" && rebar3 compile
+	@echo "Compiling purerl output to BEAM..."
+	cd "$(SHOWCASES)/psd3-tilted-radio/purerl-tidal" && find output -name "*.erl" -exec erlc -o ebin {} \;
 
 # PureScript frontend
 ps-tidal: lib-layout lib-selection lib-simulation lib-showcase-shell
@@ -283,6 +292,22 @@ ps-tidal: lib-layout lib-selection lib-simulation lib-showcase-shell
 	cd "$(SHOWCASES)/psd3-tilted-radio/purescript-psd3-tidal" && spago build
 	@echo "Bundling purescript-psd3-tidal..."
 	cd "$(SHOWCASES)/psd3-tilted-radio/purescript-psd3-tidal" && spago bundle
+
+# ----------------------------------------------------------------------------
+# Scuppered Ligature (Edge Layer - Lua)
+# ----------------------------------------------------------------------------
+
+app-edge:
+	@echo "Building scuppered-ligature (PureScript → Lua)..."
+	cd "$(SHOWCASES)/scuppered-ligature" && spago build
+	@echo "Compiling to Lua..."
+	@if [ -x "$(PSLUA)" ]; then \
+		cd "$(SHOWCASES)/scuppered-ligature" && $(PSLUA) --foreign-path lua-ffi --ps-output output --lua-output-file dist/edge.lua --entry Main; \
+	else \
+		echo "WARNING: pslua not found, skipping Lua compilation"; \
+		echo "  Install from: https://github.com/Unisay/purescript-lua"; \
+		echo "  Existing dist/edge.lua will be used"; \
+	fi
 
 # ============================================================================
 # SERVE TARGETS (for dev-dashboard integration)
@@ -521,6 +546,9 @@ check-tools:
 	command -v rebar3 >/dev/null 2>&1 && echo "  ✓ rebar3: $$(rebar3 --version 2>/dev/null | head -1)" || echo "  ✗ rebar3"; \
 	command -v erl >/dev/null 2>&1 && echo "  ✓ erlang: $$(erl -eval 'io:format(\"~s\", [erlang:system_info(otp_release)]), halt().' -noshell 2>/dev/null)" || echo "  ✗ erlang"; \
 	echo ""; \
+	echo "pslua tools (for scuppered-ligature edge layer):"; \
+	command -v $(PSLUA) >/dev/null 2>&1 && echo "  ✓ pslua: $$($(PSLUA) --version 2>/dev/null | head -1)" || echo "  ○ pslua (optional - from github.com/Unisay/purescript-lua)"; \
+	echo ""; \
 	echo "WASM tools (for wasm-force-demo):"; \
 	if [ -x "$(WASM_PACK)" ]; then echo "  ✓ wasm-pack: $$($(WASM_PACK) --version 2>/dev/null)"; else echo "  ✗ wasm-pack (cargo install wasm-pack)"; fi; \
 	command -v cargo >/dev/null 2>&1 && echo "  ✓ cargo: $$(cargo --version)" || echo "  ✗ cargo"; \
@@ -585,6 +613,7 @@ show-config:
 	@echo "Tool paths:"
 	@echo "  PUREPY:    $(PUREPY)"
 	@echo "  PURERL:    $(PURERL)"
+	@echo "  PSLUA:     $(PSLUA)"
 	@echo "  WASM_PACK: $(WASM_PACK)"
 	@echo ""
 	@echo "To override, run: make PUREPY=/path/to/purepy <target>"
@@ -623,6 +652,84 @@ deps-json:
 dashboard: serve-dashboard
 
 # ============================================================================
+# DOCKER TARGETS
+# ============================================================================
+
+.PHONY: docker-build docker-up docker-down docker-logs docker-clean
+.PHONY: docker-prepare docker-deploy docker-status
+
+# Build all Docker images (run 'make apps' first to compile everything)
+docker-build:
+	@echo "Building Docker images..."
+	docker-compose build
+
+# Start the full stack
+docker-up:
+	@echo "Starting Docker stack..."
+	docker-compose up -d
+	@echo ""
+	@echo "Services starting. Access at:"
+	@echo "  http://localhost/           - Landing page"
+	@echo "  http://localhost/dashboard  - Dev dashboard"
+	@echo "  http://localhost:9000/      - Dashboard (direct)"
+	@echo ""
+	@echo "Run 'make docker-logs' to follow logs"
+
+# Stop all containers
+docker-down:
+	@echo "Stopping Docker stack..."
+	docker-compose down
+
+# Follow logs
+docker-logs:
+	docker-compose logs -f
+
+# Show status
+docker-status:
+	@echo "Docker stack status:"
+	@docker-compose ps
+
+# Remove all containers and images
+docker-clean:
+	@echo "Removing Docker containers and images..."
+	docker-compose down --rmi all -v
+
+# Full preparation: build apps + build Docker images
+docker-prepare: apps docker-build
+	@echo ""
+	@echo "============================================"
+	@echo "Docker images ready!"
+	@echo "============================================"
+	@docker images | grep -E "^psd3|REPOSITORY"
+
+# Deploy to remote host via SSH
+# Usage: make docker-deploy HOST=user@macmini
+docker-deploy:
+	@if [ -z "$(HOST)" ]; then \
+		echo "Usage: make docker-deploy HOST=user@host"; \
+		echo ""; \
+		echo "This will:"; \
+		echo "  1. SSH to the remote host"; \
+		echo "  2. Pull latest code from git"; \
+		echo "  3. Run 'make docker-prepare'"; \
+		echo "  4. Start the Docker stack"; \
+		exit 1; \
+	fi
+	@echo "=== Deploying to $(HOST) ==="
+	@echo ""
+	@echo "Checking SSH connectivity..."
+	@ssh -o ConnectTimeout=5 $(HOST) "echo 'SSH OK'" || { echo "SSH failed"; exit 1; }
+	@echo ""
+	@echo "Checking Docker on remote..."
+	@ssh $(HOST) "docker --version" || { echo "Docker not found on remote"; exit 1; }
+	@echo ""
+	@echo "Pulling latest code and building..."
+	@ssh $(HOST) "cd ~/psd3 && git pull && make docker-prepare && make docker-up"
+	@echo ""
+	@echo "=== Deployment complete ==="
+	@echo "Access at: http://$(HOST)/"
+
+# ============================================================================
 # HELP
 # ============================================================================
 
@@ -652,6 +759,7 @@ help:
 	@echo "  make app-sankey   - Sankey editor"
 	@echo "  make app-code-explorer - Code explorer"
 	@echo "  make app-tilted-radio - Tidal/algorave"
+	@echo "  make app-edge     - Edge layer (Lua)"
 	@echo ""
 	@echo "Serve targets (run dev servers):"
 	@echo "  make dashboard    - Dev dashboard (:9000)"
@@ -663,6 +771,15 @@ help:
 	@echo "  make serve-code-explorer - Code Explorer"
 	@echo "  make serve-tidal  - Tidal Editor"
 	@echo "  make serve-astar  - A* Demo"
+	@echo ""
+	@echo "Docker targets:"
+	@echo "  make docker-build   - Build all Docker images"
+	@echo "  make docker-up      - Start the stack"
+	@echo "  make docker-down    - Stop the stack"
+	@echo "  make docker-logs    - Follow container logs"
+	@echo "  make docker-status  - Show container status"
+	@echo "  make docker-prepare - Build apps + Docker images"
+	@echo "  make docker-deploy HOST=user@host - Deploy remotely"
 	@echo ""
 	@echo "Utility targets:"
 	@echo "  make check-tools  - Verify prerequisites"

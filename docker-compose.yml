@@ -3,11 +3,20 @@
 # Runs all showcases behind the Scuppered Ligature edge layer
 #
 # Usage:
-#   docker-compose up          # Start everything
-#   docker-compose up edge     # Just the edge layer
-#   docker-compose up --scale edge=3  # Multiple edge instances
-
-version: '3.8'
+#   docker-compose build        # Build all images
+#   docker-compose up -d        # Start all services
+#   docker-compose logs -f      # Follow logs
+#   docker-compose down         # Stop all services
+#
+# Routes (via edge layer at port 80):
+#   /           - Polyglot PureScript home (website)
+#   /website    - PSD3 documentation (alias)
+#   /ee         - Embedding Explorer (UI at /ee, API at /ee/api)
+#   /ge         - Grid Explorer (UI at /ge, API at /ge/api)
+#   /tidal      - Tidal Editor (UI at /tidal, API at /tidal/api)
+#   /code       - Code Explorer (UI at /code, API at /code/api)
+#   /sankey     - Sankey Editor
+#   /wasm       - WASM Force Demo
 
 services:
   # ============================================================
@@ -15,38 +24,36 @@ services:
   # ============================================================
   edge:
     build:
-      context: ./site/scuppered-ligature
+      context: ./showcases/scuppered-ligature
       dockerfile: docker/Dockerfile
     ports:
       - "80:80"
     depends_on:
-      - landing
-      - dashboard
+      - website
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/edge/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   # ============================================================
-  # LANDING & DASHBOARD
+  # CORE SERVICES
   # ============================================================
-  landing:
-    image: python:3-alpine
-    command: python -m http.server 8080
-    working_dir: /app
-    volumes:
-      - ./site/landing/public:/app
-    networks:
-      - polyglot
-
-  dashboard:
+  website:
     build:
-      context: ./site/dashboard
-    ports:
-      - "9000:9000"  # Also expose directly for dev
+      context: ./site/website
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   # ============================================================
-  # TILTED RADIO (Erlang)
+  # TILTED RADIO (Erlang + JavaScript)
   # ============================================================
   tidal-backend:
     build:
@@ -55,18 +62,26 @@ services:
       - "8083:8083"
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8083/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
 
   tidal-frontend:
-    image: python:3-alpine
-    command: python -m http.server 8084
-    working_dir: /app
-    volumes:
-      - ./showcases/psd3-tilted-radio/purescript-psd3-tidal:/app
+    build:
+      context: ./showcases/psd3-tilted-radio/purescript-psd3-tidal
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   # ============================================================
-  # HYPO-PUNTER (Python)
+  # HYPO-PUNTER (Python + JavaScript)
   # ============================================================
   ee-backend:
     build:
@@ -75,15 +90,23 @@ services:
       - "5081:5081"
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5081/')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
 
   ee-frontend:
-    image: python:3-alpine
-    command: python -m http.server 8087
-    working_dir: /app
-    volumes:
-      - ./showcases/hypo-punter/ee-website/public:/app
+    build:
+      context: ./showcases/hypo-punter/ee-website
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   ge-backend:
     build:
@@ -92,59 +115,80 @@ services:
       - "5082:5082"
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5082/')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
 
   ge-frontend:
-    image: python:3-alpine
-    command: python -m http.server 8088
-    working_dir: /app
-    volumes:
-      - ./showcases/hypo-punter/ge-website/public:/app
+    build:
+      context: ./showcases/hypo-punter/ge-website
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   # ============================================================
   # ARID KEYSTONE (JS only)
   # ============================================================
   sankey:
-    image: python:3-alpine
-    command: python -m http.server 8089
-    working_dir: /app
-    volumes:
-      - ./showcases/psd3-arid-keystone/demo:/app
+    build:
+      context: ./showcases/psd3-arid-keystone
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   # ============================================================
-  # CORRODE EXPEL (Node.js + JS)
+  # CORRODE EXPEL (Node.js + JavaScript)
   # ============================================================
   ce-backend:
     build:
-      context: ./showcases/corrode-expel/ce-server
+      context: ./showcases/corrode-expel
+      dockerfile: ce-server/Dockerfile
     ports:
       - "3000:3000"
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
 
   ce-frontend:
-    image: python:3-alpine
-    command: python -m http.server 8082
-    working_dir: /app
-    volumes:
-      - ./showcases/corrode-expel/ce2-website/public:/app
+    build:
+      context: ./showcases/corrode-expel/ce2-website
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   # ============================================================
-  # WASM FORCE DEMO (Rust/WASM)
+  # WASM FORCE DEMO (Rust/WASM + JavaScript)
   # ============================================================
   wasm-demo:
-    image: python:3-alpine
-    command: python -m http.server 8079
-    working_dir: /app
-    volumes:
-      - ./showcases/wasm-force-demo:/app
+    build:
+      context: ./showcases/wasm-force-demo
     networks:
       - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
 networks:
   polyglot:
