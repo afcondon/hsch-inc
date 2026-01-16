@@ -10,20 +10,24 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ---
 
-## Architecture (5 documents)
+## Architecture (6 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Unified DAG Vision | active | `apps/shaped-steer/docs/UNIFIED-DAG-VISION.md` | vision, DAG, spreadsheet, notebook, build-system, AI |
 | psd3-sheetless Architecture | active | `apps/shaped-steer/docs/ARCHITECTURE.md` | spreadsheet, comonad, finally-tagless |
 | Async Evaluation Architecture | active | `apps/shaped-steer/docs/ASYNC-EVALUATION-ARCHITECTURE.md` | async, database, streaming |
 | purerl-tidal Architecture | active | `showcases/psd3-tilted-radio/purerl-tidal/docs/ARCHITECTURE.md` | music, Tidal, Erlang |
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (16 documents)
+## Plans (19 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Finally Tagless AST | active | `docs/kb/plans/finally-tagless-ast.md` | AST, finally-tagless, extensibility, visualization |
+| Makefile to Build à la Carte | active | `apps/shaped-steer/docs/MAKEFILE-BUILD-PLAN.md` | shaped-steer, purescript-build, arid-keystone, makefile |
+| Typed Cells Design | active | `apps/shaped-steer/docs/TYPED-CELLS-DESIGN.md` | spreadsheet, notebook, compilation, Try-PureScript |
 | Kernel Separation Phase 2 | active | `docs/kb/plans/kernel-separation-phase2.md` | WASM, D3, kernel, separation |
 | Formula Analysis Module Plan | implemented | `apps/shaped-steer/docs/ANALYSIS-MODULE-PLAN.md` | analysis, spreadsheet, formulas |
 | Excel Compiler Implementation | implemented | `apps/shaped-steer/docs/EXCEL-COMPILER-IMPLEMENTATION-PLAN.md` | Excel, compiler, FFI |
@@ -87,15 +91,16 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 39 documents
-- **Active**: 33
+- **Total**: 42 documents
+- **Active**: 36
 - **Implemented**: 5
 - **Superseded/Stale**: 1
 
 ## Major Themes
 
 1. **Functional Spreadsheets** - Comonads, finally-tagless DSL, Excel interop
-2. **Algorithmic Music** - Tidal patterns, Erlang backend, modular synth
-3. **Visualization** - D3-style declarative system (psd3-selection, graph, tree)
-4. **Multi-Backend** - JS, Python (PurePy), Erlang (purerl), Lua (pslua), WASM
-5. **DevOps** - Docker, deployment, test infrastructure
+2. **Unified DAG Systems** - Spreadsheet/notebook/build unification, human+AI co-driving
+3. **Algorithmic Music** - Tidal patterns, Erlang backend, modular synth
+4. **Visualization** - D3-style declarative system (psd3-selection, graph, tree)
+5. **Multi-Backend** - JS, Python (PurePy), Erlang (purerl), Lua (pslua), WASM
+6. **DevOps** - Docker, deployment, test infrastructure
