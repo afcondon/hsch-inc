@@ -73,12 +73,15 @@ APPS := apps
 .PHONY: lib-tree lib-graph lib-layout lib-selection lib-music lib-simulation
 .PHONY: lib-showcase-shell lib-simulation-halogen lib-astar-demo
 .PHONY: app-wasm app-embedding-explorer app-sankey app-code-explorer app-tilted-radio
-.PHONY: app-edge
+.PHONY: app-timber-lieder app-edge app-emptier-coinage
 .PHONY: wasm-kernel
 .PHONY: npm-install npm-install-embedding-explorer npm-install-code-explorer
 .PHONY: ee-server ge-server ee-website ge-website landing
 .PHONY: ce-database ce-server ce2-website vscode-ext
 .PHONY: purerl-tidal ps-tidal
+.PHONY: lib-sites lib-site-selection lib-site-simulation lib-site-layout
+.PHONY: lib-site-graph lib-site-music lib-site-tree lib-site-shell
+.PHONY: website
 
 # ============================================================================
 # TOP-LEVEL TARGETS
@@ -145,7 +148,7 @@ lib-astar-demo: lib-simulation lib-graph
 # SHOWCASE APPLICATIONS
 # ============================================================================
 
-apps: app-wasm app-embedding-explorer app-sankey app-code-explorer app-tilted-radio app-edge
+apps: app-wasm app-embedding-explorer app-sankey app-code-explorer app-tilted-radio app-timber-lieder app-edge app-emptier-coinage
 	@echo "All applications built successfully"
 
 # ----------------------------------------------------------------------------
@@ -236,7 +239,19 @@ app-sankey: lib-layout lib-selection
 	@echo "Building sankey editor..."
 	cd "$(SHOWCASES)/psd3-arid-keystone" && spago build
 	@echo "Bundling sankey editor..."
-	cd "$(SHOWCASES)/psd3-arid-keystone" && spago bundle --module Main --outfile demo/bundle.js
+	cd "$(SHOWCASES)/psd3-arid-keystone" && spago bundle -p psd3-sankey-editor --module Main --outfile demo/bundle.js
+
+# ----------------------------------------------------------------------------
+# TreeBuilder Demo (psd3-timber-lieder)
+# ----------------------------------------------------------------------------
+
+app-timber-lieder: lib-selection
+	@echo "Installing npm dependencies for timber-lieder..."
+	cd "$(SHOWCASES)/psd3-timber-lieder" && npm install
+	@echo "Building timber-lieder..."
+	cd "$(SHOWCASES)/psd3-timber-lieder" && spago build
+	@echo "Bundling timber-lieder..."
+	cd "$(SHOWCASES)/psd3-timber-lieder" && spago bundle --module Main --outfile demo/bundle.js
 
 # ----------------------------------------------------------------------------
 # Code Explorer (Corrode Expel)
@@ -294,6 +309,16 @@ ps-tidal: lib-layout lib-selection lib-simulation lib-showcase-shell
 	cd "$(SHOWCASES)/psd3-tilted-radio/purescript-psd3-tidal" && spago bundle
 
 # ----------------------------------------------------------------------------
+# Emptier Coinage (Optics Showcase)
+# ----------------------------------------------------------------------------
+
+app-emptier-coinage: lib-layout lib-selection
+	@echo "Building emptier-coinage..."
+	cd "$(SHOWCASES)/emptier-coinage" && spago build
+	@echo "Bundling emptier-coinage..."
+	cd "$(SHOWCASES)/emptier-coinage" && spago bundle --platform browser --bundle-type app --outfile public/bundle.js
+
+# ----------------------------------------------------------------------------
 # Scuppered Ligature (Edge Layer - Lua)
 # ----------------------------------------------------------------------------
 
@@ -310,11 +335,62 @@ app-edge:
 	fi
 
 # ============================================================================
+# LIBRARY DOCUMENTATION SITES
+# ============================================================================
+# Landing pages for each PSD3 library, served at /psd3/<lib>/
+
+# Build all library sites
+lib-sites: lib-site-shell lib-site-selection lib-site-simulation lib-site-layout lib-site-graph lib-site-music lib-site-tree
+	@echo "All library sites built successfully"
+
+# Shared shell component (dependency for all lib sites)
+lib-site-shell:
+	@echo "Building lib-shell (shared component)..."
+	cd "$(SITE)/lib-shell" && spago build
+
+# Individual library sites
+lib-site-selection: lib-site-shell
+	@echo "Building lib-selection site..."
+	cd "$(SITE)/lib-selection" && spago build
+	@echo "Bundling lib-selection..."
+	cd "$(SITE)/lib-selection" && spago bundle --module Main --outfile public/bundle.js
+
+lib-site-simulation: lib-site-shell
+	@echo "Building lib-simulation site..."
+	cd "$(SITE)/lib-simulation" && spago build
+	@echo "Bundling lib-simulation..."
+	cd "$(SITE)/lib-simulation" && spago bundle --module Main --outfile public/bundle.js
+
+lib-site-layout: lib-site-shell
+	@echo "Building lib-layout site..."
+	cd "$(SITE)/lib-layout" && spago build
+	@echo "Bundling lib-layout..."
+	cd "$(SITE)/lib-layout" && spago bundle --module Main --outfile public/bundle.js
+
+lib-site-graph: lib-site-shell
+	@echo "Building lib-graph site..."
+	cd "$(SITE)/lib-graph" && spago build
+	@echo "Bundling lib-graph..."
+	cd "$(SITE)/lib-graph" && spago bundle --module Main --outfile public/bundle.js
+
+lib-site-music: lib-site-shell
+	@echo "Building lib-music site..."
+	cd "$(SITE)/lib-music" && spago build
+	@echo "Bundling lib-music..."
+	cd "$(SITE)/lib-music" && spago bundle --module Main --outfile public/bundle.js
+
+lib-site-tree: lib-site-shell
+	@echo "Building lib-tree site..."
+	cd "$(SITE)/lib-tree" && spago build
+	@echo "Bundling lib-tree..."
+	cd "$(SITE)/lib-tree" && spago bundle --module Main --outfile public/bundle.js
+
+# ============================================================================
 # SERVE TARGETS (for dev-dashboard integration)
 # ============================================================================
 
 .PHONY: serve-wasm serve-ee serve-ee-backend serve-ge serve-ge-backend
-.PHONY: serve-sankey serve-code-explorer serve-code-explorer-backend
+.PHONY: serve-sankey serve-timber-lieder serve-code-explorer serve-code-explorer-backend
 .PHONY: serve-tidal serve-tidal-backend serve-astar serve-landing
 .PHONY: serve-website serve-dashboard
 
@@ -361,6 +437,11 @@ serve-sankey: app-sankey
 	@echo "Serving Sankey Editor on port $(PORT)..."
 	cd "$(SHOWCASES)/psd3-arid-keystone/demo" && python3 -m http.server $(PORT)
 
+# TreeBuilder Demo (Timber Lieder)
+serve-timber-lieder: app-timber-lieder
+	@echo "Serving TreeBuilder Demo on port $(PORT)..."
+	cd "$(SHOWCASES)/psd3-timber-lieder/demo" && python3 -m http.server $(PORT)
+
 # Code Explorer
 serve-code-explorer: ce2-website
 	@echo "Serving Code Explorer Frontend on port $(PORT)..."
@@ -385,10 +466,13 @@ serve-astar: lib-astar-demo
 	cd "$(VIS_LIBS)/psd3-astar-demo" && python3 -m http.server $(PORT)
 
 # Demo Website
-serve-website:
-	@echo "Serving Demo Website on port $(PORT)..."
-	@echo "Building and bundling demo-website..."
-	cd "$(SITE)/website" && spago bundle
+website:
+	@echo "Building demo-website..."
+	cd "$(SITE)/website" && spago build
+	@echo "Bundling demo-website..."
+	cd "$(SITE)/website" && spago bundle -p demo-website --module PSD3.Main --outfile public/bundle.js
+
+serve-website: website
 	@echo "Starting server at http://localhost:$(PORT)/#/home"
 	cd "$(SITE)/website/public" && python3 -m http.server $(PORT)
 
@@ -741,6 +825,7 @@ help:
 	@echo "  make all          - Build everything (libs + apps)"
 	@echo "  make libs         - Build all PureScript libraries"
 	@echo "  make apps         - Build all applications"
+	@echo "  make website      - Build main demo website"
 	@echo "  make clean        - Remove build artifacts"
 	@echo "  make clean-deps   - Remove node_modules too"
 	@echo ""
@@ -760,6 +845,15 @@ help:
 	@echo "  make app-code-explorer - Code explorer"
 	@echo "  make app-tilted-radio - Tidal/algorave"
 	@echo "  make app-edge     - Edge layer (Lua)"
+	@echo ""
+	@echo "Library site targets (landing pages at /psd3/<lib>/):"
+	@echo "  make lib-sites    - Build all library landing pages"
+	@echo "  make lib-site-selection - Selection library site"
+	@echo "  make lib-site-simulation - Simulation library site"
+	@echo "  make lib-site-layout - Layout library site"
+	@echo "  make lib-site-graph - Graph library site"
+	@echo "  make lib-site-music - Music library site"
+	@echo "  make lib-site-tree - Tree library site"
 	@echo ""
 	@echo "Serve targets (run dev servers):"
 	@echo "  make dashboard    - Dev dashboard (:9000)"
