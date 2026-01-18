@@ -1,8 +1,13 @@
 # D3 Dependency Reduction Plan
 
-**Status**: Draft
+**Status**: In Progress
 **Created**: 2026-01-18
+**Updated**: 2026-01-18
 **Branch**: `feature/d3-reduction`
+
+**Completed Phases**:
+- Phase 1: Dead code removal ✓
+- Phase 3: d3-chord removal ✓
 
 ## Executive Summary
 
@@ -18,11 +23,11 @@ PSD3 has evolved beyond its origins as "PureScript bindings for D3". Many D3 mod
 
 | D3 Module | Status | Used In | Action |
 |-----------|--------|---------|--------|
-| d3-hierarchy | Redundant | Code Explorer only (2 internal JS functions) | **Remove** - use psd3-layout Pack |
-| d3-chord | Redundant | TreeAPI example only | **Remove** - pure PS exists |
+| d3-hierarchy | Reduced | Code Explorer only (hierarchy, pack) | Pending Phase 2 |
+| d3-chord | ✓ REMOVED | N/A | Replaced with DataViz.Layout.Chord |
 | d3-ease | Redundant | Transition FFI | **Remove** - add pure PS easing |
 | d3-transition | Partially redundant | TransitionM | **Reduce** - unify with Tick engine |
-| d3-selection | 80% dead code | Various FFI | **Cleanup** - remove unused exports |
+| d3-selection | ✓ CLEANED | Drag, highlights only | ~20 unused exports removed |
 | d3-scale | Essential | Scales, color schemes | **Keep** (for now) |
 | d3-force | Essential | Force simulation | **Keep** (WASM alternative exists) |
 | d3-drag | Essential | Drag behavior | **Keep** |
