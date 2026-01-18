@@ -1,6 +1,6 @@
 # D3 Dependency Reduction Plan
 
-**Status**: In Progress
+**Status**: In Progress (Phase 6 blocked on design)
 **Created**: 2026-01-18
 **Updated**: 2026-01-18
 **Branch**: `feature/d3-reduction`
@@ -11,6 +11,9 @@
 - Phase 3: d3-chord removal ✓
 - Phase 4: Easing unification ✓
 - Phase 5: Transition system unification ✓
+
+**Blocked**:
+- Phase 6: Requires unified transition model design (see `docs/kb/architecture/unified-transition-model.md`)
 
 ## Executive Summary
 
@@ -29,7 +32,7 @@ PSD3 has evolved beyond its origins as "PureScript bindings for D3". Many D3 mod
 | d3-hierarchy | ✓ REMOVED | N/A | Dead code - never imported |
 | d3-chord | ✓ REMOVED | N/A | Replaced with DataViz.Layout.Chord |
 | d3-ease | ✓ SUPERSEDED | N/A | PSD3.Transition.Tick/Easing now complete |
-| d3-transition | Partially redundant | TransitionM | **Reduce** - unify with Tick engine |
+| d3-transition | In use (tour) | Capabilities.Transition, tour demos | **KEEP** - unified model design in progress |
 | d3-selection | ✓ CLEANED | Drag, highlights only | ~20 unused exports removed |
 | d3-scale | Essential | Scales, color schemes | **Keep** (for now) |
 | d3-force | Essential | Force simulation | **Keep** (WASM alternative exists) |
@@ -323,61 +326,77 @@ spago build && spago test  # All pass
 
 ---
 
-## Phase 6: d3-transition Replacement (Optional/Future)
+## Phase 6: Transition Unification (Design Required)
 
-### 6.1 Implement RAF-based transition runner
+**Status**: BLOCKED - requires unified transition model design
 
-```javascript
-// New FFI: requestAnimationFrame loop
-export function runTransitions_(transitions, onTick, onComplete) {
-  return function() {
-    let startTime = null;
+**Prerequisite**: Complete design work in `docs/kb/architecture/unified-transition-model.md`
 
-    function frame(timestamp) {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
+### 6.0 Why This Phase is Blocked
 
-      const progress = Math.min(elapsed / transitions.duration, 1.0);
-      onTick(progress)();
+The original plan assumed d3-transition was largely dead code that could be replaced
+with our tick-based Engine. Investigation revealed:
 
-      if (progress < 1.0) {
-        requestAnimationFrame(frame);
-      } else {
-        onComplete();
-      }
-    }
+1. **Active usage**: d3-transition is used in website tour demos via:
+   `TourMotionAnimations → Capabilities.Transition → D3 interpreter → TransitionFFI`
 
-    requestAnimationFrame(frame);
-  };
-}
-```
+2. **Fundamental incoherence**: d3-transition and tick-based Engine don't compose well.
+   This is the same problem D3 itself has - transitions and simulations both want to
+   control element attributes (especially position).
 
-### 6.2 Implement color interpolation
+3. **Valid use cases for both**:
+   - d3-transition: CSS-style attribute animations (opacity, radius, color)
+   - Tick engine: Simulation-compatible, framework-agnostic interpolation
+   - Neither fully subsumes the other
 
-For removing d3-interpolate dependency on colors:
+### 6.1 Design Work Required
 
-```purescript
-lerpRGB :: RGB -> RGB -> Progress -> RGB
-lerpRGB (RGB r1 g1 b1) (RGB r2 g2 b2) t =
-  RGB (lerp r1 r2 t) (lerp g1 g2 t) (lerp b1 b2 t)
+Before proceeding, complete the unified transition model design:
 
--- Parse CSS color strings
-parseColor :: String -> Maybe Color
-parseColor s = parseHex s <|> parseRGB s <|> parseNamed s
-```
+1. **Investigate WASM tick flow**: How does wasm-force-demo report ticks to PureScript?
+   Document the actual mechanism.
 
-### 6.3 Remove d3-transition and d3-ease
+2. **Prototype PositionMode in AST**: Make attribute ownership explicit:
+   ```purescript
+   data PositionMode
+     = StaticPosition          -- Set once, don't touch
+     | TransitionPosition      -- Animate position (standalone, no sim)
+     | SimulationPosition      -- Physics controls position
+     | DataDrivenPosition      -- Layout computes position (tree, etc.)
+   ```
 
-After full replacement:
-1. Remove imports from Transition/FFI.js
-2. Remove from package.json
-3. Update documentation
+3. **Type-level enforcement**: Can phantom types prevent invalid combinations?
+   ```purescript
+   -- Can't call withTransition on a simulated element
+   withTransition :: Element Static datum -> TransitionConfig -> ...
+   ```
+
+4. **Inventory current usage**: Document exactly which attributes are transitioned
+   where across all demos and showcases.
+
+### 6.2 Implementation (After Design)
+
+Once the unified model is designed:
+
+1. Implement RAF-based transition runner (if needed)
+2. Bridge Engine with existing Capabilities.Transition
+3. Decide: replace d3-transition or document coexistence
+4. Update all affected demos
+
+### 6.3 Color Interpolation (Already Done)
+
+Phase 5 implemented color interpolation in `PSD3.Transition.Interpolate`:
+- `lerpRGB`, `lerpHSL` for color interpolation
+- `cssToRGB`, `rgbToCSS`, `hslToCSS` for parsing/formatting
+- `hslToRGB`, `rgbToHSL` for conversions
 
 ### Checkpoint 6
 ```bash
+# After design is complete and implementation done:
 make all
 # Full showcase suite
 # Verify all animations still work
+# Verify tour demos specifically
 ```
 
 ---
@@ -420,34 +439,32 @@ Document:
 
 ## Execution Order
 
-| Phase | Risk | Effort | Dependencies |
-|-------|------|--------|--------------|
-| 1. Dead code removal | Low | Small | None |
-| 2. Code Explorer hierarchy | Medium | Medium | Phase 1 |
-| 3. d3-chord removal | Low | Small | Phase 1 |
-| 4. Easing unification | Low | Medium | None |
-| 5. Transition unification | Medium | Large | Phase 4 |
-| 6. d3-transition removal | High | Large | Phase 5 |
-| 7. Documentation | Low | Medium | All above |
+| Phase | Risk | Effort | Dependencies | Status |
+|-------|------|--------|--------------|--------|
+| 1. Dead code removal | Low | Small | None | ✓ Complete |
+| 2. Code Explorer hierarchy | Medium | Medium | Phase 1 | ✓ Complete |
+| 3. d3-chord removal | Low | Small | Phase 1 | ✓ Complete |
+| 4. Easing unification | Low | Medium | None | ✓ Complete |
+| 5. Transition unification | Medium | Large | Phase 4 | ✓ Complete |
+| 6. Transition design | High | Large | Phase 5 + design | **BLOCKED** |
+| 7. Documentation | Low | Medium | All above | Partial |
 
-**Recommended approach**:
-- Phases 1, 3, 4 can run in parallel (independent)
-- Phase 2 after Phase 1
-- Phase 5 after Phase 4
-- Phase 6 is optional - assess after Phase 5
-- Phase 7 ongoing throughout
+**Current status**:
+- Phases 1-5: Complete
+- Phase 6: Blocked on unified transition model design (see `docs/kb/architecture/unified-transition-model.md`)
+- Phase 7: Can proceed for completed phases; d3-transition section pending design
 
 ---
 
 ## Success Criteria
 
-1. **All showcases build and run** after each phase
-2. **No d3-hierarchy** in final state
-3. **No d3-chord** in final state
-4. **No d3-ease** in final state (replaced by pure PS)
-5. **d3-transition** either removed or documented as essential
-6. **Unified easing** in PSD3.Transition.Easing
-7. **Documentation** reflects actual dependencies
+1. **All showcases build and run** after each phase ✓
+2. **No d3-hierarchy** in final state ✓
+3. **No d3-chord** in final state ✓
+4. **No d3-ease** in final state (replaced by pure PS) ✓
+5. **d3-transition** - unified transition model designed; coexistence documented
+6. **Unified easing** in PSD3.Transition.Easing ✓
+7. **Documentation** reflects actual dependencies (in progress)
 
 ---
 

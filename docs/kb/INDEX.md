@@ -10,10 +10,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ---
 
-## Architecture (6 documents)
+## Architecture (7 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Unified Transition Model | active | `docs/kb/architecture/unified-transition-model.md` | transitions, simulation, animation, D3, WASM |
 | Unified DAG Vision | active | `apps/shaped-steer/docs/UNIFIED-DAG-VISION.md` | vision, DAG, spreadsheet, notebook, build-system, AI |
 | psd3-sheetless Architecture | active | `apps/shaped-steer/docs/ARCHITECTURE.md` | spreadsheet, comonad, finally-tagless |
 | Async Evaluation Architecture | active | `apps/shaped-steer/docs/ASYNC-EVALUATION-ARCHITECTURE.md` | async, database, streaming |
