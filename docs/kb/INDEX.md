@@ -21,10 +21,12 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (19 documents)
+## Plans (21 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| D3 Dependency Reduction | active | `docs/kb/plans/d3-dependency-reduction.md` | D3, dependencies, refactoring, transitions, easing |
+| Purehask: Haskell Backend for PureScript | active | `docs/kb/plans/purehask-haskell-backend.md` | PureScript, Haskell, compiler, backend, full-stack, SBV |
 | Finally Tagless AST | active | `docs/kb/plans/finally-tagless-ast.md` | AST, finally-tagless, extensibility, visualization |
 | Makefile to Build à la Carte | active | `apps/shaped-steer/docs/MAKEFILE-BUILD-PLAN.md` | shaped-steer, purescript-build, arid-keystone, makefile |
 | Typed Cells Design | active | `apps/shaped-steer/docs/TYPED-CELLS-DESIGN.md` | spreadsheet, notebook, compilation, Try-PureScript |
@@ -46,10 +48,13 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Deployment Plan | active | `site/docs/DEPLOYMENT-PLAN.md` | devops, Docker |
 | Graph Library Ideas | active | `visualisation libraries/psd3-astar-demo/GRAPH-LIBRARY-IDEAS.md` | visualization, graphs |
 
-## Research (3 documents)
+## Research (6 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Lessons from marimo | active | `docs/kb/research/marimo-lessons.md` | notebook, reactivity, DAG, marimo, shaped-steer |
+| Taming the Stack: Lessons for PurePy | active | `docs/kb/research/taming-the-stack-lessons.md` | PurePy, stack-safety, trampolining, CPS, defunctionalization |
+| Lessons from Inflex | active | `docs/kb/research/inflex-lessons.md` | spreadsheet, type-system, variants, row-types |
 | Functional Spreadsheet Theory | active | `apps/shaped-steer/docs/FUNCTIONAL-SPREADSHEET.md` | comonad, recursion-schemes |
 | Unified Data DSL | active | `apps/shaped-steer/docs/UNIFIED-DATA-DSL.md` | DSL, finally-tagless |
 | Hackage-to-PS Analysis | active | `docs/kb/research/hackage-analysis.md` | porting, Haskell, ecosystem |
@@ -91,8 +96,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 42 documents
-- **Active**: 36
+- **Total**: 47 documents
+- **Active**: 41
 - **Implemented**: 5
 - **Superseded/Stale**: 1
 
@@ -102,5 +107,5 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 2. **Unified DAG Systems** - Spreadsheet/notebook/build unification, human+AI co-driving
 3. **Algorithmic Music** - Tidal patterns, Erlang backend, modular synth
 4. **Visualization** - D3-style declarative system (psd3-selection, graph, tree)
-5. **Multi-Backend** - JS, Python (PurePy), Erlang (purerl), Lua (pslua), WASM
+5. **Multi-Backend** - JS, Python (PurePy), Erlang (purerl), Lua (pslua), WASM, Haskell (proposed)
 6. **DevOps** - Docker, deployment, test infrastructure
