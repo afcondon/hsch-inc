@@ -7,8 +7,10 @@
 
 **Completed Phases**:
 - Phase 1: Dead code removal ✓
+- Phase 2: Code Explorer d3-hierarchy removal ✓
 - Phase 3: d3-chord removal ✓
 - Phase 4: Easing unification ✓
+- Phase 5: Transition system unification ✓
 
 ## Executive Summary
 
@@ -24,7 +26,7 @@ PSD3 has evolved beyond its origins as "PureScript bindings for D3". Many D3 mod
 
 | D3 Module | Status | Used In | Action |
 |-----------|--------|---------|--------|
-| d3-hierarchy | Reduced | Code Explorer only (hierarchy, pack) | Pending Phase 2 |
+| d3-hierarchy | ✓ REMOVED | N/A | Dead code - never imported |
 | d3-chord | ✓ REMOVED | N/A | Replaced with DataViz.Layout.Chord |
 | d3-ease | ✓ SUPERSEDED | N/A | PSD3.Transition.Tick/Easing now complete |
 | d3-transition | Partially redundant | TransitionM | **Reduce** - unify with Tick engine |
@@ -33,7 +35,7 @@ PSD3 has evolved beyond its origins as "PureScript bindings for D3". Many D3 mod
 | d3-force | Essential | Force simulation | **Keep** (WASM alternative exists) |
 | d3-drag | Essential | Drag behavior | **Keep** |
 | d3-zoom | Essential | Zoom/pan behavior | **Keep** |
-| d3-brush | Essential | Brush selection | **Keep** |
+| d3-brush | Essential | Brush selection | **Keep** - flag for coordinated interaction design |
 | d3-shape | Partially used | Line generator | **Assess** |
 | d3-interpolate | Used by scales | Color interpolation | **Keep** (tied to scales) |
 
@@ -100,54 +102,39 @@ make libs && make apps && make website
 
 ---
 
-## Phase 2: Code Explorer d3-hierarchy Replacement
+## Phase 2: Code Explorer d3-hierarchy Removal ✓ COMPLETE
 
-### 2.1 Analyze Code Explorer usage
+### 2.1 Analysis Result
 
-The functions `updateNodeExpansion_` and `drawInterModuleDeclarationLinks_` use:
-- `hierarchy(data)` - wraps data into d3 hierarchy node
-- `.sum(d => d.value)` - accumulates values up the tree
-- `pack().size([w,h]).padding(p)` - creates pack layout
-- `packLayout(root)` - applies layout, sets x/y on nodes
-- `root.leaves()` - gets leaf nodes with positions
+Investigation revealed that `updateNodeExpansion_`, `drawInterModuleDeclarationLinks_`, and related functions were **dead code**:
+- Exported from FFI.js but never imported anywhere in the codebase
+- Never used by Code Explorer or any other application
+- Grep found zero imports across all projects
 
-### 2.2 Replace with psd3-layout Pack
+### 2.2 Removed Functions (656 lines)
 
-The pure PureScript Pack layout in `psd3-layout` provides equivalent functionality:
+- `updateNodeExpansion_` - d3-hierarchy pack layout
+- `expandNodeById_` - node expansion
+- `drawInterModuleDeclarationLinks_` - inter-module links
+- `highlightConnectedNodes_` - highlight dependencies
+- `clearHighlights_` - clear highlights
+- `filterToConnectedNodes_` - filter nodes
+- `unpinAllNodes_` - unpin nodes
+- `updateBubbleRadii_` - bubble sizing
+- `addModuleArrowMarker_` - SVG markers
+- `unsafeSetField_` - field mutation helper
+- Related helper functions (declarationColor, categorizeDeclarations, etc.)
 
-```purescript
-import DataViz.Layout.Hierarchy.Pack (pack, PackConfig)
+### 2.3 Result
 
--- Convert to tree-rose Tree, run pack layout
-let tree = mkTree rootData children
-let packed = pack config tree
--- Extract positions from packed tree
-```
+- d3-hierarchy import completely removed from FFI.js
+- 682 lines removed total (656 JS + 26 PureScript)
+- All downstream builds pass (psd3-selection, psd3-simulation, website)
+- d3-hierarchy can be removed from package.json
 
-### 2.3 Implementation approach
-
-Option A: Rewrite the JS functions in PureScript
-- Move logic to `corrode-expel/ce2-website/src/Viz/`
-- Use psd3-layout Pack
-- Call from existing code paths
-
-Option B: Keep JS functions but import pack from psd3-layout
-- Less invasive
-- Still removes d3-hierarchy dependency
-
-**Recommendation**: Option A - Code Explorer needs refactoring anyway, this is a good forcing function.
-
-### 2.4 Remove d3-hierarchy entirely
-
-After Code Explorer migration:
-1. Remove all d3-hierarchy imports from FFI.js
-2. Remove d3-hierarchy from package.json
-3. Verify build
-
-### Checkpoint 2
+### Checkpoint 2 ✓
 ```bash
-make libs && make code-explorer
-# Test Code Explorer declaration expansion feature
+make libs && make website  # All pass
 ```
 
 ---
@@ -296,85 +283,42 @@ make psd3-simulation
 
 ---
 
-## Phase 5: Transition System Unification
+## Phase 5: Transition System Unification ✓ COMPLETE
 
-### 5.1 Create unified transition infrastructure
+### 5.1 Module Structure (Implemented)
 
-New module structure:
 ```
 psd3-simulation/src/PSD3/Transition/
-├── Tick.purs          -- Existing: lerp, progress tracking
-├── Easing.purs        -- New: full easing suite (Phase 4)
-├── Interpolate.purs   -- New: value interpolation
-└── Engine.purs        -- New: unified tick-driven transitions
+├── Tick.purs          -- Existing: lerp, progress tracking, easing functions
+├── Easing.purs        -- Phase 4: EasingType ADT with Show/Eq
+├── Interpolate.purs   -- NEW: type-safe value interpolation
+└── Engine.purs        -- NEW: unified tick-driven transitions
 ```
 
-### 5.2 Interpolate module
+### 5.2 Interpolate Module (Implemented)
 
-```purescript
-module PSD3.Transition.Interpolate where
+- Point interpolation: `lerpPoint`, `lerpPointXY`
+- RGB color: `RGB` newtype, `lerpRGB`, `rgbToCSS`, `cssToRGB`
+- HSL color: `HSL` newtype, `lerpHSL`, `hslToCSS`
+- Color conversions: `hslToRGB`, `rgbToHSL`
+- Generic: `Interpolatable` typeclass, `makeInterpolator`
 
--- Numeric interpolation (existing in Tick)
-lerp :: Number -> Number -> Progress -> Number
+### 5.3 Engine Module (Implemented)
 
--- Color interpolation (new)
-lerpColor :: Color -> Color -> Progress -> Color
-lerpRGB :: RGB -> RGB -> Progress -> RGB
-lerpHSL :: HSL -> HSL -> Progress -> HSL
+- `TransitionSpec a`: defines from/to, duration, easing, interpolation
+- `TransitionState a`: current state of in-flight transition
+- `TransitionGroup`: coordinate multiple transitions
+- Functions: `start`, `tick`, `currentValue`, `isComplete`, `remaining`
+- Framework-agnostic (no dependencies on Halogen/React)
 
--- Could add later:
--- lerpPath :: PathData -> PathData -> Progress -> PathData
-```
+### 5.4 TransitionM Bridge
 
-### 5.3 Unified TransitionEngine
+Deferred to Phase 6. The Engine provides the foundation; integrating with
+existing TransitionM requires more invasive changes to psd3-selection.
 
-```purescript
-module PSD3.Transition.Engine where
-
-type TransitionSpec a =
-  { duration :: Milliseconds
-  , easing :: EasingType
-  , from :: a
-  , to :: a
-  , interpolate :: a -> a -> Progress -> a
-  }
-
--- Tick-driven transition state
-type TransitionState a =
-  { spec :: TransitionSpec a
-  , progress :: Progress
-  , current :: a
-  }
-
--- Advance transition by one tick
-tick :: TickDelta -> TransitionState a -> TransitionState a
-
--- Check if complete
-isComplete :: TransitionState a -> Boolean
-```
-
-### 5.4 Bridge to existing TransitionM
-
-The existing `TransitionM` typeclass can be reimplemented to use the unified engine:
-
-```purescript
--- Current: uses d3-transition FFI
-instance TransitionM D3v2Selection_ D3v2M where
-  withTransition config sel attrs = ...
-
--- New: uses PSD3.Transition.Engine + RAF
-instance TransitionM D3v2Selection_ D3v2M where
-  withTransition config sel attrs = D3v2M do
-    let transitions = buildTransitions config sel attrs
-    scheduleRAFLoop transitions
-```
-
-This is the most invasive change - defer to Phase 6 if risky.
-
-### Checkpoint 5
+### Checkpoint 5 ✓
 ```bash
-make psd3-simulation
-# Test unified engine with simple animations
+spago build && spago test  # All pass
 ```
 
 ---
@@ -524,3 +468,29 @@ The feature branch preserves full history for cherry-picking successful phases i
 - WASM force kernel already proves D3-free simulation is possible
 - The d3-scale dependency is large but provides significant value - defer removal
 - d3-drag/zoom/brush are behavior libraries that would require significant effort to replace - keep for now
+
+---
+
+## Future: Coordinated Interaction Framework
+
+**Status**: Design phase (not part of D3 reduction, but related)
+
+d3-brush represents a broader category: **coordinated interactions between data viz components**. Rather than simply replacing d3-brush, we should design a principled framework for:
+
+- **Brush-and-link**: Select in one view, highlight in others
+- **Coordinate Hover**: Existing PSD3 pattern for cross-component hover
+- **Synchronized zoom/pan**: Multiple views tracking same data region
+- **Shared selections**: Component-agnostic selection state
+
+**Requirements**:
+- Framework-agnostic (Halogen and React compatible)
+- Component-oriented (composable, not monolithic)
+- Declarative state management
+- Support for both D3-based and pure PS implementations
+
+**Related existing work**:
+- `PSD3.Internal.Behavior.FFI` - brush, zoom, drag FFI
+- Coordinate Hover pattern in showcases
+- psd3-selection highlighting infrastructure
+
+This is architectural work that should inform future d3-brush decisions.
