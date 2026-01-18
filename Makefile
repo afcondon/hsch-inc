@@ -70,8 +70,8 @@ APPS := apps
 # ============================================================================
 
 .PHONY: all libs apps clean help
-.PHONY: lib-tree lib-graph lib-layout lib-selection lib-music lib-simulation
-.PHONY: lib-showcase-shell lib-simulation-halogen lib-astar-demo
+.PHONY: lib-graph lib-layout lib-selection lib-music lib-simulation
+.PHONY: lib-showcase-shell lib-simulation-halogen
 .PHONY: app-wasm app-embedding-explorer app-sankey app-code-explorer app-tilted-radio
 .PHONY: app-timber-lieder app-edge app-emptier-coinage
 .PHONY: wasm-kernel
@@ -80,8 +80,8 @@ APPS := apps
 .PHONY: ce-database ce-server ce2-website vscode-ext
 .PHONY: purerl-tidal ps-tidal
 .PHONY: lib-sites lib-site-selection lib-site-simulation lib-site-layout
-.PHONY: lib-site-graph lib-site-music lib-site-tree lib-site-shell
-.PHONY: website
+.PHONY: lib-site-graph lib-site-music lib-site-shell
+.PHONY: website content
 
 # ============================================================================
 # TOP-LEVEL TARGETS
@@ -97,27 +97,23 @@ all: libs apps
 # ============================================================================
 
 # Build all libraries in dependency order
-# Layer 0 → Layer 1 → Layer 2 → Layer 3 → Layer 4
-libs: lib-tree lib-graph lib-layout lib-selection lib-music lib-simulation \
-      lib-showcase-shell lib-simulation-halogen lib-astar-demo
+# Layer 1 → Layer 2 → Layer 3 → Layer 4
+# Note: psd3-tree was removed; libraries now depend directly on tree-rose from registry
+libs: lib-graph lib-layout lib-selection lib-music lib-simulation \
+      lib-showcase-shell lib-simulation-halogen
 	@echo "All libraries built successfully"
 
-# Layer 0: Foundation (no PSD3 dependencies)
-lib-tree:
-	@echo "Building psd3-tree..."
-	cd "$(VIS_LIBS)/purescript-psd3-tree" && spago build
-
-# Layer 1: Depends on psd3-tree
-lib-graph: lib-tree
+# Layer 1: Foundation (depends on tree-rose from registry, no PSD3 dependencies)
+lib-graph:
 	@echo "Building psd3-graph..."
 	cd "$(VIS_LIBS)/purescript-psd3-graph" && spago build
 
-lib-layout: lib-tree
+lib-layout:
 	@echo "Building psd3-layout..."
 	cd "$(VIS_LIBS)/purescript-psd3-layout" && spago build
 
-# Layer 2: Depends on psd3-tree + psd3-graph
-lib-selection: lib-tree lib-graph
+# Layer 2: Depends on psd3-graph
+lib-selection: lib-graph
 	@echo "Building psd3-selection..."
 	cd "$(VIS_LIBS)/purescript-psd3-selection" && spago build
 
@@ -339,8 +335,13 @@ app-edge:
 # ============================================================================
 # Landing pages for each PSD3 library, served at /psd3/<lib>/
 
+# Generate Main.purs from library READMEs
+lib-site-generate:
+	@echo "Generating Halogen pages from library READMEs..."
+	node tools/readme-to-halogen.mjs all
+
 # Build all library sites
-lib-sites: lib-site-shell lib-site-selection lib-site-simulation lib-site-layout lib-site-graph lib-site-music lib-site-tree
+lib-sites: lib-site-shell lib-site-selection lib-site-simulation lib-site-layout lib-site-graph lib-site-music
 	@echo "All library sites built successfully"
 
 # Shared shell component (dependency for all lib sites)
@@ -378,12 +379,6 @@ lib-site-music: lib-site-shell
 	cd "$(SITE)/lib-music" && spago build
 	@echo "Bundling lib-music..."
 	cd "$(SITE)/lib-music" && spago bundle --module Main --outfile public/bundle.js
-
-lib-site-tree: lib-site-shell
-	@echo "Building lib-tree site..."
-	cd "$(SITE)/lib-tree" && spago build
-	@echo "Bundling lib-tree..."
-	cd "$(SITE)/lib-tree" && spago bundle --module Main --outfile public/bundle.js
 
 # ============================================================================
 # SERVE TARGETS (for dev-dashboard integration)
@@ -465,8 +460,17 @@ serve-astar: lib-astar-demo
 	@echo "Serving A* Demo on port $(PORT)..."
 	cd "$(VIS_LIBS)/psd3-astar-demo" && python3 -m http.server $(PORT)
 
+# Content Generation (Markdown → Halogen)
+content:
+	@echo "Generating Halogen from Markdown..."
+	@if [ -d "content" ] && [ -n "$$(find content -name '*.md' 2>/dev/null)" ]; then \
+		node tools/md-to-halogen/index.js --dir content --out-dir $(SITE)/website/src/Content; \
+	else \
+		echo "  No markdown files in content/, skipping."; \
+	fi
+
 # Demo Website
-website:
+website: content
 	@echo "Building demo-website..."
 	cd "$(SITE)/website" && spago build
 	@echo "Bundling demo-website..."
@@ -707,15 +711,12 @@ deps-graph:
 	@echo "PSD3 Library Dependency Graph"
 	@echo "=============================="
 	@echo ""
-	@echo "Layer 0 (foundation):"
-	@echo "  psd3-tree"
+	@echo "Layer 1 (foundation, depends on tree-rose from registry):"
+	@echo "  psd3-graph ──→ tree-rose"
+	@echo "  psd3-layout ─→ tree-rose"
 	@echo ""
-	@echo "Layer 1 (depends on tree):"
-	@echo "  psd3-graph ──→ psd3-tree"
-	@echo "  psd3-layout ─→ psd3-tree"
-	@echo ""
-	@echo "Layer 2 (depends on tree + graph):"
-	@echo "  psd3-selection ─→ psd3-tree, psd3-graph"
+	@echo "Layer 2 (depends on graph):"
+	@echo "  psd3-selection ─→ psd3-graph"
 	@echo ""
 	@echo "Layer 3 (depends on selection):"
 	@echo "  psd3-music ─────────→ psd3-selection"
@@ -830,8 +831,7 @@ help:
 	@echo "  make clean-deps   - Remove node_modules too"
 	@echo ""
 	@echo "Library targets:"
-	@echo "  make lib-tree     - Foundation library"
-	@echo "  make lib-graph    - Graph algorithms"
+	@echo "  make lib-graph    - Graph algorithms (depends on tree-rose)"
 	@echo "  make lib-layout   - Layout algorithms"
 	@echo "  make lib-selection - D3-style selections"
 	@echo "  make lib-music    - Music/audio support"
@@ -853,7 +853,6 @@ help:
 	@echo "  make lib-site-layout - Layout library site"
 	@echo "  make lib-site-graph - Graph library site"
 	@echo "  make lib-site-music - Music library site"
-	@echo "  make lib-site-tree - Tree library site"
 	@echo ""
 	@echo "Serve targets (run dev servers):"
 	@echo "  make dashboard    - Dev dashboard (:9000)"
