@@ -8,6 +8,7 @@
 **Completed Phases**:
 - Phase 1: Dead code removal ✓
 - Phase 3: d3-chord removal ✓
+- Phase 4: Easing unification ✓
 
 ## Executive Summary
 
@@ -25,7 +26,7 @@ PSD3 has evolved beyond its origins as "PureScript bindings for D3". Many D3 mod
 |-----------|--------|---------|--------|
 | d3-hierarchy | Reduced | Code Explorer only (hierarchy, pack) | Pending Phase 2 |
 | d3-chord | ✓ REMOVED | N/A | Replaced with DataViz.Layout.Chord |
-| d3-ease | Redundant | Transition FFI | **Remove** - add pure PS easing |
+| d3-ease | ✓ SUPERSEDED | N/A | PSD3.Transition.Tick/Easing now complete |
 | d3-transition | Partially redundant | TransitionM | **Reduce** - unify with Tick engine |
 | d3-selection | ✓ CLEANED | Drag, highlights only | ~20 unused exports removed |
 | d3-scale | Essential | Scales, color schemes | **Keep** (for now) |
