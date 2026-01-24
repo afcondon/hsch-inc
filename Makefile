@@ -273,7 +273,11 @@ ce2-website: npm-install-code-explorer lib-layout lib-selection lib-simulation
 	@echo "Building ce2-website..."
 	cd "$(SHOWCASES)/corrode-expel" && spago build -p ce2-website
 	@echo "Bundling ce2-website..."
-	cd "$(SHOWCASES)/corrode-expel" && spago bundle -p ce2-website --module CE2.Main --outfile ce2-website/public/bundle.js
+	cd "$(SHOWCASES)/corrode-expel/ce2-website" && spago bundle --module CE2.Main --outfile public/bundle.js
+	@echo "Adding cache-busting timestamp..."
+	@TIMESTAMP=$$(date +%s); \
+	sed -i '' "s|bundle.js[^\"]*\"|bundle.js?v=$$TIMESTAMP\"|g" "$(SHOWCASES)/corrode-expel/ce2-website/public/index.html"; \
+	echo "  bundle.js?v=$$TIMESTAMP"
 
 vscode-ext: npm-install-code-explorer
 	@echo "Building VSCode extension..."
@@ -475,6 +479,11 @@ website: content
 	cd "$(SITE)/website" && spago build
 	@echo "Bundling demo-website..."
 	cd "$(SITE)/website" && spago bundle -p demo-website --module PSD3.Main --outfile public/bundle.js
+	@echo "Adding cache-busting version to bundle.js..."
+	@TIMESTAMP=$$(date +%s); \
+	sed -i.bak 's|bundle\.js[^"]*"|bundle.js?v='$$TIMESTAMP'"|g' "$(SITE)/website/public/index.html" && \
+	rm -f "$(SITE)/website/public/index.html.bak"
+	@echo "  Bundle version: $$(grep -o 'bundle.js?v=[0-9]*' $(SITE)/website/public/index.html)"
 
 serve-website: website
 	@echo "Starting server at http://localhost:$(PORT)/#/home"
@@ -494,7 +503,8 @@ clean:
 	find . -name "output-py" -type d -exec rm -rf {} + 2>/dev/null || true
 	# Purerl/Erlang output
 	find . -name "_build" -type d -exec rm -rf {} + 2>/dev/null || true
-	find . -name "ebin" -type d -exec rm -rf {} + 2>/dev/null || true
+	# Clean ebin contents but preserve directory (needed for purerl builds)
+	find . -name "ebin" -type d -exec sh -c 'rm -f "$$1"/*.beam "$$1"/*.bea* 2>/dev/null' _ {} \; 2>/dev/null || true
 	# WASM output
 	rm -rf "$(SHOWCASES)/wasm-force-demo/pkg" 2>/dev/null || true
 	rm -rf "$(SHOWCASES)/wasm-force-demo/force-kernel/target" 2>/dev/null || true
