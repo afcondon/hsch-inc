@@ -10,10 +10,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ---
 
-## Architecture (7 documents)
+## Architecture (8 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| PSD3 Interpreter Systems | active | `docs/kb/architecture/psd3-interpreter-systems.md` | finally-tagless, interpreters, AST, psd3-selection, psd3-simulation |
 | Unified Transition Model | active | `docs/kb/architecture/unified-transition-model.md` | transitions, simulation, animation, D3, WASM |
 | Unified DAG Vision | active | `apps/shaped-steer/docs/UNIFIED-DAG-VISION.md` | vision, DAG, spreadsheet, notebook, build-system, AI |
 | psd3-sheetless Architecture | active | `apps/shaped-steer/docs/ARCHITECTURE.md` | spreadsheet, comonad, finally-tagless |
@@ -22,10 +23,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (21 documents)
+## Plans (22 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| CE2 Scene Development | active | `docs/kb/plans/ce2-scene-development.md` | code-explorer, visualization, components, parameterization |
 | D3 Dependency Reduction | active | `docs/kb/plans/d3-dependency-reduction.md` | D3, dependencies, refactoring, transitions, easing |
 | Purehask: Haskell Backend for PureScript | active | `docs/kb/plans/purehask-haskell-backend.md` | PureScript, Haskell, compiler, backend, full-stack, SBV |
 | Finally Tagless AST | active | `docs/kb/plans/finally-tagless-ast.md` | AST, finally-tagless, extensibility, visualization |
@@ -97,8 +99,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 47 documents
-- **Active**: 41
+- **Total**: 48 documents
+- **Active**: 42
 - **Implemented**: 5
 - **Superseded/Stale**: 1
 
