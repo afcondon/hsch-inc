@@ -10,10 +10,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ---
 
-## Architecture (8 documents)
+## Architecture (9 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| CE2 Architecture Overview | active | `docs/kb/architecture/ce2-architecture.md` | ce2, code-explorer, halogen, psd3, visualization, state-machine |
 | PSD3 Interpreter Systems | active | `docs/kb/architecture/psd3-interpreter-systems.md` | finally-tagless, interpreters, AST, psd3-selection, psd3-simulation |
 | Unified Transition Model | active | `docs/kb/architecture/unified-transition-model.md` | transitions, simulation, animation, D3, WASM |
 | Unified DAG Vision | active | `apps/shaped-steer/docs/UNIFIED-DAG-VISION.md` | vision, DAG, spreadsheet, notebook, build-system, AI |
