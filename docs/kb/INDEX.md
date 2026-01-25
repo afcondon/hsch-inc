@@ -23,11 +23,13 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (22 documents)
+## Plans (24 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| CE2 Links, Hover, Navigation | active | `docs/kb/plans/ce2-links-hover-navigation.md` | ce2, code-explorer, visualization, navigation, pursuit, hover |
 | CE2 Scene Development | active | `docs/kb/plans/ce2-scene-development.md` | code-explorer, visualization, components, parameterization |
+| Array Safety Fixes | active | `docs/kb/plans/array-safety-fixes.md` | safety, bugs, psd3-simulation, psd3-selection |
 | D3 Dependency Reduction | active | `docs/kb/plans/d3-dependency-reduction.md` | D3, dependencies, refactoring, transitions, easing |
 | Purehask: Haskell Backend for PureScript | active | `docs/kb/plans/purehask-haskell-backend.md` | PureScript, Haskell, compiler, backend, full-stack, SBV |
 | Finally Tagless AST | active | `docs/kb/plans/finally-tagless-ast.md` | AST, finally-tagless, extensibility, visualization |
@@ -51,10 +53,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Deployment Plan | active | `site/docs/DEPLOYMENT-PLAN.md` | devops, Docker |
 | Graph Library Ideas | active | `visualisation libraries/psd3-astar-demo/GRAPH-LIBRARY-IDEAS.md` | visualization, graphs |
 
-## Research (6 documents)
+## Research (7 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| CE2 Visualization Architecture Analysis | active | `docs/kb/research/ce2-visualization-architecture-analysis.md` | ce2, visualization, componentization, halogen, psd3 |
 | Lessons from marimo | active | `docs/kb/research/marimo-lessons.md` | notebook, reactivity, DAG, marimo, shaped-steer |
 | Taming the Stack: Lessons for PurePy | active | `docs/kb/research/taming-the-stack-lessons.md` | PurePy, stack-safety, trampolining, CPS, defunctionalization |
 | Lessons from Inflex | active | `docs/kb/research/inflex-lessons.md` | spreadsheet, type-system, variants, row-types |
@@ -99,8 +102,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 48 documents
-- **Active**: 42
+- **Total**: 49 documents
+- **Active**: 43
 - **Implemented**: 5
 - **Superseded/Stale**: 1
 
