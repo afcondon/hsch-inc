@@ -79,20 +79,19 @@ SHOWCASE APPLICATIONS
   Corrode Expel | Hypo-Punter | Arid Keystone | Tilted Radio
         ↓
 FRAMEWORK INTEGRATIONS
-  psd3-react | Halogen (site/website)
+  psd3-simulation-halogen | Halogen (site/website)
         ↓
-PRESENTATION LAYER
-  psd3-music | psd3-tidal
+DOMAIN LAYER
+  psd3-music | psd3-simulation (force)
         ↓
-INTERACTION LAYER
-  psd3-selection (DOM) | psd3-simulation (force)
+CORE LAYER
+  psd3-selection (DOM + HATS AST)
         ↓
 COMPUTATION LAYER
   psd3-layout | psd3-graph
-        ↓
-FOUNDATION LAYER
-  psd3-tree
 ```
+
+**HATS** (Hylomorphic Abstract Tree Syntax) is the new declarative AST in psd3-selection for describing visualization trees. It enables multiple interpreters (D3, English descriptions, Mermaid diagrams) from a single specification.
 
 ## Anagram Codenames
 

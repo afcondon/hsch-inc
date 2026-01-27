@@ -17,6 +17,7 @@
 #   /code       - Code Explorer (UI at /code, API at /code/api)
 #   /sankey     - Sankey Editor
 #   /wasm       - WASM Force Demo
+#   /psd3/*     - Library documentation sites
 
 services:
   # ============================================================
@@ -182,6 +183,122 @@ services:
   wasm-demo:
     build:
       context: ./showcases/wasm-force-demo
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # ============================================================
+  # ADDITIONAL PURESCRIPT SHOWCASES
+  # ============================================================
+  optics:
+    build:
+      context: ./showcases/emptier-coinage
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  zoo:
+    build:
+      context: ./showcases/psd3-prim-zoo-mosh
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  honeycomb:
+    build:
+      context: ./showcases/psd3-honeycomb
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  anscombe:
+    build:
+      context: ./visualisation libraries/psd3-anscombe-quartet
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  layouts:
+    build:
+      context: ./showcases/allergy-outlay
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # ============================================================
+  # LIBRARY DOCUMENTATION SITES
+  # ============================================================
+  lib-selection:
+    build:
+      context: ./site/lib-selection
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  lib-simulation:
+    build:
+      context: ./site/lib-simulation
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  lib-layout:
+    build:
+      context: ./site/lib-layout
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  lib-graph:
+    build:
+      context: ./site/lib-graph
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  lib-music:
+    build:
+      context: ./site/lib-music
     networks:
       - polyglot
     healthcheck:
