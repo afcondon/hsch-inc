@@ -10,10 +10,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ---
 
-## Architecture (9 documents)
+## Architecture (10 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| HATS Existential Design | active | `docs/kb/architecture/hats-existential-design.md` | HATS, existential-types, CPS, heterogeneous-composition, psd3-selection |
 | CE2 Architecture Overview | active | `docs/kb/architecture/ce2-architecture.md` | ce2, code-explorer, halogen, psd3, visualization, state-machine |
 | PSD3 Interpreter Systems | active | `docs/kb/architecture/psd3-interpreter-systems.md` | finally-tagless, interpreters, AST, psd3-selection, psd3-simulation |
 | Unified Transition Model | active | `docs/kb/architecture/unified-transition-model.md` | transitions, simulation, animation, D3, WASM |
@@ -24,7 +25,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (24 documents)
+## Plans (28 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
@@ -53,6 +54,10 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Tilted Radio Roadmap | active | `showcases/psd3-tilted-radio/purescript-psd3-tidal/docs/ROADMAP.md` | roadmap, music |
 | Deployment Plan | active | `site/docs/DEPLOYMENT-PLAN.md` | devops, Docker |
 | Graph Library Ideas | active | `visualisation libraries/psd3-astar-demo/GRAPH-LIBRARY-IDEAS.md` | visualization, graphs |
+| Hylograph Tour: Structures Page | active | `docs/kb/plans/hylograph-tour-structures-page.md` | hylograph, hats, tour, demo, visualization |
+| AST Builder Redesign for HATS | active | `docs/kb/plans/ast-builder-redesign.md` | hylograph, hats, ast-builder, showcase, ui-design |
+| Hylograph: The Interactive Guide | active | `docs/kb/plans/hylograph-guide-unified.md` | hylograph, hats, tour, demo, ast-builder, unified |
+| Beads PureScript Port | draft | `docs/kb/plans/beads-purescript-port.md` | beads, issue-tracking, purescript, cli, graph |
 
 ## Research (7 documents)
 
@@ -81,10 +86,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Presentation Planning | active | `visualisation libraries/purescript-psd3-selection/docs/PRESENTATION-PLANNING.md` | presentation, planning |
 | Documentation TOC | active | `apps/shaped-steer/docs/DOCUMENTATION-TOC.md` | documentation, diátaxis |
 
-## How-To (5 documents)
+## How-To (6 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| HATS Brushing Guide | active | `docs/kb/howto/hats-brushing.md` | HATS, brushing, coordinated-interaction, SPLOM |
 | Excel Compiler Guide | implemented | `apps/shaped-steer/docs/EXCEL-COMPILER.md` | Excel, compiler |
 | PSD3 Migration Guide | active | `apps/shaped-steer/docs/PSD3-MIGRATION-GUIDE.md` | migration, DSL |
 | tmux Setup | active | `apps/shaped-steer/docs/TMUX-SETUP.md` | workflow, tools |
@@ -103,8 +109,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 49 documents
-- **Active**: 43
+- **Total**: 53 documents
+- **Active**: 47
 - **Implemented**: 5
 - **Superseded/Stale**: 1
 
