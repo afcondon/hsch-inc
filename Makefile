@@ -105,40 +105,40 @@ libs: lib-graph lib-layout lib-selection lib-music lib-simulation \
 
 # Layer 1: Foundation (depends on tree-rose from registry, no PSD3 dependencies)
 lib-graph:
-	@echo "Building psd3-graph..."
-	cd "$(VIS_LIBS)/purescript-psd3-graph" && spago build
+	@echo "Building hylograph-graph..."
+	cd "$(VIS_LIBS)/purescript-hylograph-graph" && spago build
 
 lib-layout:
-	@echo "Building psd3-layout..."
-	cd "$(VIS_LIBS)/purescript-psd3-layout" && spago build
+	@echo "Building hylograph-layout..."
+	cd "$(VIS_LIBS)/purescript-hylograph-layout" && spago build
 
 # Layer 2: Depends on psd3-graph
 lib-selection: lib-graph
-	@echo "Building psd3-selection..."
-	cd "$(VIS_LIBS)/purescript-psd3-selection" && spago build
+	@echo "Building hylograph-selection..."
+	cd "$(VIS_LIBS)/purescript-hylograph-selection" && spago build
 
 # Layer 3: Depends on psd3-selection
 lib-music: lib-selection
-	@echo "Building psd3-music..."
-	cd "$(VIS_LIBS)/purescript-psd3-music" && spago build
+	@echo "Building hylograph-music..."
+	cd "$(VIS_LIBS)/purescript-hylograph-music" && spago build
 
 lib-simulation: lib-selection
-	@echo "Building psd3-simulation..."
-	cd "$(VIS_LIBS)/purescript-psd3-simulation" && spago build
+	@echo "Building hylograph-simulation..."
+	cd "$(VIS_LIBS)/purescript-hylograph-simulation" && spago build
 
 lib-showcase-shell: lib-selection
-	@echo "Building psd3-showcase-shell..."
+	@echo "Building hylograph-showcase-shell..."
 	cd "$(SITE)/showcase-shell" && spago build
 
 # Layer 4: Depends on psd3-simulation
 lib-simulation-halogen: lib-simulation
-	@echo "Building psd3-simulation-halogen..."
-	cd "$(VIS_LIBS)/purescript-psd3-simulation-halogen" && spago build
+	@echo "Building hylograph-simulation-halogen..."
+	cd "$(VIS_LIBS)/purescript-hylograph-simulation-halogen" && spago build
 
 # Demo app in visualisation libraries (depends on simulation)
 lib-astar-demo: lib-simulation lib-graph
-	@echo "Building psd3-astar-demo..."
-	cd "$(VIS_LIBS)/psd3-astar-demo" && spago build
+	@echo "Building hylograph-astar-demo..."
+	cd "$(VIS_LIBS)/hylograph-astar-demo" && spago build
 
 # ============================================================================
 # SHOWCASE APPLICATIONS
@@ -170,12 +170,12 @@ app-embedding-explorer: ee-server ge-server ee-website ge-website landing
 
 npm-install-embedding-explorer:
 	@echo "Installing npm dependencies for embedding-explorer..."
-	cd "$(SHOWCASES)/hypo-punter" && npm install
+	cd "$(SHOWCASES)/hypo-punter" && npm install --ignore-scripts
 
-# Embedding Explorer Python backend
+# Embedding Explorer Python backend (run from workspace root for correct path resolution)
 ee-server: npm-install-embedding-explorer
 	@echo "Building ee-server (PurePy)..."
-	cd "$(SHOWCASES)/hypo-punter/ee-server" && spago build
+	cd "$(SHOWCASES)/hypo-punter" && spago build -p ee-server
 	@echo "Transpiling to Python..."
 	cd "$(SHOWCASES)/hypo-punter" && $(PUREPY) output ee-server/output-py
 	@echo "Copying FFI files..."
@@ -186,10 +186,10 @@ ee-server: npm-install-embedding-explorer
 	cp "$(SHOWCASES)/hypo-punter/ee-server/src/Server/Flask.py" \
 	   "$(SHOWCASES)/hypo-punter/ee-server/output-py/server_flask_foreign.py"
 
-# Grid Explorer Python backend
+# Grid Explorer Python backend (run from workspace root for correct path resolution)
 ge-server: npm-install-embedding-explorer
 	@echo "Building ge-server (PurePy)..."
-	cd "$(SHOWCASES)/hypo-punter/ge-server" && spago build
+	cd "$(SHOWCASES)/hypo-punter" && spago build -p ge-server
 	@echo "Transpiling to Python..."
 	cd "$(SHOWCASES)/hypo-punter" && $(PUREPY) output ge-server/output-py
 	@echo "Copying FFI files..."
@@ -204,26 +204,26 @@ ge-server: npm-install-embedding-explorer
 	cp "$(SHOWCASES)/hypo-punter/ge-server/src/Server/Flask.py" \
 	   "$(SHOWCASES)/hypo-punter/ge-server/output-py/server_flask_foreign.py"
 
-# Embedding Explorer frontend
+# Embedding Explorer frontend (run from workspace root for correct path resolution)
 ee-website: npm-install-embedding-explorer
 	@echo "Building ee-website..."
-	cd "$(SHOWCASES)/hypo-punter/ee-website" && spago build
+	cd "$(SHOWCASES)/hypo-punter" && spago build -p ee-website
 	@echo "Bundling ee-website..."
-	cd "$(SHOWCASES)/hypo-punter/ee-website" && spago bundle
+	cd "$(SHOWCASES)/hypo-punter" && spago bundle -p ee-website
 
-# Grid Explorer frontend
+# Grid Explorer frontend (run from workspace root for correct path resolution)
 ge-website: npm-install-embedding-explorer
 	@echo "Building ge-website..."
-	cd "$(SHOWCASES)/hypo-punter/ge-website" && spago build
+	cd "$(SHOWCASES)/hypo-punter" && spago build -p ge-website
 	@echo "Bundling ge-website..."
-	cd "$(SHOWCASES)/hypo-punter/ge-website" && spago bundle
+	cd "$(SHOWCASES)/hypo-punter" && spago bundle -p ge-website
 
-# Landing page (Hypo-Punter)
+# Landing page (Hypo-Punter) (run from workspace root for correct path resolution)
 landing: npm-install-embedding-explorer
 	@echo "Building landing page..."
-	cd "$(SHOWCASES)/hypo-punter/landing" && spago build
+	cd "$(SHOWCASES)/hypo-punter" && spago build -p landing
 	@echo "Bundling landing page..."
-	cd "$(SHOWCASES)/hypo-punter/landing" && spago bundle
+	cd "$(SHOWCASES)/hypo-punter" && spago bundle -p landing
 
 # ----------------------------------------------------------------------------
 # Sankey Editor (psd3-arid-keystone)
@@ -235,7 +235,7 @@ app-sankey: lib-layout lib-selection
 	@echo "Building sankey editor..."
 	cd "$(SHOWCASES)/psd3-arid-keystone" && spago build
 	@echo "Bundling sankey editor..."
-	cd "$(SHOWCASES)/psd3-arid-keystone" && spago bundle -p psd3-sankey-editor --module Main --outfile demo/bundle.js
+	cd "$(SHOWCASES)/psd3-arid-keystone" && spago bundle -p hylograph-sankey-editor --module Main --outfile demo/bundle.js
 
 # ----------------------------------------------------------------------------
 # Hylograph (Interactive HATS Explorer)
@@ -489,7 +489,7 @@ serve-tidal-backend: purerl-tidal
 # A* Demo
 serve-astar: lib-astar-demo
 	@echo "Serving A* Demo on port $(PORT)..."
-	cd "$(VIS_LIBS)/psd3-astar-demo" && python3 -m http.server $(PORT)
+	cd "$(VIS_LIBS)/hylograph-astar-demo" && python3 -m http.server $(PORT)
 
 # Content Generation (Markdown → Halogen)
 content:

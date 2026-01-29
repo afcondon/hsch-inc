@@ -25,7 +25,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (28 documents)
+## Plans (29 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
@@ -57,7 +57,10 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Hylograph Tour: Structures Page | active | `docs/kb/plans/hylograph-tour-structures-page.md` | hylograph, hats, tour, demo, visualization |
 | AST Builder Redesign for HATS | active | `docs/kb/plans/ast-builder-redesign.md` | hylograph, hats, ast-builder, showcase, ui-design |
 | Hylograph: The Interactive Guide | active | `docs/kb/plans/hylograph-guide-unified.md` | hylograph, hats, tour, demo, ast-builder, unified |
-| Beads PureScript Port | draft | `docs/kb/plans/beads-purescript-port.md` | beads, issue-tracking, purescript, cli, graph |
+| Beads PureScript Port | implemented | `docs/kb/plans/beads-purescript-port.md` | beads, issue-tracking, purescript, cli, graph |
+| Hylograph & Polyglot Release Plan | active | `docs/kb/plans/release-plan-2026.md` | release, hylograph, polyglot, deployment, cloudflare |
+| Hylograph Cloudflare Deployment | active | `docs/kb/plans/hylograph-cloudflare-deployment.md` | hylograph, cloudflare, deployment, infrastructure |
+| Beads Visualization Showcase | planned | `docs/kb/plans/beads-viz-showcase.md` | beads, visualization, force-graph, hats, showcase |
 
 ## Research (7 documents)
 
@@ -86,10 +89,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Presentation Planning | active | `visualisation libraries/purescript-psd3-selection/docs/PRESENTATION-PLANNING.md` | presentation, planning |
 | Documentation TOC | active | `apps/shaped-steer/docs/DOCUMENTATION-TOC.md` | documentation, diátaxis |
 
-## How-To (6 documents)
+## How-To (7 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| HATS Componentization Patterns | active | `docs/kb/howto/hats-componentization.md` | HATS, componentization, MetaHATS, map-forEach, chrome |
 | HATS Brushing Guide | active | `docs/kb/howto/hats-brushing.md` | HATS, brushing, coordinated-interaction, SPLOM |
 | Excel Compiler Guide | implemented | `apps/shaped-steer/docs/EXCEL-COMPILER.md` | Excel, compiler |
 | PSD3 Migration Guide | active | `apps/shaped-steer/docs/PSD3-MIGRATION-GUIDE.md` | migration, DSL |
@@ -97,6 +101,12 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | purerl-tidal Quick Start | active | `showcases/psd3-tilted-radio/purerl-tidal/docs/QUICKSTART.md` | music, quick-start |
 | Coordinated Highlighting | active | `visualisation libraries/purescript-psd3-selection/docs/howto-coordinated-highlighting.md` | D3, interaction |
 | Tooltips | active | `visualisation libraries/purescript-psd3-selection/docs/howto-tooltips.md` | D3, interaction |
+
+## Tutorials (1 document)
+
+| Title | Status | Location | Tags |
+|-------|--------|----------|------|
+| Simpson's Paradox Visualization | active | `docs/kb/tutorials/simpsons/` | data-viz, statistics, paradox, interactive |
 
 ## Archive (2 documents)
 
@@ -109,8 +119,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 53 documents
-- **Active**: 47
+- **Total**: 54 documents
+- **Active**: 48
 - **Implemented**: 5
 - **Superseded/Stale**: 1
 

@@ -1,0 +1,10 @@
+## What Simpson's paradox is not
+
+*Simpson's:* It was [first mentioned](http://www.jstor.org/discover/10.2307/2331677?uid=2&uid=4&sid=21102567680247) by British statistician [Udny Yule](http://en.wikipedia.org/wiki/Udny_Yule) in 1903.
+
+*A paradox:* Simpson's paradox is just a special case of [ommitted variable bias](http://en.wikipedia.org/wiki/Omitted-variable_bias). W.V. Quine would call it a [veridical paradox](http://en.wikipedia.org/wiki/Paradox#Quine.27s_classification_of_paradoxes).
+
+*Every ommitted variable problem:* Women earn only 77 percent of what men do, but according to Cornell economists [Francine Blau and Lawrence Kahn](http://digitalcommons.ilr.cornell.edu/cgi/viewcontent.cgi?article=1248&context=ilrreview), accounting for work experience, education, industry, and unionization shrinks the gap to 91 percent (p. 52). So, discrimination matters less than the `77 percent` stat would lead you to believe. But is this Simpson's paradox? No, because the correction isn't large enough for the effect of gender to change sign.
+
+## Why it matters
+Simpson's paradox usually fools us on tests of performance. In a [famous example](http://en.wikipedia.org/wiki/Simpson's_paradox#Kidney_stone_treatment), researchers concluded that a newer treatment for kidney stones was more effective than traditional surgery, but it was [later revealed](http://www.bmj.com/content/309/6967/1480) that the newer treatment was more often being used on small kidney stones. More recently, [on elementary school tests](http://educationnext.org/are-wisconsin-schools-better-than-those-in-texas/), minority students in Texas outperform their peers in Wisconsin, but Texas has so many minority students that Wisconsin beats it in state rankings. It would be a shame if Simpson's paradox led doctors to prescribe ineffective treatments or Texas schools to waste money copying Wisconsin.
