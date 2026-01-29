@@ -72,8 +72,8 @@ APPS := apps
 .PHONY: all libs apps clean help
 .PHONY: lib-graph lib-layout lib-selection lib-music lib-simulation
 .PHONY: lib-showcase-shell lib-simulation-halogen
-.PHONY: app-wasm app-embedding-explorer app-sankey app-code-explorer app-tilted-radio
-.PHONY: app-timber-lieder app-edge app-emptier-coinage
+.PHONY: app-wasm app-embedding-explorer app-sankey app-hylograph app-code-explorer app-tilted-radio
+.PHONY: app-timber-lieder app-edge app-emptier-coinage app-simpsons
 .PHONY: wasm-kernel
 .PHONY: npm-install npm-install-embedding-explorer npm-install-code-explorer
 .PHONY: ee-server ge-server ee-website ge-website landing
@@ -144,7 +144,7 @@ lib-astar-demo: lib-simulation lib-graph
 # SHOWCASE APPLICATIONS
 # ============================================================================
 
-apps: app-wasm app-embedding-explorer app-sankey app-code-explorer app-tilted-radio app-timber-lieder app-edge app-emptier-coinage
+apps: app-wasm app-embedding-explorer app-sankey app-hylograph app-code-explorer app-tilted-radio app-timber-lieder app-edge app-emptier-coinage
 	@echo "All applications built successfully"
 
 # ----------------------------------------------------------------------------
@@ -236,6 +236,18 @@ app-sankey: lib-layout lib-selection
 	cd "$(SHOWCASES)/psd3-arid-keystone" && spago build
 	@echo "Bundling sankey editor..."
 	cd "$(SHOWCASES)/psd3-arid-keystone" && spago bundle -p psd3-sankey-editor --module Main --outfile demo/bundle.js
+
+# ----------------------------------------------------------------------------
+# Hylograph (Interactive HATS Explorer)
+# ----------------------------------------------------------------------------
+
+app-hylograph: lib-selection
+	@echo "Installing npm dependencies for hylograph..."
+	cd "$(SHOWCASES)/hylograph-app" && npm install
+	@echo "Building hylograph..."
+	cd "$(SHOWCASES)/hylograph-app" && spago build
+	@echo "Bundling hylograph..."
+	cd "$(SHOWCASES)/hylograph-app" && spago bundle -p hylograph-app --module Main --outfile public/bundle.js
 
 # ----------------------------------------------------------------------------
 # TreeBuilder Demo (psd3-timber-lieder)
@@ -333,6 +345,16 @@ app-edge:
 		echo "  Install from: https://github.com/Unisay/purescript-lua"; \
 		echo "  Existing dist/edge.lua will be used"; \
 	fi
+
+# ----------------------------------------------------------------------------
+# Simpson's Paradox (HATS Showcase)
+# ----------------------------------------------------------------------------
+
+app-simpsons: lib-selection lib-simulation
+	@echo "Building simpsons-paradox..."
+	cd "$(SHOWCASES)/simpsons-paradox" && spago build
+	@echo "Bundling simpsons-paradox..."
+	cd "$(SHOWCASES)/simpsons-paradox" && spago bundle --module Simpsons.Main --outfile public/bundle.js
 
 # ============================================================================
 # LIBRARY DOCUMENTATION SITES
@@ -435,6 +457,11 @@ serve-landing: landing
 serve-sankey: app-sankey
 	@echo "Serving Sankey Editor on port $(PORT)..."
 	cd "$(SHOWCASES)/psd3-arid-keystone/demo" && python3 -m http.server $(PORT)
+
+# Hylograph (HATS Explorer)
+serve-hylograph: app-hylograph
+	@echo "Serving Hylograph on port $(PORT)..."
+	cd "$(SHOWCASES)/hylograph-app/public" && python3 -m http.server $(PORT)
 
 # TreeBuilder Demo (Timber Lieder)
 serve-timber-lieder: app-timber-lieder

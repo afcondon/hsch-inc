@@ -249,6 +249,17 @@ services:
       timeout: 3s
       retries: 3
 
+  hylograph:
+    build:
+      context: ./showcases/hylograph-app
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
   # ============================================================
   # LIBRARY DOCUMENTATION SITES
   # ============================================================
