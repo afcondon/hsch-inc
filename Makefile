@@ -505,7 +505,7 @@ website: content
 	@echo "Building demo-website..."
 	cd "$(SITE)/website" && spago build
 	@echo "Bundling demo-website..."
-	cd "$(SITE)/website" && spago bundle -p demo-website --module PSD3.Main --outfile public/bundle.js
+	cd "$(SITE)/website" && spago bundle -p demo-website --module Hylograph.Main --outfile public/bundle.js
 	@echo "Adding cache-busting version to bundle.js..."
 	@TIMESTAMP=$$(date +%s); \
 	sed -i.bak 's|bundle\.js[^"]*"|bundle.js?v='$$TIMESTAMP'"|g' "$(SITE)/website/public/index.html" && \
