@@ -1,18 +1,21 @@
-# What Claude Needs to Know: PSD3 Ecosystem Reference
+# What Claude Needs to Know: Hylograph Ecosystem Reference
 
-This document provides essential context about the PSD3 suite of libraries, tools, and showcase applications. It covers all repositories under `/Users/afc/work/afc-work/PSD3-Repos/` plus the alternative compiler backends (Erlang and Python).
+This document provides essential context about the Hylograph suite of libraries, tools, and showcase applications. It covers all repositories under `/Users/afc/work/afc-work/PSD3-Repos/` plus the alternative compiler backends (Erlang and Python).
+
+> **Name Change**: The project was renamed from "PSD3" to "Hylograph" to reflect its core abstraction: HATS (Hylomorphic Abstract Tree Syntax). The visualization approach is fundamentally a hylomorphism—an unfold (data → tree) composed with a fold (tree → DOM).
 
 ## Table of Contents
 1. [Design Philosophy](#design-philosophy)
 2. [Ecosystem Overview](#ecosystem-overview)
-3. [Core PSD3 Libraries](#core-psd3-libraries)
+3. [Core Hylograph Libraries](#core-hylograph-libraries)
 4. [Site Infrastructure](#site-infrastructure)
 5. [Showcase Applications](#showcase-applications)
 6. [Full Applications](#full-applications)
 7. [Alternative Backends](#alternative-backends)
 8. [Build Systems](#build-systems)
 9. [FFI Patterns](#ffi-patterns)
-10. [Common Tasks Quick Reference](#common-tasks-quick-reference)
+10. [Knowledge Base & Claude Skills](#knowledge-base--claude-skills)
+11. [Common Tasks Quick Reference](#common-tasks-quick-reference)
 
 ---
 
@@ -22,9 +25,19 @@ This document provides essential context about the PSD3 suite of libraries, tool
 
 There is a strong emphasis on **declarative programming styles** throughout this ecosystem, using ASTs interpreted by Finally Tagless interpreters:
 
-- **PSD3 takes control from D3** - We don't write imperative D3 code that mutates the DOM directly
+- **Hylograph takes control from D3** - We don't write imperative D3 code that mutates the DOM directly
 - **D3 as calculation engine only** - We use D3's mathematical algorithms (force simulation engine) but manage state and rendering declaratively through PureScript
 - **Data flows down, events flow up** - Visualizations are functions of data, not sequences of mutations
+
+### HATS: Hylomorphic Abstract Tree Syntax
+
+The core abstraction is **HATS** - a declarative AST for describing visualization trees. The name captures the insight that visualization IS fundamentally a hylomorphism:
+
+- **Ana** (unfold): data → visualization tree
+- **Cata** (fold): tree → DOM operations
+- **Hylo** (fused): data → DOM with virtual intermediate tree
+
+HATS enables multiple interpreters from a single specification: D3 rendering, English descriptions, Mermaid diagrams, accessibility trees.
 
 ### Prefer Public Libraries
 
@@ -32,7 +45,7 @@ We strive to **use public PureScript libraries from the current Spago package se
 
 1. Check if it exists in the registry
 2. Use well-maintained community packages
-3. Only build custom solutions when the domain is truly novel (like PSD3's type-safe D3 bindings)
+3. Only build custom solutions when the domain is truly novel
 
 ### Code Quality Standards
 
@@ -47,31 +60,28 @@ Everything in this ecosystem is either:
 
 ## Ecosystem Overview
 
-### What is PSD3?
+### What is Hylograph?
 
-PSD3 (PureScript D3) is a **type-safe data visualization ecosystem** that provides D3-style visualizations with PureScript's strong type system. Unlike typical D3.js wrappers, PSD3 implements layout algorithms in pure PureScript and provides a layered architecture from data structures to DOM rendering. Several showcase applications make deep use of other ecosystems (Tidal, Erlang, Excel, Python, Node).
+Hylograph (formerly PSD3) is a **type-safe data visualization ecosystem** that provides D3-style visualizations with PureScript's strong type system. Unlike typical D3.js wrappers, Hylograph implements layout algorithms in pure PureScript and provides a layered architecture from data structures to DOM rendering. Several showcase applications make deep use of other ecosystems (Tidal, Erlang, Excel, Python, Node).
 
 ### Architecture Hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    SHOWCASE APPLICATIONS                        │
-│  Corrode Expel | Hypo-Punter | Arid Keystone | Tilted Radio    │
+│  Code Explorer | Hypo-Punter | Sankey Editor | Tidal | Zoo     │
 ├─────────────────────────────────────────────────────────────────┤
 │                    FRAMEWORK INTEGRATIONS                       │
-│              psd3-react | site/website (Halogen)                │
+│         hylograph-simulation-halogen | site/website (Halogen)   │
 ├─────────────────────────────────────────────────────────────────┤
-│                    PRESENTATION LAYER                           │
-│                  psd3-music | psd3-tidal                        │
+│                    DOMAIN LAYER                                 │
+│                  hylograph-music | hylograph-simulation         │
 ├─────────────────────────────────────────────────────────────────┤
-│                    INTERACTION LAYER                            │
-│           psd3-selection (DOM) | psd3-simulation (force)        │
+│                    CORE LAYER                                   │
+│             hylograph-selection (DOM + HATS AST)                │
 ├─────────────────────────────────────────────────────────────────┤
 │                    COMPUTATION LAYER                            │
-│             psd3-layout | psd3-graph                            │
-├─────────────────────────────────────────────────────────────────┤
-│                    FOUNDATION LAYER                             │
-│                       psd3-tree                                 │
+│                 hylograph-layout | hylograph-graph              │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -79,18 +89,21 @@ PSD3 (PureScript D3) is a **type-safe data visualization ecosystem** that provid
 
 ```
 /Users/afc/work/afc-work/PSD3-Repos/
-├── visualisation libraries/        # Core PSD3 libraries
-│   ├── purescript-psd3-tree/       # Rose trees (foundation)
-│   ├── purescript-psd3-graph/      # Graph data structures
-│   ├── purescript-psd3-layout/     # Layout algorithms
-│   ├── purescript-psd3-selection/  # D3-style DOM selection
-│   ├── purescript-psd3-simulation/ # Force-directed simulation
-│   ├── purescript-psd3-simulation-halogen/  # Halogen bindings
-│   ├── purescript-psd3-music/      # Audio/sonification
-│   └── psd3-astar-demo/            # Pathfinding visualization
+├── visualisation libraries/        # Core publishable Hylograph libraries
+│   ├── purescript-hylograph-canvas/       # Canvas rendering
+│   ├── purescript-hylograph-d3-kernel/    # D3 core bindings
+│   ├── purescript-hylograph-graph/        # Graph data structures
+│   ├── purescript-hylograph-layout/       # Layout algorithms
+│   ├── purescript-hylograph-music/        # Audio/sonification
+│   ├── purescript-hylograph-optics/       # Lens utilities
+│   ├── purescript-hylograph-selection/    # D3-style DOM selection + HATS
+│   ├── purescript-hylograph-simulation/   # Force-directed simulation
+│   ├── purescript-hylograph-simulation-core/  # Simulation core
+│   ├── purescript-hylograph-simulation-halogen/  # Halogen bindings
+│   ├── purescript-hylograph-transitions/  # Animation transitions
+│   └── purescript-hylograph-wasm-kernel/  # WASM acceleration
 │
 ├── site/                           # Demo infrastructure
-│   ├── scuppered-ligature/         # Edge layer (PureScript → Lua → Nginx)
 │   ├── website/                    # Halogen demo site
 │   ├── dashboard/                  # Dev dashboard (Node.js)
 │   ├── react-proof/                # React integration proof
@@ -103,34 +116,37 @@ PSD3 (PureScript D3) is a **type-safe data visualization ecosystem** that provid
 │       └── wasm-test/              # Test Rust WASM toolchain
 │
 ├── showcases/                      # Showcase applications
-│   ├── hypo-punter/                # PurePy demos (monorepo)
-│   │   ├── ee-server/              # Embedding Explorer Python backend
-│   │   ├── ee-website/             # Embedding Explorer Halogen frontend
-│   │   ├── ge-server/              # Grid Explorer Python backend
-│   │   ├── ge-website/             # Grid Explorer Halogen frontend
-│   │   └── landing/                # Unified landing page
-│   ├── corrode-expel/              # Code Explorer
-│   │   ├── ce-server/              # Node.js API server
-│   │   ├── ce-database/            # DuckDB code indexing
-│   │   ├── ce2-website/            # Halogen + PSD3 frontend
-│   │   └── code-explorer-vscode-ext/  # VSCode extension
+│   ├── allergy-outlay/             # Gallery Outlays (image grid viz)
+│   ├── corrode-expel/              # Code Explorer (Node.js backend)
+│   ├── emptier-coinage/            # Emptier Coinage (metrics viz)
+│   ├── graph-algos/                # Graph algorithms demo
+│   ├── halogen-spider/             # Site Explorer (route analysis)
+│   ├── hylograph-app/              # Hylograph main app
+│   ├── hylograph-guide/            # Interactive guide
+│   ├── hypo-punter/                # PurePy demos (EE + GE)
 │   ├── psd3-arid-keystone/         # Sankey diagram editor
+│   ├── psd3-lorenz-attractor/      # Lorenz attractor viz
+│   ├── psd3-prim-zoo-mosh/         # Recursion schemes zoo
 │   ├── psd3-tilted-radio/          # Tidal/Algorave
-│   │   ├── purerl-tidal/           # Erlang backend
-│   │   └── purescript-psd3-tidal/  # PureScript frontend
+│   ├── psd3-timber-lieder/         # Timber Lieder (music viz)
+│   ├── psd3-topics/                # Topic modeling viz
+│   ├── purescript-makefile-parser/ # Makefile parsing library
+│   ├── scuppered-ligature/         # Edge layer (PureScript → Lua)
+│   ├── simpsons-paradox/           # Simpson's paradox demo
 │   └── wasm-force-demo/            # Rust WASM + PureScript
-│       └── force-kernel/           # Rust WASM kernel
 │
 ├── apps/                           # Full applications (not showcases)
-│   └── shaped-steer/               # Spreadsheet/build/WASM vision
+│   └── shaped-steer/               # Spreadsheet/build/WASM app
 │
 ├── _external/                      # Music ecosystem (separate project)
 │   ├── tarot-music/
 │   └── ES-config/
 │
 ├── tools/                          # Build tools
-├── scripts/                        # makefile-to-sankey.js etc
+├── scripts/                        # Utility scripts
 ├── docs/                           # Shared documentation
+│   ├── kb/                         # Knowledge base
+│   └── worklog/                    # Session logs
 └── purescript-python-new/          # PurePy compiler (convenience)
 ```
 
@@ -144,75 +160,73 @@ PSD3 (PureScript D3) is a **type-safe data visualization ecosystem** that provid
 | **Arid Keystone** | Sankey Editor | PureScript showcase |
 | **Tilted Radio** | Tidal Editor | Purerl showcase |
 | **Shaped Steer** | Spreadsheet | Full app (not showcase) |
+| **Allergy Outlay** | Gallery Outlays | Image grid showcase |
+| **Emptier Coinage** | Metrics Coinage | Metrics showcase |
+| **Halogen Spider** | Spider Halogen | Site Explorer |
+| **Prim Zoo Mosh** | Morphisms Zoo | Recursion schemes |
+| **Timber Lieder** | Timbrel Dialer | Music visualization |
 
 ### spago.yaml Path Conventions
 
-Projects reference PSD3 libraries via workspace `extraPackages` with relative paths:
-- Site projects: `path: "../visualisation libraries/purescript-psd3-*"`
-- Showcases: `path: "../../visualisation libraries/purescript-psd3-*"`
-- Nested showcases: `path: "../../../visualisation libraries/purescript-psd3-*"`
+Projects reference Hylograph libraries via workspace `extraPackages` with relative paths:
+- Site projects: `path: "../visualisation libraries/purescript-hylograph-*"`
+- Showcases: `path: "../../visualisation libraries/purescript-hylograph-*"`
+- Nested showcases: `path: "../../../visualisation libraries/purescript-hylograph-*"`
 
 ---
 
-## Core PSD3 Libraries
+## Core Hylograph Libraries
 
-### 1. psd3-tree (`purescript-psd3-tree`)
-**Purpose**: Rose tree data structure
-**Path**: `visualisation libraries/purescript-psd3-tree`
-**Dependencies**: arrays, foldable-traversable, lists, maybe, prelude, tree-rose
-**Used by**: psd3-graph, psd3-layout, psd3-selection
+### 1. hylograph-selection (`purescript-hylograph-selection`)
+**Purpose**: Type-safe D3 selection and HATS AST
+**Path**: `visualisation libraries/purescript-hylograph-selection`
+**Key modules**: `Hylograph.Selection`, `Hylograph.HATS`, `Hylograph.Attr`, `Hylograph.Scale`, `Hylograph.Axis`
+**Note**: This is the core library containing the HATS declarative AST
 
-### 2. psd3-graph (`purescript-psd3-graph`)
+### 2. hylograph-graph (`purescript-hylograph-graph`)
 **Purpose**: Graph data structures and algorithms
-**Path**: `visualisation libraries/purescript-psd3-graph`
-**Dependencies**: psd3-tree, arrays, control, foldable-traversable, free, graphs
-**Key modules**: `Data.Graph.Inductive`, graph traversal algorithms
+**Path**: `visualisation libraries/purescript-hylograph-graph`
+**Key modules**: `Data.Graph.Inductive`, `Data.Graph.Layout` (Sugiyama)
 
-### 3. psd3-layout (`purescript-psd3-layout`)
+### 3. hylograph-layout (`purescript-hylograph-layout`)
 **Purpose**: Pure PureScript layout algorithms (tree, pack, sankey, edge-bundle)
-**Path**: `visualisation libraries/purescript-psd3-layout`
-**Dependencies**: psd3-tree, ordered-collections, random, transformers
+**Path**: `visualisation libraries/purescript-hylograph-layout`
 **Key modules**: `Layout.Tree`, `Layout.Sankey`, `Layout.Pack`, `Layout.EdgeBundle`
 
-### 4. psd3-selection (`purescript-psd3-selection`)
-**Purpose**: Type-safe D3 selection and attribute binding
-**Path**: `visualisation libraries/purescript-psd3-selection`
-**Dependencies**: psd3-tree, psd3-graph, web-dom, web-events, halogen-subscriptions
-**Key modules**: `PSD3.Selection`, `PSD3.Attr`, `PSD3.Scale`, `PSD3.Axis`
-
-### 5. psd3-simulation (`purescript-psd3-simulation`)
+### 4. hylograph-simulation (`purescript-hylograph-simulation`)
 **Purpose**: Force-directed graph simulation
-**Path**: `visualisation libraries/purescript-psd3-simulation`
-**Dependencies**: psd3-selection, halogen-subscriptions, refs
-**Key modules**: `PSD3.Simulation`, `PSD3.Force`
+**Path**: `visualisation libraries/purescript-hylograph-simulation`
+**Key modules**: `Hylograph.Simulation`, `Hylograph.Force`
 
-### 6. psd3-simulation-halogen (`purescript-psd3-simulation-halogen`)
+### 5. hylograph-simulation-halogen (`purescript-hylograph-simulation-halogen`)
 **Purpose**: Halogen integration for force simulation
-**Path**: `visualisation libraries/purescript-psd3-simulation-halogen`
-**Dependencies**: psd3-simulation, halogen
+**Path**: `visualisation libraries/purescript-hylograph-simulation-halogen`
 
-### 7. psd3-music (`purescript-psd3-music`)
+### 6. hylograph-music (`purescript-hylograph-music`)
 **Purpose**: Data sonification for accessibility
-**Path**: `visualisation libraries/purescript-psd3-music`
-**Dependencies**: psd3-selection, refs, transformers
+**Path**: `visualisation libraries/purescript-hylograph-music`
+
+### 7. hylograph-canvas (`purescript-hylograph-canvas`)
+**Purpose**: Canvas rendering backend
+**Path**: `visualisation libraries/purescript-hylograph-canvas`
+
+### 8. hylograph-d3-kernel (`purescript-hylograph-d3-kernel`)
+**Purpose**: Core D3.js bindings
+**Path**: `visualisation libraries/purescript-hylograph-d3-kernel`
+
+### 9. hylograph-transitions (`purescript-hylograph-transitions`)
+**Purpose**: Animation and transition support
+**Path**: `visualisation libraries/purescript-hylograph-transitions`
+
+### 10. hylograph-wasm-kernel (`purescript-hylograph-wasm-kernel`)
+**Purpose**: WASM acceleration for compute-intensive operations
+**Path**: `visualisation libraries/purescript-hylograph-wasm-kernel`
 
 ---
 
 ## Site Infrastructure
 
 The `site/` directory contains demo and documentation infrastructure:
-
-### scuppered-ligature
-**Purpose**: Edge layer for Polyglot PureScript - routes all traffic through PureScript compiled to Lua
-**Path**: `site/scuppered-ligature`
-**Technologies**: PureScript, Lua, Nginx/OpenResty
-**Port**: 80
-**Features**: Request routing, rate limiting, metrics collection, upstream proxying
-**Codename**: Anagram of "PureScript Edge Lua"
-
-This is the entry point for the entire Polyglot PureScript website. Every request
-flows through PureScript code running as Lua inside Nginx, demonstrating that
-PureScript can run at the edge. See `docker-compose.yml` for the full stack.
 
 ### dashboard
 **Purpose**: Dev dashboard for managing all services
@@ -224,12 +238,12 @@ PureScript can run at the edge. See `docker-compose.yml` for the full stack.
 ### website
 **Purpose**: Main Halogen demo website
 **Path**: `site/website`
-**Technologies**: Halogen, PSD3
+**Technologies**: Halogen, Hylograph
 
 ### react-proof
-**Purpose**: Prove PSD3 works with React
+**Purpose**: Prove Hylograph works with React
 **Path**: `site/react-proof`
-**Technologies**: React, PSD3
+**Technologies**: React, Hylograph
 
 ### showcase-shell
 **Purpose**: Reusable Halogen shell component for demos
@@ -237,21 +251,28 @@ PureScript can run at the edge. See `docker-compose.yml` for the full stack.
 **Features**: Header slot, zoomable SVG layer, toggleable panels
 
 ### styling
-**Purpose**: PSD3 house style CSS
+**Purpose**: Hylograph house style CSS
 **Path**: `site/styling`
 **File**: `psd3.css` - design tokens, components, utilities
-
-### docs
-**Purpose**: Antora documentation server
-**Path**: `site/docs`
 
 ---
 
 ## Showcase Applications
 
-### 1. Hypo-Punter (`showcases/hypo-punter`)
+### 1. Corrode Expel (`showcases/corrode-expel`)
+**Purpose**: Code structure visualization
+**Type**: Full-stack development tool
+**Codename**: Anagram of "Code Explorer"
+
+- **ce-server**: Node.js HTTP API server with DuckDB
+- **ce-database**: DuckDB code indexing
+- **ce2-website**: Halogen + Hylograph frontend with dependency graph
+- **code-explorer-vscode-ext**: VSCode extension
+
+### 2. Hypo-Punter (`showcases/hypo-punter`)
 **Purpose**: PurePy demonstration (word embeddings + power grid)
 **Type**: Monorepo with 5 sub-projects
+**Codename**: Anagram of "Pure Python"
 
 #### ee-server (Embedding Explorer Backend)
 - **Language**: PureScript → Python (via purepy)
@@ -269,31 +290,19 @@ PureScript can run at the edge. See `docker-compose.yml` for the full stack.
 - **Port**: 5082
 
 #### ge-website (Grid Explorer Frontend)
-- **Framework**: Halogen + PSD3
+- **Framework**: Halogen + Hylograph
 - **Features**: Force-directed network graph, voltage coloring
 - **Port**: 8088
 
-#### landing
-- **Purpose**: Unified landing page for both demos
-- **Port**: 8091
-
-### 2. Corrode Expel (`showcases/corrode-expel`)
-**Purpose**: Code structure visualization
-**Type**: Full-stack development tool
-
-- **ce-server**: Node.js HTTP API server
-- **ce-database**: DuckDB code indexing
-- **ce2-website**: Halogen + PSD3 frontend with dependency graph
-- **code-explorer-vscode-ext**: VSCode extension
-
 ### 3. Arid Keystone (`showcases/psd3-arid-keystone`)
 **Purpose**: Sankey diagram editor + build visualization
+**Codename**: Anagram of "Sankey Editor"
 **Features**: Interactive Sankey diagram creation, Makefile dependency visualization
-**Uses**: psd3-layout (Sankey algorithm), psd3-selection, Halogen
 **Port**: 8089
 
 ### 4. Tilted Radio (`showcases/psd3-tilted-radio`)
 **Purpose**: TidalCycles live coding
+**Codename**: Anagram of "Tidal Editor"
 
 #### purerl-tidal (Erlang Backend)
 - **Language**: PureScript → Erlang (via purerl)
@@ -301,7 +310,7 @@ PureScript can run at the edge. See `docker-compose.yml` for the full stack.
 - **Port**: 8083
 
 #### purescript-psd3-tidal (Browser Frontend)
-- **Framework**: Halogen + PSD3
+- **Framework**: Halogen + Hylograph
 - **Features**: Pattern visualization, MIDI output
 - **Port**: 8084
 
@@ -310,15 +319,51 @@ PureScript can run at the edge. See `docker-compose.yml` for the full stack.
 **Technologies**: wasm-pack, Rust, PureScript
 **Port**: 8079
 
+### 6. Halogen Spider (`showcases/halogen-spider`)
+**Purpose**: Site Explorer - route analysis and annotation
+**Codename**: Anagram of "Spider Halogen"
+**Features**: D3 force graph, route reachability analysis, Rose Adler Art Deco styling
+**Backend**: Uses ce-server API
+
+### 7. Prim Zoo Mosh (`showcases/psd3-prim-zoo-mosh`)
+**Purpose**: Recursion schemes educational zoo
+**Codename**: Anagram of "Morphisms Zoo"
+**Features**: Catamorphism, anamorphism, hylomorphism, apomorphism visualizations
+**Includes**: L-System implementation demonstrating schemes
+
+### 8. Scuppered Ligature (`showcases/scuppered-ligature`)
+**Purpose**: Edge layer for Polyglot PureScript
+**Codename**: Anagram of "PureScript Edge Lua"
+**Technologies**: PureScript, Lua, Nginx/OpenResty
+**Features**: Request routing, rate limiting, metrics, upstream proxying
+**Note**: Entry point for entire polyglot website - all requests flow through PureScript→Lua
+
+### 9. Graph Algos (`showcases/graph-algos`)
+**Purpose**: Graph algorithm visualizations
+**Features**: A* pathfinding, Dijkstra, BFS/DFS demos
+
+### 10. Simpsons Paradox (`showcases/simpsons-paradox`)
+**Purpose**: Simpson's paradox statistical visualization
+**Features**: Interactive demonstration of aggregation fallacy
+
+### 11. Lorenz Attractor (`showcases/psd3-lorenz-attractor`)
+**Purpose**: Chaos theory visualization
+**Features**: 3D Lorenz attractor rendering
+
+### 12. Timber Lieder (`showcases/psd3-timber-lieder`)
+**Purpose**: Music/timbre visualization
+**Codename**: Related to "Timbrel Dialer"
+
 ---
 
 ## Full Applications
 
 ### Shaped Steer (`apps/shaped-steer`)
 **Purpose**: Full-featured spreadsheet/build system/database application
+**Codename**: Anagram of "Spreadsheet"
 **Status**: In development
 **Vision**: Unifies spreadsheets, charting, build systems, databases with WASM calculations
-**Note**: Not a showcase - this is a standalone product
+**Note**: Not a showcase - this is a standalone product exploring "typed feedback loops"
 
 ---
 
@@ -464,6 +509,50 @@ All multi-argument functions must be curried:
 def addThree(x):
     return lambda y: lambda z: x + y + z
 ```
+
+---
+
+## Knowledge Base & Claude Skills
+
+### Knowledge Base (`docs/kb/`)
+
+The knowledge base contains classified technical reports:
+
+```
+docs/kb/
+├── INDEX.md           # Master index of all reports
+├── _TEMPLATE.md       # Template for new reports
+├── architecture/      # System design documents
+├── plans/             # Implementation roadmaps
+├── research/          # Analysis and investigations
+├── reference/         # Specifications and status docs
+├── howto/             # Practical guides
+└── archive/           # Superseded/completed docs
+```
+
+**When to consult**: Before working on unfamiliar territory, check INDEX.md for relevant reports. The `howto/` guides often have solutions to common problems.
+
+### Claude Skills (`.claude/commands/`)
+
+Custom skills extend Claude Code's capabilities:
+
+| Skill | Purpose |
+|-------|---------|
+| `/build` | Build any/all project artifacts via Makefile |
+| `/deploy` | Deploy to MacMini via rsync + Docker |
+| `/css-review` | Review CSS for cleanliness and modern practices |
+| `/feature` | Create feature branches with proper workflow |
+| `/plan-stack` | Plan implementation with stack considerations |
+| `/fp-police` | Code quality audit for FP principles |
+
+### Session Logging
+
+Session logs go in `docs/worklog/YYYY-MM-DD.md`. Required sections:
+1. **Accomplished**: What was completed
+2. **Explored But Not Pursued**: Paths investigated but set aside
+3. **Parking Lot**: Ideas surfaced but not addressed
+4. **Decisions Made**: Choices with rationale
+5. **Next Session Setup**: Context for resuming
 
 ---
 

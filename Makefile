@@ -72,8 +72,8 @@ APPS := apps
 .PHONY: all libs apps clean help
 .PHONY: lib-graph lib-layout lib-selection lib-music lib-simulation
 .PHONY: lib-showcase-shell lib-simulation-halogen
-.PHONY: app-wasm app-embedding-explorer app-sankey app-hylograph app-code-explorer app-tilted-radio
-.PHONY: app-timber-lieder app-edge app-emptier-coinage app-simpsons
+.PHONY: app-wasm app-embedding-explorer app-sankey app-hylograph app-code-explorer app-halogen-spider spider-analyze spider-compare spider-html app-tilted-radio
+.PHONY: app-timber-lieder app-edge app-emptier-coinage app-simpsons app-nn
 .PHONY: wasm-kernel
 .PHONY: npm-install npm-install-embedding-explorer npm-install-code-explorer
 .PHONY: ee-server ge-server ee-website ge-website landing
@@ -144,7 +144,7 @@ lib-astar-demo: lib-simulation lib-graph
 # SHOWCASE APPLICATIONS
 # ============================================================================
 
-apps: app-wasm app-embedding-explorer app-sankey app-hylograph app-code-explorer app-tilted-radio app-timber-lieder app-edge app-emptier-coinage
+apps: app-wasm app-embedding-explorer app-sankey app-hylograph app-code-explorer app-halogen-spider app-tilted-radio app-timber-lieder app-edge app-emptier-coinage
 	@echo "All applications built successfully"
 
 # ----------------------------------------------------------------------------
@@ -296,6 +296,34 @@ vscode-ext: npm-install-code-explorer
 	cd "$(SHOWCASES)/corrode-expel/code-explorer-vscode-ext" && npx tsc -p ./
 
 # ----------------------------------------------------------------------------
+# Halogen Spider (Site Explorer - route analysis tool)
+# ----------------------------------------------------------------------------
+
+app-halogen-spider:
+	@echo "Building halogen-spider (site explorer tool)..."
+	cd "$(SHOWCASES)/halogen-spider" && npm install
+	cd "$(SHOWCASES)/halogen-spider" && spago build
+	@echo "Halogen Spider build complete"
+	@echo "Run with: cd showcases/halogen-spider && node run.js"
+
+spider-analyze: app-halogen-spider
+	@echo "Spidering deployed site at http://100.101.177.83..."
+	cd "$(SHOWCASES)/halogen-spider" && node run.js spider http://100.101.177.83
+	@echo ""
+	@echo "Results written to showcases/halogen-spider/"
+
+spider-compare: app-halogen-spider
+	@echo "Comparing static analysis with live spidering..."
+	cd "$(SHOWCASES)/halogen-spider" && node run.js compare ../../site/website http://100.101.177.83
+	@echo ""
+	@echo "Results written to showcases/halogen-spider/"
+
+spider-html: app-halogen-spider
+	@echo "Generating HTML report..."
+	cd "$(SHOWCASES)/halogen-spider" && node run.js html ../../site/website http://100.101.177.83
+	@echo "Report: showcases/halogen-spider/site-explorer.html"
+
+# ----------------------------------------------------------------------------
 # Tilted Radio (Tidal Editor - Purerl + PureScript)
 # ----------------------------------------------------------------------------
 
@@ -355,6 +383,16 @@ app-simpsons: lib-selection lib-simulation
 	cd "$(SHOWCASES)/simpsons-paradox" && spago build
 	@echo "Bundling simpsons-paradox..."
 	cd "$(SHOWCASES)/simpsons-paradox" && spago bundle --module Simpsons.Main --outfile public/bundle.js
+
+# ----------------------------------------------------------------------------
+# Hylograph-NN (Neural Network Diagrams via Catamorphism)
+# ----------------------------------------------------------------------------
+
+app-nn: lib-selection lib-simulation lib-simulation-halogen
+	@echo "Building hylograph-nn..."
+	cd "$(SHOWCASES)/hylograph-nn" && spago build
+	@echo "Bundling hylograph-nn..."
+	cd "$(SHOWCASES)/hylograph-nn" && spago bundle --module Main --outfile public/bundle.js
 
 # ============================================================================
 # LIBRARY DOCUMENTATION SITES
@@ -880,6 +918,10 @@ help:
 	@echo "  make app-embedding-explorer - EE + GE apps"
 	@echo "  make app-sankey   - Sankey editor"
 	@echo "  make app-code-explorer - Code explorer"
+	@echo "  make app-halogen-spider - Site explorer (route analysis)"
+	@echo "  make spider-analyze     - Spider deployed site for routes"
+	@echo "  make spider-compare     - Compare static vs live routes"
+	@echo "  make spider-html        - Generate HTML route report"
 	@echo "  make app-tilted-radio - Tidal/algorave"
 	@echo "  make app-edge     - Edge layer (Lua)"
 	@echo ""
