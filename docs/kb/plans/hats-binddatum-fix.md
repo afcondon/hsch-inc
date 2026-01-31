@@ -1,10 +1,12 @@
 # HATS bindDatum Fix Plan
 
-## Status: Pending (blocked on git cleanup)
+## Status: Implemented (2026-01-31)
+
+**Commit:** `7e4c452` on `feature/hats-migration` in hylograph-selection
 
 ## Summary
 
-The HATS implementation has a bug where datum is never bound to DOM elements, breaking behaviors that need to read datum at event time (e.g., simulation drag). The fix is small and architecturally clean.
+The HATS implementation had a bug where datum was never bound to DOM elements, breaking behaviors that need to read datum at event time (e.g., simulation drag). The fix was small and architecturally clean.
 
 ## The Bug
 
@@ -102,9 +104,14 @@ Files to check:
 4. Test ForcePlayground drag behavior
 5. Rename D3 interpreter references (optional, lower priority)
 
-## Blocked On
+## Implementation Complete
 
-Git cleanup - need to resolve the multi-repo state before making more changes.
+All steps implemented:
+1. ✅ Added `foreign import bindDatum` to InterpreterTick.purs
+2. ✅ Call `bindDatum el datum` in `renderEnteringItem` (ENTER path)
+3. ✅ Call `bindDatum el datum` in update handling (UPDATE path)
+4. ⏳ Test ForcePlayground drag behavior (pending)
+5. ⏳ Rename D3 interpreter references (optional, lower priority)
 
 ## Related Documents
 
