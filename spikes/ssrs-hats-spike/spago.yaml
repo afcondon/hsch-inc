@@ -1,0 +1,19 @@
+package:
+  name: ssrs-hats-spike
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - arrays
+    - tuples
+    - maybe
+    - foldable-traversable
+    - ssrs
+    - dissect
+    - fixed-points
+    - free  # for Cofree if needed
+    - bifunctors
+
+workspace:
+  packageSet:
+    registry: 67.0.1

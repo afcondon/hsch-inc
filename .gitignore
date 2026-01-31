@@ -17,6 +17,9 @@ docs/**/.DS_Store
 # Track scripts
 !scripts/
 
+# Track spikes (experimental explorations)
+!spikes/
+
 # Ignore common junk
 .DS_Store
 *.swp

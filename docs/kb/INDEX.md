@@ -25,10 +25,12 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (29 documents)
+## Plans (31 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| L-Systems Visualization | planned | `docs/kb/plans/l-systems-visualization.md` | l-systems, recursion-schemes, hylomorphism, apomorphism, generative |
+| Sugiyama Layered Graph Layout | planned | `docs/kb/plans/sugiyama-layered-graph.md` | graph-layout, sugiyama, dag, graphviz-alternative, algorithms |
 | CE2 Links, Hover, Navigation | active | `docs/kb/plans/ce2-links-hover-navigation.md` | ce2, code-explorer, visualization, navigation, pursuit, hover |
 | CE2 Scene Development | active | `docs/kb/plans/ce2-scene-development.md` | code-explorer, visualization, components, parameterization |
 | Array Safety Fixes | active | `docs/kb/plans/array-safety-fixes.md` | safety, bugs, psd3-simulation, psd3-selection |
@@ -62,10 +64,13 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Hylograph Cloudflare Deployment | active | `docs/kb/plans/hylograph-cloudflare-deployment.md` | hylograph, cloudflare, deployment, infrastructure |
 | Beads Visualization Showcase | planned | `docs/kb/plans/beads-viz-showcase.md` | beads, visualization, force-graph, hats, showcase |
 
-## Research (7 documents)
+## Research (15 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| PureScript REPL & Live Coding Research | active | `docs/kb/research/purescript-repl-research.md` | REPL, PSCi, playground, Bret-Victor, Try-PureScript, live-coding |
+| Typed Feedback Loops Synthesis | active | `docs/kb/research/typed-feedback-loops-synthesis.md` | playground, shaped-steer, DAG, reactive, feedback-loop, learning |
+| Liquid PureScript Feasibility | active | `docs/kb/research/liquid-purescript-feasibility.md` | refinement-types, Liquid-Haskell, SMT, Z3, verification, dependent-types |
 | CE2 Visualization Architecture Analysis | active | `docs/kb/research/ce2-visualization-architecture-analysis.md` | ce2, visualization, componentization, halogen, psd3 |
 | Lessons from marimo | active | `docs/kb/research/marimo-lessons.md` | notebook, reactivity, DAG, marimo, shaped-steer |
 | Taming the Stack: Lessons for PurePy | active | `docs/kb/research/taming-the-stack-lessons.md` | PurePy, stack-safety, trampolining, CPS, defunctionalization |
@@ -73,6 +78,10 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Functional Spreadsheet Theory | active | `apps/shaped-steer/docs/FUNCTIONAL-SPREADSHEET.md` | comonad, recursion-schemes |
 | Unified Data DSL | active | `apps/shaped-steer/docs/UNIFIED-DATA-DSL.md` | DSL, finally-tagless |
 | Hackage-to-PS Analysis | active | `docs/kb/research/hackage-analysis.md` | porting, Haskell, ecosystem |
+| Recursion Schemes as Visualization Primitives | active | `docs/kb/research/recursion-schemes-visualization.md` | recursion-schemes, theory, visualization, paper-idea |
+| Catana → HATS Diagram Derivation | active | `docs/kb/research/catana-hats-diagram-derivation.md` | catana, recursion-schemes, hats, type-directed, meta-visualization |
+| Grid Snapping in Force Layouts | active | `docs/kb/research/grid-snapping-force-layouts.md` | force-layout, grid, d3, layout-enhancement, value-add |
+| SSRS Integration for HATS | active | `docs/kb/research/ssrs-hats-integration.md` | recursion-schemes, ssrs, hats, hylograph, stack-safety |
 
 ## Reference (10 documents)
 
@@ -119,8 +128,9 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 54 documents
-- **Active**: 48
+- **Total**: 63 documents
+- **Active**: 54
+- **Planned**: 3
 - **Implemented**: 5
 - **Superseded/Stale**: 1
 
@@ -132,3 +142,5 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 4. **Visualization** - D3-style declarative system (psd3-selection, graph, tree)
 5. **Multi-Backend** - JS, Python (PurePy), Erlang (purerl), Lua (pslua), WASM, Haskell (proposed)
 6. **DevOps** - Docker, deployment, test infrastructure
+7. **Interactive Development** - Playgrounds, REPL alternatives, typed feedback loops, refinement types
+8. **Recursion Schemes** - Hylomorphism-based visualization, L-systems, type-directed diagrams
