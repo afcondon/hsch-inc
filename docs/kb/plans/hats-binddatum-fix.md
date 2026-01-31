@@ -110,7 +110,7 @@ All steps implemented:
 1. ✅ Added `foreign import bindDatum` to InterpreterTick.purs
 2. ✅ Call `bindDatum el datum` in `renderEnteringItem` (ENTER path)
 3. ✅ Call `bindDatum el datum` in update handling (UPDATE path)
-4. ⏳ Test ForcePlayground drag behavior (pending)
+4. ✅ Test ForcePlayground drag behavior - **confirmed working**
 5. ⏳ Rename D3 interpreter references (optional, lower priority)
 
 ## Related Documents
