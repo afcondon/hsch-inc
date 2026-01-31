@@ -136,6 +136,16 @@ Multi-argument functions must be curried: `def add(x): return lambda y: x + y`
 - **Python**: `Data.Array` → `data_array.py`, FFI → `data_array_foreign.py`
 - **Erlang**: `Foo.Bar` → `foo_bar@ps`, FFI → `foo_bar@foreign`
 
+## PureScript Gotchas (Differs from Haskell)
+
+These catch even experienced Haskellers:
+
+| Function | Haskell | PureScript | Fix |
+|----------|---------|------------|-----|
+| `sqrt` | In `Prelude` via `Floating` | `Data.Number.sqrt` (explicit import) | `import Data.Number (sqrt)` |
+| `scanl` | Includes initial value: `scanl (+) 0 [1,2,3] = [0,1,3,6]` | **Excludes** initial value: `scanl (+) 0 [1,2,3] = [1,3,6]` | Prepend initial: `[0] <> scanl (+) 0 xs` |
+| `show` for `Number` | Shows decimal | May show scientific notation | Use `Number.Format` for control |
+
 ## Build Conventions (MANDATORY)
 
 ### Rule Zero: Makefile Only
