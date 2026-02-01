@@ -409,11 +409,20 @@ impl LoadPipeline {
         docs_path: &Path,
         package_id: i64,
     ) -> Result<ParsedModule> {
+        use crate::parse::CoreFn;
 
         let module_id = self.id_gen.next_module_id();
 
-        // Compute LOC from source spans before we need docs for other things
-        let loc = docs.compute_loc();
+        // Compute LOC: prefer corefn.json (includes all declarations) over docs.json (exports only)
+        let corefn_path = docs_path.with_file_name("corefn.json");
+        let loc = if corefn_path.exists() {
+            CoreFn::from_path(&corefn_path)
+                .ok()
+                .and_then(|cf| cf.compute_loc())
+                .or_else(|| docs.compute_loc())
+        } else {
+            docs.compute_loc()
+        };
 
         let module = Module {
             id: module_id,

@@ -29,6 +29,19 @@ pub struct CoreFnDecl {
     #[serde(rename = "bindType")]
     pub bind_type: Option<String>,
     pub expression: Option<Value>,
+    pub annotation: Option<CoreFnAnnotation>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CoreFnAnnotation {
+    #[serde(rename = "sourceSpan")]
+    pub source_span: Option<CoreFnSourceSpan>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CoreFnSourceSpan {
+    pub start: [u32; 2],
+    pub end: [u32; 2],
 }
 
 /// A function call extracted from corefn
@@ -66,6 +79,28 @@ impl CoreFn {
             .map(|i| i.module_name.join("."))
             .filter(|m| m != &self.module_name_str()) // Exclude self-import
             .collect()
+    }
+
+    /// Compute lines of code by finding the maximum end line across all declarations
+    /// This is more accurate than docs.json because it includes internal (non-exported) declarations
+    pub fn compute_loc(&self) -> Option<i32> {
+        let mut max_line: u32 = 0;
+
+        for decl in &self.decls {
+            if let Some(ann) = &decl.annotation {
+                if let Some(span) = &ann.source_span {
+                    if span.end[0] > max_line {
+                        max_line = span.end[0];
+                    }
+                }
+            }
+        }
+
+        if max_line > 0 {
+            Some(max_line as i32)
+        } else {
+            None
+        }
     }
 
     /// Extract function calls from declarations

@@ -221,7 +221,17 @@ pub fn load_registry_modules_from_output(
 
         for (docs, docs_path) in modules_data {
             let module_id = id_gen.next_module_id();
-            let loc = docs.compute_loc();
+
+            // Compute LOC: prefer corefn.json (includes all declarations) over docs.json (exports only)
+            let corefn_path = docs_path.with_file_name("corefn.json");
+            let loc = if corefn_path.exists() {
+                crate::parse::CoreFn::from_path(&corefn_path)
+                    .ok()
+                    .and_then(|cf| cf.compute_loc())
+                    .or_else(|| docs.compute_loc())
+            } else {
+                docs.compute_loc()
+            };
 
             namespace_paths.insert(docs.name.clone());
 
