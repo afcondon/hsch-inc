@@ -20,6 +20,13 @@ docs/**/.DS_Store
 # Track spikes (experimental explorations)
 !spikes/
 
+# Track minard-loader (Rust replacement for Node.js loader)
+!apps/
+apps/*
+!apps/minard/
+apps/minard/*
+!apps/minard/minard-loader/
+
 # Ignore common junk
 .DS_Store
 *.swp

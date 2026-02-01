@@ -25,10 +25,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (31 documents)
+## Plans (33 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Minard Future Work | active | `docs/kb/plans/minard-future-work.md` | minard, code-explorer, api-routes, visualization, Napoleon |
 | L-Systems Visualization | planned | `docs/kb/plans/l-systems-visualization.md` | l-systems, recursion-schemes, hylomorphism, apomorphism, generative |
 | Sugiyama Layered Graph Layout | planned | `docs/kb/plans/sugiyama-layered-graph.md` | graph-layout, sugiyama, dag, graphviz-alternative, algorithms |
 | CE2 Links, Hover, Navigation | active | `docs/kb/plans/ce2-links-hover-navigation.md` | ce2, code-explorer, visualization, navigation, pursuit, hover |
@@ -63,6 +64,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Hylograph & Polyglot Release Plan | active | `docs/kb/plans/release-plan-2026.md` | release, hylograph, polyglot, deployment, cloudflare |
 | Hylograph Cloudflare Deployment | active | `docs/kb/plans/hylograph-cloudflare-deployment.md` | hylograph, cloudflare, deployment, infrastructure |
 | Beads Visualization Showcase | planned | `docs/kb/plans/beads-viz-showcase.md` | beads, visualization, force-graph, hats, showcase |
+| Code Explorer Evolution | active | `docs/kb/plans/code-explorer-evolution.md` | code-explorer, cli, visualization, halogen, developer-tools |
 
 ## Research (15 documents)
 
@@ -98,10 +100,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Presentation Planning | active | `visualisation libraries/purescript-psd3-selection/docs/PRESENTATION-PLANNING.md` | presentation, planning |
 | Documentation TOC | active | `apps/shaped-steer/docs/DOCUMENTATION-TOC.md` | documentation, diátaxis |
 
-## How-To (7 documents)
+## How-To (8 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| HATS Animation Patterns | active | `docs/kb/howto/hats-animation-patterns.md` | HATS, animation, transitions, interpolation, requestAnimationFrame |
 | HATS Componentization Patterns | active | `docs/kb/howto/hats-componentization.md` | HATS, componentization, MetaHATS, map-forEach, chrome |
 | HATS Brushing Guide | active | `docs/kb/howto/hats-brushing.md` | HATS, brushing, coordinated-interaction, SPLOM |
 | Excel Compiler Guide | implemented | `apps/shaped-steer/docs/EXCEL-COMPILER.md` | Excel, compiler |
@@ -128,8 +131,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 63 documents
-- **Active**: 54
+- **Total**: 64 documents
+- **Active**: 55
 - **Planned**: 3
 - **Implemented**: 5
 - **Superseded/Stale**: 1

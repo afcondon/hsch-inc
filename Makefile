@@ -72,12 +72,12 @@ APPS := apps
 .PHONY: all libs apps clean help
 .PHONY: lib-graph lib-layout lib-selection lib-music lib-simulation
 .PHONY: lib-showcase-shell lib-simulation-halogen
-.PHONY: app-wasm app-embedding-explorer app-sankey app-hylograph app-code-explorer app-halogen-spider spider-analyze spider-compare spider-html app-tilted-radio
+.PHONY: app-wasm app-embedding-explorer app-sankey app-hylograph app-minard minard-site-explorer spider-analyze spider-compare spider-html app-tilted-radio
 .PHONY: app-timber-lieder app-edge app-emptier-coinage app-simpsons app-nn
 .PHONY: wasm-kernel
-.PHONY: npm-install npm-install-embedding-explorer npm-install-code-explorer
+.PHONY: npm-install npm-install-embedding-explorer npm-install-minard
 .PHONY: ee-server ge-server ee-website ge-website landing
-.PHONY: ce-database ce-server ce2-website vscode-ext
+.PHONY: minard-database minard-server minard-frontend minard-vscode-ext
 .PHONY: purerl-tidal ps-tidal
 .PHONY: lib-sites lib-site-selection lib-site-simulation lib-site-layout
 .PHONY: lib-site-graph lib-site-music lib-site-shell
@@ -144,7 +144,7 @@ lib-astar-demo: lib-simulation lib-graph
 # SHOWCASE APPLICATIONS
 # ============================================================================
 
-apps: app-wasm app-embedding-explorer app-sankey app-hylograph app-code-explorer app-halogen-spider app-tilted-radio app-timber-lieder app-edge app-emptier-coinage
+apps: app-wasm app-embedding-explorer app-sankey app-hylograph app-minard minard-site-explorer app-tilted-radio app-timber-lieder app-edge app-emptier-coinage
 	@echo "All applications built successfully"
 
 # ----------------------------------------------------------------------------
@@ -262,66 +262,66 @@ app-timber-lieder: lib-selection
 	cd "$(SHOWCASES)/psd3-timber-lieder" && spago bundle --module Main --outfile demo/bundle.js
 
 # ----------------------------------------------------------------------------
-# Code Explorer (Corrode Expel)
+# Minard (Code Cartography - promoted from Corrode Expel)
 # ----------------------------------------------------------------------------
 
-app-code-explorer: npm-install-code-explorer ce-server ce2-website vscode-ext
-	@echo "Code Explorer build complete"
+app-minard: npm-install-minard minard-server minard-frontend minard-vscode-ext
+	@echo "Minard build complete"
 
-npm-install-code-explorer:
-	@echo "Installing npm dependencies for code-explorer..."
-	cd "$(SHOWCASES)/corrode-expel" && npm install
-	cd "$(SHOWCASES)/corrode-expel/ce-database" && npm install
-	cd "$(SHOWCASES)/corrode-expel/code-explorer-vscode-ext" && npm install
+npm-install-minard:
+	@echo "Installing npm dependencies for minard..."
+	cd "$(APPS)/minard" && npm install
+	cd "$(APPS)/minard/database" && npm install
+	cd "$(APPS)/minard/vscode-extension" && npm install
 
-# Note: ce-database contains pre-built DuckDB data, no build needed
+# Note: minard-database contains pre-built DuckDB data, no build needed
 # The loader/ directory can regenerate it if needed
 
-ce-server: npm-install-code-explorer
-	@echo "Building ce-server..."
-	cd "$(SHOWCASES)/corrode-expel" && spago build -p ce-server
+minard-server: npm-install-minard
+	@echo "Building minard-server..."
+	cd "$(APPS)/minard" && spago build -p minard-server
 
-ce2-website: npm-install-code-explorer lib-layout lib-selection lib-simulation
-	@echo "Building ce2-website..."
-	cd "$(SHOWCASES)/corrode-expel" && spago build -p ce2-website
-	@echo "Bundling ce2-website..."
-	cd "$(SHOWCASES)/corrode-expel/ce2-website" && spago bundle --module CE2.Main --outfile public/bundle.js
+minard-frontend: npm-install-minard lib-layout lib-selection lib-simulation
+	@echo "Building minard-frontend..."
+	cd "$(APPS)/minard" && spago build -p minard-frontend
+	@echo "Bundling minard-frontend..."
+	cd "$(APPS)/minard/frontend" && spago bundle --module CE2.Main --outfile public/bundle.js
 	@echo "Adding cache-busting timestamp..."
 	@TIMESTAMP=$$(date +%s); \
-	sed -i '' "s|bundle.js[^\"]*\"|bundle.js?v=$$TIMESTAMP\"|g" "$(SHOWCASES)/corrode-expel/ce2-website/public/index.html"; \
+	sed -i '' "s|bundle.js[^\"]*\"|bundle.js?v=$$TIMESTAMP\"|g" "$(APPS)/minard/frontend/public/index.html"; \
 	echo "  bundle.js?v=$$TIMESTAMP"
 
-vscode-ext: npm-install-code-explorer
-	@echo "Building VSCode extension..."
-	cd "$(SHOWCASES)/corrode-expel/code-explorer-vscode-ext" && npx tsc -p ./
+minard-vscode-ext: npm-install-minard
+	@echo "Building Minard VSCode extension..."
+	cd "$(APPS)/minard/vscode-extension" && npx tsc -p ./
 
 # ----------------------------------------------------------------------------
-# Halogen Spider (Site Explorer - route analysis tool)
+# Minard Site Explorer (route analysis tool - part of Minard)
 # ----------------------------------------------------------------------------
 
-app-halogen-spider:
-	@echo "Building halogen-spider (site explorer tool)..."
-	cd "$(SHOWCASES)/halogen-spider" && npm install
-	cd "$(SHOWCASES)/halogen-spider" && spago build
-	@echo "Halogen Spider build complete"
-	@echo "Run with: cd showcases/halogen-spider && node run.js"
+minard-site-explorer:
+	@echo "Building minard-site-explorer (route analysis tool)..."
+	cd "$(APPS)/minard/site-explorer" && npm install
+	cd "$(APPS)/minard/site-explorer" && spago build
+	@echo "Minard Site Explorer build complete"
+	@echo "Run with: cd apps/minard/site-explorer && node run.js"
 
-spider-analyze: app-halogen-spider
+spider-analyze: minard-site-explorer
 	@echo "Spidering deployed site at http://100.101.177.83..."
-	cd "$(SHOWCASES)/halogen-spider" && node run.js spider http://100.101.177.83
+	cd "$(APPS)/minard/site-explorer" && node run.js spider http://100.101.177.83
 	@echo ""
-	@echo "Results written to showcases/halogen-spider/"
+	@echo "Results written to apps/minard/site-explorer/"
 
-spider-compare: app-halogen-spider
+spider-compare: minard-site-explorer
 	@echo "Comparing static analysis with live spidering..."
-	cd "$(SHOWCASES)/halogen-spider" && node run.js compare ../../site/website http://100.101.177.83
+	cd "$(APPS)/minard/site-explorer" && node run.js compare ../../../site/website http://100.101.177.83
 	@echo ""
-	@echo "Results written to showcases/halogen-spider/"
+	@echo "Results written to apps/minard/site-explorer/"
 
-spider-html: app-halogen-spider
+spider-html: minard-site-explorer
 	@echo "Generating HTML report..."
-	cd "$(SHOWCASES)/halogen-spider" && node run.js html ../../site/website http://100.101.177.83
-	@echo "Report: showcases/halogen-spider/site-explorer.html"
+	cd "$(APPS)/minard/site-explorer" && node run.js html ../../../site/website http://100.101.177.83
+	@echo "Report: apps/minard/site-explorer/site-explorer.html"
 
 # ----------------------------------------------------------------------------
 # Tilted Radio (Tidal Editor - Purerl + PureScript)
@@ -449,7 +449,7 @@ lib-site-music: lib-site-shell
 # ============================================================================
 
 .PHONY: serve-wasm serve-ee serve-ee-backend serve-ge serve-ge-backend
-.PHONY: serve-sankey serve-timber-lieder serve-code-explorer serve-code-explorer-backend
+.PHONY: serve-sankey serve-timber-lieder serve-minard serve-minard-backend
 .PHONY: serve-tidal serve-tidal-backend serve-astar serve-landing
 .PHONY: serve-website serve-dashboard
 
@@ -506,14 +506,14 @@ serve-timber-lieder: app-timber-lieder
 	@echo "Serving TreeBuilder Demo on port $(PORT)..."
 	cd "$(SHOWCASES)/psd3-timber-lieder/demo" && python3 -m http.server $(PORT)
 
-# Code Explorer
-serve-code-explorer: ce2-website
-	@echo "Serving Code Explorer Frontend on port $(PORT)..."
-	cd "$(SHOWCASES)/corrode-expel/ce2-website/public" && python3 -m http.server $(PORT)
+# Minard (Code Cartography)
+serve-minard: minard-frontend
+	@echo "Serving Minard Frontend on port $(PORT)..."
+	cd "$(APPS)/minard/frontend/public" && python3 -m http.server $(PORT)
 
-serve-code-explorer-backend: ce-server
-	@echo "Starting Code Explorer Backend on port 3000..."
-	cd "$(SHOWCASES)/corrode-expel/ce-server" && node run.js
+serve-minard-backend: minard-server
+	@echo "Starting Minard Backend on port 3000..."
+	cd "$(APPS)/minard/server" && node run.js
 
 # Tidal Editor (Tilted Radio)
 serve-tidal: ps-tidal
@@ -578,7 +578,7 @@ clean:
 	rm -f "$(SHOWCASES)/wasm-force-demo/dist/bundle.js" 2>/dev/null || true
 	rm -f "$(SHOWCASES)/psd3-arid-keystone/demo/bundle.js" 2>/dev/null || true
 	# TypeScript output
-	rm -rf "$(SHOWCASES)/corrode-expel/code-explorer-vscode-ext/out" 2>/dev/null || true
+	rm -rf "$(APPS)/minard/vscode-extension/out" 2>/dev/null || true
 	@echo "Clean complete"
 
 clean-deps: clean
@@ -672,7 +672,7 @@ verify-bundles:
 	verify_bundle "$(SHOWCASES)/hypo-punter/landing/public" "landing"; \
 	verify_bundle "$(SHOWCASES)/hypo-punter/ee-website/public" "ee-website"; \
 	verify_bundle "$(SHOWCASES)/hypo-punter/ge-website/public" "ge-website"; \
-	verify_bundle "$(SHOWCASES)/corrode-expel/ce2-website/public" "ce2-website"; \
+	verify_bundle "$(APPS)/minard/frontend/public" "minard-frontend"; \
 	verify_bundle "$(SHOWCASES)/psd3-tilted-radio/purescript-psd3-tidal" "psd3-tidal"; \
 	verify_bundle "$(SHOWCASES)/psd3-lorenz-attractor/demo" "lorenz-attractor"; \
 	echo ""; \
@@ -917,8 +917,8 @@ help:
 	@echo "  make app-wasm     - WASM force demo"
 	@echo "  make app-embedding-explorer - EE + GE apps"
 	@echo "  make app-sankey   - Sankey editor"
-	@echo "  make app-code-explorer - Code explorer"
-	@echo "  make app-halogen-spider - Site explorer (route analysis)"
+	@echo "  make app-minard   - Minard code cartography (frontend + server + vscode)"
+	@echo "  make minard-site-explorer - Site explorer (route analysis)"
 	@echo "  make spider-analyze     - Spider deployed site for routes"
 	@echo "  make spider-compare     - Compare static vs live routes"
 	@echo "  make spider-html        - Generate HTML route report"
@@ -940,7 +940,7 @@ help:
 	@echo "  make serve-ee     - Embedding Explorer frontend"
 	@echo "  make serve-ge     - Grid Explorer frontend"
 	@echo "  make serve-sankey - Sankey Editor"
-	@echo "  make serve-code-explorer - Code Explorer"
+	@echo "  make serve-minard - Minard (Code Cartography)"
 	@echo "  make serve-tidal  - Tidal Editor"
 	@echo "  make serve-astar  - A* Demo"
 	@echo ""

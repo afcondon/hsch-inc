@@ -14,7 +14,7 @@
 #   /ee         - Embedding Explorer (UI at /ee, API at /ee/api)
 #   /ge         - Grid Explorer (UI at /ge, API at /ge/api)
 #   /tidal      - Tidal Editor (UI at /tidal, API at /tidal/api)
-#   /code       - Code Explorer (UI at /code, API at /code/api)
+#   /code       - Minard Code Cartography (UI at /code, API at /code/api)
 #   /sankey     - Sankey Editor
 #   /wasm       - WASM Force Demo
 #   /psd3/*     - Library documentation sites
@@ -149,12 +149,12 @@ services:
       retries: 3
 
   # ============================================================
-  # CORRODE EXPEL (Node.js + JavaScript)
+  # MINARD - Code Cartography (Node.js + JavaScript)
   # ============================================================
-  ce-backend:
+  minard-backend:
     build:
-      context: ./showcases/corrode-expel
-      dockerfile: ce-server/Dockerfile
+      context: ./apps/minard
+      dockerfile: server/Dockerfile
     ports:
       - "3000:3000"
     networks:
@@ -166,9 +166,9 @@ services:
       start_period: 5s
       retries: 3
 
-  ce-frontend:
+  minard-frontend:
     build:
-      context: ./showcases/corrode-expel/ce2-website
+      context: ./apps/minard/frontend
     networks:
       - polyglot
     healthcheck:
@@ -252,6 +252,17 @@ services:
   hylograph:
     build:
       context: ./showcases/hylograph-app
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  site-explorer:
+    build:
+      context: ./apps/minard/site-explorer
     networks:
       - polyglot
     healthcheck:
