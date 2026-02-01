@@ -6,6 +6,7 @@ pub mod loader;
 pub mod model;
 pub mod parse;
 pub mod progress;
+pub mod registry;
 
 pub use config::{Cli, Commands};
 pub use error::{LoaderError, Result};

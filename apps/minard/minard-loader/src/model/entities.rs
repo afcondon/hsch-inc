@@ -40,14 +40,27 @@ pub struct PackageVersion {
     pub source: String, // "registry" | "local" | "git"
 }
 
+/// A module namespace - hierarchical path like Data.Array.NonEmpty
+#[derive(Debug, Clone)]
+pub struct ModuleNamespace {
+    pub id: i64,
+    pub path: String,      // "Data.Array.NonEmpty" (full dotted path)
+    pub segment: String,   // "NonEmpty" (just this level)
+    pub parent_id: Option<i64>,
+    pub depth: i32,
+    pub is_leaf: bool,
+}
+
 /// A module within a package version
 #[derive(Debug, Clone)]
 pub struct Module {
     pub id: i64,
     pub package_version_id: i64,
+    pub namespace_id: Option<i64>,
     pub name: String,
     pub path: Option<String>,
     pub comments: Option<String>,
+    pub loc: Option<i32>,
 }
 
 /// A top-level declaration in a module
@@ -106,12 +119,24 @@ pub struct LoadStats {
     pub project_name: String,
     pub snapshot_label: Option<String>,
     pub packages_loaded: usize,
+    pub packages_reused: usize,
     pub modules_loaded: usize,
+    pub modules_reused: usize,
     pub declarations_loaded: usize,
     pub child_declarations_loaded: usize,
+    pub namespaces_created: usize,
     pub dependencies_loaded: usize,
     pub parse_errors: usize,
     pub elapsed_ms: u64,
+    // Post-load metrics
+    pub module_imports_loaded: usize,
+    pub function_calls_loaded: usize,
+    pub commits_loaded: usize,
+    pub topo_layers_computed: usize,
+    // Registry package metrics
+    pub registry_packages_loaded: usize,
+    pub registry_modules_loaded: usize,
+    pub registry_declarations_loaded: usize,
 }
 
 impl LoadStats {
@@ -121,27 +146,89 @@ impl LoadStats {
             .as_ref()
             .map(|l| format!(" ({})", l))
             .unwrap_or_default();
-        format!(
-            "Loaded {}{}: {} packages, {} modules, {} declarations, {} children in {}ms ({} parse errors)",
+
+        let pkg_info = if self.packages_reused > 0 {
+            format!("{} packages ({} new, {} reused)",
+                self.packages_loaded + self.packages_reused,
+                self.packages_loaded,
+                self.packages_reused)
+        } else {
+            format!("{} packages", self.packages_loaded)
+        };
+
+        let mod_info = if self.modules_reused > 0 {
+            format!("{} modules ({} new, {} reused)",
+                self.modules_loaded + self.modules_reused,
+                self.modules_loaded,
+                self.modules_reused)
+        } else {
+            format!("{} modules", self.modules_loaded)
+        };
+
+        let mut result = format!(
+            "Loaded {}{}: {}, {}, {} declarations, {} children",
             self.project_name,
             label,
-            self.packages_loaded,
-            self.modules_loaded,
+            pkg_info,
+            mod_info,
             self.declarations_loaded,
             self.child_declarations_loaded,
-            self.elapsed_ms,
-            self.parse_errors
-        )
+        );
+
+        // Add registry stats if any
+        if self.registry_modules_loaded > 0 {
+            result.push_str(&format!(
+                " + registry: {} modules from {} packages",
+                self.registry_modules_loaded,
+                self.registry_packages_loaded
+            ));
+        }
+
+        // Add post-load stats if any
+        let mut extras = Vec::new();
+        if self.module_imports_loaded > 0 {
+            extras.push(format!("{} imports", self.module_imports_loaded));
+        }
+        if self.function_calls_loaded > 0 {
+            extras.push(format!("{} calls", self.function_calls_loaded));
+        }
+        if self.commits_loaded > 0 {
+            extras.push(format!("{} commits", self.commits_loaded));
+        }
+        if self.topo_layers_computed > 0 {
+            extras.push(format!("{} topo layers", self.topo_layers_computed));
+        }
+
+        if !extras.is_empty() {
+            result.push_str(&format!(" + {}", extras.join(", ")));
+        }
+
+        result.push_str(&format!(" in {}ms", self.elapsed_ms));
+        if self.parse_errors > 0 {
+            result.push_str(&format!(" ({} parse errors)", self.parse_errors));
+        }
+
+        result
     }
 
     /// Merge stats from multiple loads
     pub fn merge(&mut self, other: &LoadStats) {
         self.packages_loaded += other.packages_loaded;
+        self.packages_reused += other.packages_reused;
         self.modules_loaded += other.modules_loaded;
+        self.modules_reused += other.modules_reused;
         self.declarations_loaded += other.declarations_loaded;
         self.child_declarations_loaded += other.child_declarations_loaded;
+        self.namespaces_created += other.namespaces_created;
         self.dependencies_loaded += other.dependencies_loaded;
         self.parse_errors += other.parse_errors;
+        self.module_imports_loaded += other.module_imports_loaded;
+        self.function_calls_loaded += other.function_calls_loaded;
+        self.commits_loaded += other.commits_loaded;
+        self.topo_layers_computed += other.topo_layers_computed;
+        self.registry_packages_loaded += other.registry_packages_loaded;
+        self.registry_modules_loaded += other.registry_modules_loaded;
+        self.registry_declarations_loaded += other.registry_declarations_loaded;
     }
 }
 
@@ -150,10 +237,13 @@ impl LoadStats {
 pub struct ScanStats {
     pub projects_loaded: usize,
     pub projects_skipped: usize,
-    pub total_packages: usize,
-    pub total_modules: usize,
+    pub total_packages_new: usize,
+    pub total_packages_reused: usize,
+    pub total_modules_new: usize,
+    pub total_modules_reused: usize,
     pub total_declarations: usize,
     pub total_children: usize,
+    pub total_namespaces: usize,
     pub total_parse_errors: usize,
     pub elapsed_ms: u64,
 }
@@ -161,20 +251,25 @@ pub struct ScanStats {
 impl ScanStats {
     pub fn add(&mut self, stats: &LoadStats) {
         self.projects_loaded += 1;
-        self.total_packages += stats.packages_loaded;
-        self.total_modules += stats.modules_loaded;
+        self.total_packages_new += stats.packages_loaded;
+        self.total_packages_reused += stats.packages_reused;
+        self.total_modules_new += stats.modules_loaded;
+        self.total_modules_reused += stats.modules_reused;
         self.total_declarations += stats.declarations_loaded;
         self.total_children += stats.child_declarations_loaded;
+        self.total_namespaces += stats.namespaces_created;
         self.total_parse_errors += stats.parse_errors;
     }
 
     pub fn report(&self) -> String {
         format!(
-            "Scanned {} projects ({} skipped): {} packages, {} modules, {} declarations, {} children in {}ms ({} parse errors)",
+            "Scanned {} projects ({} skipped): {} packages ({} new), {} modules ({} new), {} declarations, {} children in {}ms ({} parse errors)",
             self.projects_loaded,
             self.projects_skipped,
-            self.total_packages,
-            self.total_modules,
+            self.total_packages_new + self.total_packages_reused,
+            self.total_packages_new,
+            self.total_modules_new + self.total_modules_reused,
+            self.total_modules_new,
             self.total_declarations,
             self.total_children,
             self.elapsed_ms,

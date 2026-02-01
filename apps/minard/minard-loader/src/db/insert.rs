@@ -1,9 +1,10 @@
 use duckdb::{params, Connection};
+use std::collections::HashMap;
 
 use crate::error::Result;
 use crate::model::{
-    ChildDeclaration, Declaration, Module, PackageDependency, PackageVersion, Project, Snapshot,
-    SnapshotPackage,
+    ChildDeclaration, Declaration, Module, ModuleNamespace, PackageDependency, PackageVersion,
+    Project, Snapshot, SnapshotPackage,
 };
 
 /// Insert or get a project, returning its ID
@@ -148,21 +149,167 @@ pub fn insert_package_dependencies(conn: &Connection, deps: &[PackageDependency]
 pub fn insert_modules(conn: &Connection, modules: &[Module]) -> Result<()> {
     let mut stmt = conn.prepare(
         "INSERT OR IGNORE INTO modules
-         (id, package_version_id, name, path, comments)
-         VALUES (?, ?, ?, ?, ?)",
+         (id, package_version_id, namespace_id, name, path, comments, loc)
+         VALUES (?, ?, ?, ?, ?, ?, ?)",
     )?;
 
     for module in modules {
         stmt.execute(params![
             module.id,
             module.package_version_id,
+            module.namespace_id,
             module.name,
             module.path,
             module.comments,
+            module.loc,
         ])?;
     }
 
     Ok(())
+}
+
+/// Insert modules and return info about which were new vs reused
+/// Returns (new_count, reused_count, module_id_map)
+/// module_id_map maps (package_version_id, module_name) -> actual_module_id
+pub fn insert_modules_with_dedup(
+    conn: &Connection,
+    modules: &[Module],
+) -> Result<(usize, usize, HashMap<(i64, String), i64>)> {
+    let mut new_count = 0usize;
+    let mut reused_count = 0usize;
+    let mut module_id_map = HashMap::new();
+
+    let mut insert_stmt = conn.prepare(
+        "INSERT OR IGNORE INTO modules
+         (id, package_version_id, namespace_id, name, path, comments, loc)
+         VALUES (?, ?, ?, ?, ?, ?, ?)",
+    )?;
+
+    let mut query_stmt = conn.prepare(
+        "SELECT id FROM modules WHERE package_version_id = ? AND name = ?",
+    )?;
+
+    for module in modules {
+        // Try to insert
+        let rows_affected = insert_stmt.execute(params![
+            module.id,
+            module.package_version_id,
+            module.namespace_id,
+            module.name,
+            module.path,
+            module.comments,
+            module.loc,
+        ])?;
+
+        // Query back the actual ID
+        let actual_id: i64 =
+            query_stmt.query_row(params![module.package_version_id, &module.name], |row| {
+                row.get(0)
+            })?;
+
+        module_id_map.insert(
+            (module.package_version_id, module.name.clone()),
+            actual_id,
+        );
+
+        if rows_affected > 0 {
+            new_count += 1;
+        } else {
+            reused_count += 1;
+        }
+    }
+
+    Ok((new_count, reused_count, module_id_map))
+}
+
+/// Get or create a namespace, returning its ID
+/// Creates parent namespaces as needed
+pub fn get_or_create_namespace(conn: &Connection, path: &str, next_id: &mut i64) -> Result<i64> {
+    // Check if namespace already exists
+    let existing: std::result::Result<i64, _> = conn.query_row(
+        "SELECT id FROM module_namespaces WHERE path = ?",
+        params![path],
+        |row| row.get(0),
+    );
+
+    if let Ok(id) = existing {
+        return Ok(id);
+    }
+
+    // Split path to get parent and segment
+    let parts: Vec<&str> = path.split('.').collect();
+    let segment = parts.last().unwrap().to_string();
+    let depth = (parts.len() - 1) as i32;
+
+    // Get or create parent namespace
+    let parent_id = if parts.len() > 1 {
+        let parent_path = parts[..parts.len() - 1].join(".");
+        Some(get_or_create_namespace(conn, &parent_path, next_id)?)
+    } else {
+        None
+    };
+
+    // Mark parent as non-leaf if it exists
+    if let Some(pid) = parent_id {
+        conn.execute(
+            "UPDATE module_namespaces SET is_leaf = FALSE WHERE id = ?",
+            params![pid],
+        )?;
+    }
+
+    // Insert new namespace
+    let id = *next_id;
+    *next_id += 1;
+
+    conn.execute(
+        "INSERT INTO module_namespaces (id, path, segment, parent_id, depth, is_leaf)
+         VALUES (?, ?, ?, ?, ?, TRUE)",
+        params![id, path, segment, parent_id, depth],
+    )?;
+
+    Ok(id)
+}
+
+/// Insert namespaces and return map of path -> ID
+pub fn insert_namespaces_with_ids(
+    conn: &Connection,
+    namespaces: &[ModuleNamespace],
+) -> Result<HashMap<String, i64>> {
+    let mut result = HashMap::new();
+
+    let mut insert_stmt = conn.prepare(
+        "INSERT OR IGNORE INTO module_namespaces (id, path, segment, parent_id, depth, is_leaf)
+         VALUES (?, ?, ?, ?, ?, ?)",
+    )?;
+
+    let mut query_stmt = conn.prepare("SELECT id FROM module_namespaces WHERE path = ?")?;
+
+    for ns in namespaces {
+        insert_stmt.execute(params![
+            ns.id,
+            &ns.path,
+            &ns.segment,
+            ns.parent_id,
+            ns.depth,
+            ns.is_leaf,
+        ])?;
+
+        // Query back actual ID
+        let actual_id: i64 = query_stmt.query_row(params![&ns.path], |row| row.get(0))?;
+        result.insert(ns.path.clone(), actual_id);
+    }
+
+    Ok(result)
+}
+
+/// Check if a package already has modules loaded
+pub fn package_has_modules(conn: &Connection, package_version_id: i64) -> Result<bool> {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM modules WHERE package_version_id = ?",
+        params![package_version_id],
+        |row| row.get(0),
+    )?;
+    Ok(count > 0)
 }
 
 /// Insert a batch of declarations
@@ -239,9 +386,20 @@ pub fn insert_child_declarations(conn: &Connection, children: &[ChildDeclaration
     Ok(())
 }
 
+/// Max IDs from the database
+#[derive(Debug, Default)]
+pub struct MaxIds {
+    pub project: i64,
+    pub snapshot: i64,
+    pub package: i64,
+    pub namespace: i64,
+    pub module: i64,
+    pub declaration: i64,
+    pub child: i64,
+}
+
 /// Get max IDs from existing database tables
-/// Returns (max_project, max_snapshot, max_package, max_module, max_decl, max_child)
-pub fn get_max_ids(conn: &Connection) -> Result<(i64, i64, i64, i64, i64, i64)> {
+pub fn get_max_ids(conn: &Connection) -> Result<MaxIds> {
     let max_proj: i64 = conn
         .query_row("SELECT COALESCE(MAX(id), 0) FROM projects", [], |row| {
             row.get(0)
@@ -257,6 +415,14 @@ pub fn get_max_ids(conn: &Connection) -> Result<(i64, i64, i64, i64, i64, i64)> 
     let max_pkg: i64 = conn
         .query_row(
             "SELECT COALESCE(MAX(id), 0) FROM package_versions",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(0);
+
+    let max_ns: i64 = conn
+        .query_row(
+            "SELECT COALESCE(MAX(id), 0) FROM module_namespaces",
             [],
             |row| row.get(0),
         )
@@ -284,7 +450,15 @@ pub fn get_max_ids(conn: &Connection) -> Result<(i64, i64, i64, i64, i64, i64)> 
         )
         .unwrap_or(0);
 
-    Ok((max_proj, max_snap, max_pkg, max_mod, max_decl, max_child))
+    Ok(MaxIds {
+        project: max_proj,
+        snapshot: max_snap,
+        package: max_pkg,
+        namespace: max_ns,
+        module: max_mod,
+        declaration: max_decl,
+        child: max_child,
+    })
 }
 
 /// Get existing package ID by name and version

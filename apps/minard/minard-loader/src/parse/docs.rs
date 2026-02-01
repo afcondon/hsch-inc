@@ -150,6 +150,64 @@ impl DocsJson {
             source: e,
         })
     }
+
+    /// Check if this module belongs to THIS package (from src/) vs a dependency
+    /// Returns true only if the module's source path starts with "src/" or "test/"
+    /// (not "../" for workspace deps or ".spago/" for registry deps)
+    pub fn is_local_module(&self) -> bool {
+        // Check the first declaration's source_span to determine if this is a local module
+        if let Some(decl) = self.declarations.first() {
+            if let Some(ref span) = decl.source_span {
+                if let Some(ref name) = span.name {
+                    // Only count as local if path starts with src/ or test/
+                    // Exclude:
+                    // - ".spago/p/prelude-6.0.1/src/..." (registry deps)
+                    // - "../purescript-hylograph-selection/src/..." (workspace deps)
+                    return name.starts_with("src/") || name.starts_with("test/");
+                }
+            }
+        }
+        // If we can't determine (no declarations or no source_span), exclude it
+        false
+    }
+
+    /// Get the source file path from the first declaration's source_span
+    pub fn get_source_path(&self) -> Option<String> {
+        self.declarations
+            .first()
+            .and_then(|decl| decl.source_span.as_ref())
+            .and_then(|span| span.name.clone())
+    }
+
+    /// Compute approximate lines of code by finding the maximum end line
+    /// across all declarations and child declarations
+    pub fn compute_loc(&self) -> Option<i32> {
+        let mut max_line: u32 = 0;
+
+        for decl in &self.declarations {
+            if let Some(ref span) = decl.source_span {
+                // end is [line, column], we want the line (index 0)
+                if span.end[0] > max_line {
+                    max_line = span.end[0];
+                }
+            }
+
+            // Also check child declarations
+            for child in &decl.children {
+                if let Some(ref span) = child.source_span {
+                    if span.end[0] > max_line {
+                        max_line = span.end[0];
+                    }
+                }
+            }
+        }
+
+        if max_line > 0 {
+            Some(max_line as i32)
+        } else {
+            None
+        }
+    }
 }
 
 impl Declaration {

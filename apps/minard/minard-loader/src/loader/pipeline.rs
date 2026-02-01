@@ -1,14 +1,19 @@
 use rayon::prelude::*;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::sync::Mutex;
 use std::time::Instant;
 
 use crate::db::{
-    get_max_ids, get_or_create_project, insert_child_declarations, insert_declarations,
-    insert_modules, insert_package_dependencies, insert_package_versions_with_ids, insert_snapshot,
-    insert_snapshot_packages, IdGenerator,
+    get_max_ids, get_or_create_namespace, get_or_create_project, insert_child_declarations,
+    insert_declarations, insert_modules, insert_package_dependencies,
+    insert_package_versions_with_ids, insert_snapshot, insert_snapshot_packages,
+    package_has_modules, IdGenerator,
+};
+use super::postload::{
+    compute_topo_layers, insert_module_imports, insert_function_calls, collect_git_data,
+    update_module_metrics, update_coupling_metrics,
 };
 use crate::error::Result;
 use crate::git::get_git_info;
@@ -18,6 +23,9 @@ use crate::model::{
 };
 use crate::parse::{render_type, DocsJson, SpagoLock};
 use crate::progress::ProgressReporter;
+use crate::registry::{
+    get_registry_packages_to_load, load_registry_modules_from_output,
+};
 
 use super::discovery::ProjectDiscovery;
 
@@ -37,13 +45,13 @@ impl LoadPipeline {
 
     /// Initialize ID generator from database
     pub fn init_ids(&self, conn: &duckdb::Connection) -> Result<()> {
-        let (max_proj, max_snap, max_pkg, max_mod, max_decl, max_child) = get_max_ids(conn)?;
-        self.id_gen
-            .init_from_db(max_proj, max_snap, max_pkg, max_mod, max_decl, max_child);
+        let max_ids = get_max_ids(conn)?;
+        self.id_gen.init_from_db(&max_ids);
         Ok(())
     }
 
     /// Load a project into the database with project/snapshot tracking
+    /// Implements proper deduplication - shared packages are only loaded once
     pub fn load(
         &self,
         conn: &duckdb::Connection,
@@ -101,7 +109,7 @@ impl LoadPipeline {
         progress.set_message("Parsing spago.lock...");
         let spago_lock = SpagoLock::from_path(&discovery.spago_lock_path)?;
 
-        // Phase 4: Create package versions
+        // Phase 4: Create package versions (with deduplication)
         progress.set_message("Creating package versions...");
         let packages = spago_lock.all_packages();
         let mut package_versions = Vec::new();
@@ -121,7 +129,20 @@ impl LoadPipeline {
 
         // Insert packages and get actual IDs (handles existing packages)
         let pkg_id_map = insert_package_versions_with_ids(conn, &package_versions)?;
-        stats.packages_loaded = package_versions.len();
+
+        // Track which packages are new vs reused
+        let mut packages_to_load: HashSet<i64> = HashSet::new();
+        for pkg in &package_versions {
+            if let Some(&actual_id) = pkg_id_map.get(&(pkg.name.clone(), pkg.version.clone())) {
+                // Check if this package already has modules loaded
+                if !package_has_modules(conn, actual_id)? {
+                    packages_to_load.insert(actual_id);
+                    stats.packages_loaded += 1;
+                } else {
+                    stats.packages_reused += 1;
+                }
+            }
+        }
 
         // Build name -> actual_id map for dependencies
         let mut package_map: HashMap<String, i64> = HashMap::new();
@@ -131,15 +152,17 @@ impl LoadPipeline {
             }
         }
 
-        // Create package dependencies using actual IDs
+        // Create package dependencies using actual IDs (only for new packages)
         let mut package_deps = Vec::new();
         for pkg_info in &packages {
             if let Some(&pkg_id) = package_map.get(&pkg_info.name) {
-                for dep_name in &pkg_info.dependencies {
-                    package_deps.push(PackageDependency {
-                        dependent_id: pkg_id,
-                        dependency_name: dep_name.clone(),
-                    });
+                if packages_to_load.contains(&pkg_id) {
+                    for dep_name in &pkg_info.dependencies {
+                        package_deps.push(PackageDependency {
+                            dependent_id: pkg_id,
+                            dependency_name: dep_name.clone(),
+                        });
+                    }
                 }
             }
         }
@@ -160,9 +183,16 @@ impl LoadPipeline {
         };
         let workspace_id_map = insert_package_versions_with_ids(conn, &[workspace_pkg.clone()])?;
         let workspace_pkg_id = *workspace_id_map
-            .get(&(workspace_pkg.name, workspace_pkg.version))
+            .get(&(workspace_pkg.name.clone(), workspace_pkg.version.clone()))
             .unwrap_or(&workspace_pkg_id);
-        stats.packages_loaded += 1;
+
+        // Workspace packages are always "new" - we always load their modules
+        if !package_has_modules(conn, workspace_pkg_id)? {
+            packages_to_load.insert(workspace_pkg_id);
+            stats.packages_loaded += 1;
+        } else {
+            stats.packages_reused += 1;
+        }
 
         // Create snapshot_packages with actual IDs
         let mut snapshot_packages = Vec::new();
@@ -187,41 +217,94 @@ impl LoadPipeline {
 
         insert_snapshot_packages(conn, &snapshot_packages)?;
 
-        // Phase 5: Parse docs.json files in parallel
+        // Phase 5: Parse docs.json files in parallel (only for workspace package)
+        // Registry packages should be loaded from .spago cache, not output/
         progress.set_message("Parsing docs.json files...");
         progress.set_total(discovery.module_count() as u64);
 
         let parse_errors = Mutex::new(0usize);
 
-        let parsed_modules: Vec<ParsedModule> = discovery
-            .docs_json_files
-            .par_iter()
-            .filter_map(|docs_path| {
-                progress.inc(1);
+        // Only process if workspace package needs loading
+        // Filter to only load LOCAL modules (from src/) not dependency modules (from .spago/)
+        let parsed_modules: Vec<ParsedModule> = if packages_to_load.contains(&workspace_pkg_id) {
+            let local_modules = Mutex::new(0usize);
+            let dep_modules = Mutex::new(0usize);
 
-                match self.parse_docs_json(docs_path, workspace_pkg_id) {
-                    Ok(parsed) => Some(parsed),
-                    Err(e) => {
-                        if self.verbose {
-                            eprintln!("Warning: Failed to parse {}: {}", docs_path.display(), e);
+            let result: Vec<ParsedModule> = discovery
+                .docs_json_files
+                .par_iter()
+                .filter_map(|docs_path| {
+                    progress.inc(1);
+
+                    match self.parse_docs_json_if_local(docs_path, workspace_pkg_id) {
+                        Ok(Some(parsed)) => {
+                            *local_modules.lock().unwrap() += 1;
+                            Some(parsed)
                         }
-                        *parse_errors.lock().unwrap() += 1;
-                        None
+                        Ok(None) => {
+                            // Dependency module, skip
+                            *dep_modules.lock().unwrap() += 1;
+                            None
+                        }
+                        Err(e) => {
+                            if self.verbose {
+                                eprintln!("Warning: Failed to parse {}: {}", docs_path.display(), e);
+                            }
+                            *parse_errors.lock().unwrap() += 1;
+                            None
+                        }
                     }
-                }
-            })
-            .collect();
+                })
+                .collect();
+
+            if self.verbose {
+                eprintln!(
+                    "  Filtered: {} local modules, {} dependency modules skipped",
+                    *local_modules.lock().unwrap(),
+                    *dep_modules.lock().unwrap()
+                );
+            }
+
+            result
+        } else {
+            // Workspace already loaded, skip parsing
+            stats.modules_reused = discovery.module_count();
+            Vec::new()
+        };
 
         stats.parse_errors = *parse_errors.lock().unwrap();
 
-        // Phase 6: Insert into database
-        progress.set_message("Inserting into database...");
+        // Phase 6: Create namespaces and insert into database
+        progress.set_message("Creating namespaces and inserting...");
 
         let mut all_modules = Vec::new();
         let mut all_declarations = Vec::new();
         let mut all_children = Vec::new();
 
-        for parsed in parsed_modules {
+        // Collect all unique namespace paths
+        let mut namespace_paths: HashSet<String> = HashSet::new();
+        for parsed in &parsed_modules {
+            namespace_paths.insert(parsed.module.name.clone());
+        }
+
+        // Create namespaces and build path -> id map
+        let mut namespace_map: HashMap<String, i64> = HashMap::new();
+        let mut next_ns_id = self.id_gen.current_namespace_id() + 1;
+
+        for path in &namespace_paths {
+            let ns_id = get_or_create_namespace(conn, path, &mut next_ns_id)?;
+            namespace_map.insert(path.clone(), ns_id);
+        }
+
+        // Update the namespace counter
+        self.id_gen.set_namespace_counter(next_ns_id - 1);
+        stats.namespaces_created = namespace_map.len();
+
+        // Now build modules with namespace IDs
+        for mut parsed in parsed_modules {
+            // Set namespace_id on the module
+            parsed.module.namespace_id = namespace_map.get(&parsed.module.name).copied();
+
             all_modules.push(parsed.module);
             all_declarations.extend(parsed.declarations);
             all_children.extend(parsed.child_declarations);
@@ -236,20 +319,106 @@ impl LoadPipeline {
         insert_child_declarations(conn, &all_children)?;
         stats.child_declarations_loaded = all_children.len();
 
+        // Phase 6b: Load registry packages from output directory
+        progress.set_message("Loading registry packages...");
+        let registry_packages = get_registry_packages_to_load(conn)?;
+        if !registry_packages.is_empty() {
+            if self.verbose {
+                eprintln!("Loading {} registry packages from output...", registry_packages.len());
+            }
+            match load_registry_modules_from_output(
+                conn,
+                &discovery.output_dir,
+                &registry_packages,
+                &self.id_gen,
+                progress,
+                self.verbose,
+            ) {
+                Ok(registry_stats) => {
+                    stats.registry_packages_loaded = registry_stats.packages_loaded;
+                    stats.registry_modules_loaded = registry_stats.modules_loaded;
+                    stats.registry_declarations_loaded = registry_stats.declarations_loaded;
+                }
+                Err(e) if self.verbose => eprintln!("Warning: Failed to load registry packages: {}", e),
+                _ => {}
+            }
+        }
+
+        // Phase 7: Post-load processing (imports, calls, git data)
+        progress.set_message("Extracting module imports...");
+        if let Ok(count) = insert_module_imports(conn, &discovery.output_dir, workspace_pkg_id) {
+            stats.module_imports_loaded = count;
+        }
+
+        progress.set_message("Extracting function calls...");
+        match insert_function_calls(conn, &discovery.output_dir, workspace_pkg_id) {
+            Ok(count) => stats.function_calls_loaded = count,
+            Err(e) if self.verbose => eprintln!("Warning: Failed to extract function calls: {}", e),
+            _ => {}
+        }
+
+        // Phase 8: Git data collection
+        progress.set_message("Collecting git data...");
+        match collect_git_data(
+            conn,
+            &discovery.project_path,
+            project_id,
+            workspace_pkg_id,
+        ) {
+            Ok((commits, _links)) => stats.commits_loaded = commits,
+            Err(e) if self.verbose => eprintln!("Warning: Failed to collect git data: {}", e),
+            _ => {}
+        }
+
+        // Phase 9: Update metrics
+        progress.set_message("Updating metrics...");
+        let _ = update_module_metrics(conn, workspace_pkg_id);
+        let _ = update_coupling_metrics(conn, workspace_pkg_id);
+
+        // Phase 10: Compute topological layers
+        progress.set_message("Computing topological layers...");
+        if let Ok(count) = compute_topo_layers(conn, snapshot_id) {
+            stats.topo_layers_computed = count;
+        }
+
         stats.elapsed_ms = start.elapsed().as_millis() as u64;
 
         Ok(stats)
     }
 
-    /// Parse a single docs.json file
-    fn parse_docs_json(&self, docs_path: &Path, package_id: i64) -> Result<ParsedModule> {
+    /// Parse a single docs.json file, returning None if it's a dependency module
+    fn parse_docs_json_if_local(
+        &self,
+        docs_path: &Path,
+        package_id: i64,
+    ) -> Result<Option<ParsedModule>> {
         let docs = DocsJson::from_path(docs_path)?;
 
+        // Skip dependency modules - only load local workspace modules
+        if !docs.is_local_module() {
+            return Ok(None);
+        }
+
+        Ok(Some(self.parse_docs_json_inner(docs, docs_path, package_id)?))
+    }
+
+    /// Parse a single docs.json file (internal implementation)
+    fn parse_docs_json_inner(
+        &self,
+        docs: DocsJson,
+        docs_path: &Path,
+        package_id: i64,
+    ) -> Result<ParsedModule> {
+
         let module_id = self.id_gen.next_module_id();
+
+        // Compute LOC from source spans before we need docs for other things
+        let loc = docs.compute_loc();
 
         let module = Module {
             id: module_id,
             package_version_id: package_id,
+            namespace_id: None, // Will be set later
             name: docs.name.clone(),
             path: docs_path
                 .parent()
@@ -257,6 +426,7 @@ impl LoadPipeline {
                 .and_then(|n| n.to_str())
                 .map(|s| s.to_string()),
             comments: docs.comments.clone(),
+            loc,
         };
 
         let mut declarations = Vec::new();

@@ -2,32 +2,23 @@ use duckdb::Connection;
 
 use crate::error::Result;
 
-/// SQL schema for minard-loader (M2)
-/// Supports projects, snapshots, packages, modules, and declarations
+/// SQL schema for minard-loader (M3)
+/// Matches unified-schema.sql v3.0 exactly
 const SCHEMA_SQL: &str = r#"
--- Projects: A codebase being analyzed
-CREATE TABLE IF NOT EXISTS projects (
+-- =============================================================================
+-- REGISTRY LAYER
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS package_sets (
     id              INTEGER PRIMARY KEY,
-    name            VARCHAR NOT NULL UNIQUE,
-    repo_path       VARCHAR,
-    description     TEXT,
+    version         VARCHAR NOT NULL UNIQUE,
+    compiler        VARCHAR NOT NULL,
+    source          VARCHAR,
+    published_at    TIMESTAMP,
+    package_count   INTEGER,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Snapshots: A point-in-time analysis of a project
-CREATE TABLE IF NOT EXISTS snapshots (
-    id              INTEGER PRIMARY KEY,
-    project_id      INTEGER NOT NULL REFERENCES projects(id),
-    git_hash        VARCHAR,
-    git_ref         VARCHAR,
-    label           VARCHAR,
-    snapshot_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(project_id, git_hash)
-);
-
-CREATE INDEX IF NOT EXISTS idx_snapshot_project ON snapshots(project_id);
-
--- Package versions - the core identity
 CREATE TABLE IF NOT EXISTS package_versions (
     id              INTEGER PRIMARY KEY,
     name            VARCHAR NOT NULL,
@@ -40,39 +31,103 @@ CREATE TABLE IF NOT EXISTS package_versions (
     UNIQUE(name, version)
 );
 
--- Package dependencies
+CREATE TABLE IF NOT EXISTS package_set_members (
+    package_set_id      INTEGER NOT NULL REFERENCES package_sets(id),
+    package_version_id  INTEGER NOT NULL REFERENCES package_versions(id),
+    topo_layer          INTEGER,
+    PRIMARY KEY (package_set_id, package_version_id)
+);
+
 CREATE TABLE IF NOT EXISTS package_dependencies (
     dependent_id    INTEGER NOT NULL REFERENCES package_versions(id),
     dependency_name VARCHAR NOT NULL,
     PRIMARY KEY (dependent_id, dependency_name)
 );
 
--- Snapshot packages: Which package versions are used by a snapshot
+-- =============================================================================
+-- PROJECT LAYER
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS projects (
+    id              INTEGER PRIMARY KEY,
+    name            VARCHAR NOT NULL UNIQUE,
+    repo_path       VARCHAR,
+    description     TEXT,
+    package_set_id  INTEGER REFERENCES package_sets(id),
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS snapshots (
+    id              INTEGER PRIMARY KEY,
+    project_id      INTEGER NOT NULL REFERENCES projects(id),
+    git_hash        VARCHAR,
+    git_ref         VARCHAR,
+    label           VARCHAR,
+    snapshot_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(project_id, git_hash)
+);
+
 CREATE TABLE IF NOT EXISTS snapshot_packages (
     snapshot_id         INTEGER NOT NULL REFERENCES snapshots(id),
     package_version_id  INTEGER NOT NULL REFERENCES package_versions(id),
     source              VARCHAR NOT NULL,
     is_direct           BOOLEAN DEFAULT FALSE,
+    topo_layer          INTEGER,
     PRIMARY KEY (snapshot_id, package_version_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_snapshot_pkg_snapshot ON snapshot_packages(snapshot_id);
-CREATE INDEX IF NOT EXISTS idx_snapshot_pkg_package ON snapshot_packages(package_version_id);
+-- =============================================================================
+-- NAMESPACE LAYER
+-- =============================================================================
 
--- Modules
+CREATE TABLE IF NOT EXISTS module_namespaces (
+    id              INTEGER PRIMARY KEY,
+    path            VARCHAR NOT NULL UNIQUE,
+    segment         VARCHAR NOT NULL,
+    parent_id       INTEGER REFERENCES module_namespaces(id),
+    depth           INTEGER NOT NULL,
+    is_leaf         BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX IF NOT EXISTS idx_namespace_parent ON module_namespaces(parent_id);
+CREATE INDEX IF NOT EXISTS idx_namespace_depth ON module_namespaces(depth);
+
+-- =============================================================================
+-- MODULE LAYER
+-- =============================================================================
+
 CREATE TABLE IF NOT EXISTS modules (
     id                  INTEGER PRIMARY KEY,
     package_version_id  INTEGER NOT NULL REFERENCES package_versions(id),
+    namespace_id        INTEGER REFERENCES module_namespaces(id),
     name                VARCHAR NOT NULL,
     path                VARCHAR,
     comments            TEXT,
+    loc                 INTEGER,
     UNIQUE(package_version_id, name)
 );
 
 CREATE INDEX IF NOT EXISTS idx_module_package ON modules(package_version_id);
+CREATE INDEX IF NOT EXISTS idx_module_namespace ON modules(namespace_id);
 CREATE INDEX IF NOT EXISTS idx_module_name ON modules(name);
 
--- Declarations
+CREATE TABLE IF NOT EXISTS module_imports (
+    module_id           INTEGER NOT NULL REFERENCES modules(id),
+    imported_module     VARCHAR NOT NULL,
+    PRIMARY KEY (module_id, imported_module)
+);
+
+CREATE TABLE IF NOT EXISTS module_reexports (
+    module_id           INTEGER NOT NULL REFERENCES modules(id),
+    source_module       VARCHAR NOT NULL,
+    declaration_name    VARCHAR NOT NULL,
+    PRIMARY KEY (module_id, source_module, declaration_name)
+);
+
+-- =============================================================================
+-- DECLARATION LAYER
+-- =============================================================================
+
 CREATE TABLE IF NOT EXISTS declarations (
     id              INTEGER PRIMARY KEY,
     module_id       INTEGER NOT NULL REFERENCES modules(id),
@@ -88,6 +143,7 @@ CREATE TABLE IF NOT EXISTS declarations (
     synonym_type    JSON,
     comments        TEXT,
     source_span     JSON,
+    source_code     TEXT,
     UNIQUE(module_id, name)
 );
 
@@ -95,7 +151,6 @@ CREATE INDEX IF NOT EXISTS idx_decl_module ON declarations(module_id);
 CREATE INDEX IF NOT EXISTS idx_decl_kind ON declarations(kind);
 CREATE INDEX IF NOT EXISTS idx_decl_name ON declarations(name);
 
--- Child declarations (constructors, instances, class members)
 CREATE TABLE IF NOT EXISTS child_declarations (
     id                  INTEGER PRIMARY KEY,
     declaration_id      INTEGER NOT NULL REFERENCES declarations(id),
@@ -113,20 +168,204 @@ CREATE TABLE IF NOT EXISTS child_declarations (
 CREATE INDEX IF NOT EXISTS idx_child_decl_parent ON child_declarations(declaration_id);
 CREATE INDEX IF NOT EXISTS idx_child_decl_kind ON child_declarations(kind);
 
--- Metadata table
+-- =============================================================================
+-- CALL GRAPH LAYER
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS function_calls (
+    id                  INTEGER PRIMARY KEY,
+    caller_module_id    INTEGER NOT NULL REFERENCES modules(id),
+    caller_name         VARCHAR NOT NULL,
+    callee_module       VARCHAR NOT NULL,
+    callee_name         VARCHAR NOT NULL,
+    is_cross_module     BOOLEAN DEFAULT TRUE,
+    call_count          INTEGER DEFAULT 1,
+    UNIQUE(caller_module_id, caller_name, callee_module, callee_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_calls_caller ON function_calls(caller_module_id, caller_name);
+CREATE INDEX IF NOT EXISTS idx_calls_callee ON function_calls(callee_module, callee_name);
+
+-- =============================================================================
+-- GIT LAYER
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS commits (
+    id              INTEGER PRIMARY KEY,
+    project_id      INTEGER NOT NULL REFERENCES projects(id),
+    hash            VARCHAR NOT NULL,
+    timestamp       INTEGER,
+    date            VARCHAR,
+    author          VARCHAR,
+    subject         TEXT,
+    files_created   JSON,
+    files_modified  JSON,
+    files_deleted   JSON,
+    UNIQUE(project_id, hash)
+);
+
+CREATE INDEX IF NOT EXISTS idx_commits_project ON commits(project_id);
+CREATE INDEX IF NOT EXISTS idx_commits_timestamp ON commits(timestamp);
+
+CREATE TABLE IF NOT EXISTS module_commits (
+    module_id       INTEGER NOT NULL REFERENCES modules(id),
+    commit_id       INTEGER NOT NULL REFERENCES commits(id),
+    change_type     VARCHAR,
+    PRIMARY KEY (module_id, commit_id)
+);
+
+-- =============================================================================
+-- METRICS LAYER
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS module_metrics (
+    module_id           INTEGER PRIMARY KEY REFERENCES modules(id),
+    commit_count        INTEGER DEFAULT 0,
+    days_since_modified INTEGER,
+    age_in_days         INTEGER,
+    author_count        INTEGER DEFAULT 0,
+    authors             JSON,
+    efferent_coupling   INTEGER DEFAULT 0,
+    afferent_coupling   INTEGER DEFAULT 0,
+    instability         REAL,
+    normalized_commits  REAL,
+    normalized_authors  REAL,
+    normalized_coupling REAL
+);
+
+CREATE TABLE IF NOT EXISTS declaration_metrics (
+    declaration_id          INTEGER PRIMARY KEY REFERENCES declarations(id),
+    external_call_count     INTEGER DEFAULT 0,
+    external_caller_count   INTEGER DEFAULT 0,
+    total_coupling          INTEGER DEFAULT 0,
+    coupling_intensity      REAL
+);
+
+-- =============================================================================
+-- METADATA
+-- =============================================================================
+
 CREATE TABLE IF NOT EXISTS metadata (
     key     VARCHAR PRIMARY KEY,
     value   VARCHAR
 );
 
--- Insert schema version
-INSERT OR REPLACE INTO metadata (key, value) VALUES ('schema_version', 'm2-rust');
+INSERT OR REPLACE INTO metadata (key, value) VALUES ('schema_version', '3.0');
 INSERT OR REPLACE INTO metadata (key, value) VALUES ('created_at', CURRENT_TIMESTAMP);
+"#;
+
+/// Views are created separately (DuckDB has issues with some view syntax in batch)
+const VIEWS_SQL: &str = r#"
+-- Namespace tree with statistics
+CREATE OR REPLACE VIEW namespace_stats AS
+WITH RECURSIVE ns_tree AS (
+    SELECT id, path, segment, parent_id, depth, is_leaf
+    FROM module_namespaces
+    WHERE parent_id IS NULL
+    UNION ALL
+    SELECT n.id, n.path, n.segment, n.parent_id, n.depth, n.is_leaf
+    FROM module_namespaces n
+    INNER JOIN ns_tree t ON n.parent_id = t.id
+)
+SELECT
+    ns.id,
+    ns.path,
+    ns.segment,
+    ns.depth,
+    ns.parent_id,
+    COUNT(DISTINCT m.id) AS module_count,
+    COUNT(DISTINCT pv.id) AS package_count,
+    COUNT(DISTINCT d.id) AS declaration_count,
+    COALESCE(SUM(m.loc), 0) AS total_loc
+FROM ns_tree ns
+LEFT JOIN modules m ON m.namespace_id = ns.id
+LEFT JOIN package_versions pv ON m.package_version_id = pv.id
+LEFT JOIN declarations d ON d.module_id = m.id
+GROUP BY ns.id, ns.path, ns.segment, ns.depth, ns.parent_id;
+
+-- Package summary for a snapshot
+CREATE OR REPLACE VIEW snapshot_package_summary AS
+SELECT
+    sp.snapshot_id,
+    pv.id AS package_version_id,
+    pv.name,
+    pv.version,
+    sp.source,
+    sp.is_direct,
+    pv.license,
+    pv.repository,
+    COUNT(DISTINCT m.id) AS module_count,
+    COUNT(DISTINCT d.id) AS declaration_count,
+    COALESCE(SUM(m.loc), 0) AS total_loc
+FROM snapshot_packages sp
+JOIN package_versions pv ON sp.package_version_id = pv.id
+LEFT JOIN modules m ON m.package_version_id = pv.id
+LEFT JOIN declarations d ON d.module_id = m.id
+GROUP BY sp.snapshot_id, pv.id, pv.name, pv.version, sp.source, sp.is_direct, pv.license, pv.repository;
+
+-- Module with full context
+CREATE OR REPLACE VIEW module_details AS
+SELECT
+    m.id,
+    m.name AS module_name,
+    m.path,
+    m.comments,
+    m.loc,
+    pv.name AS package_name,
+    pv.version AS package_version,
+    pv.id AS package_version_id,
+    ns.path AS namespace_path,
+    ns.depth AS namespace_depth,
+    mm.commit_count,
+    mm.author_count,
+    mm.efferent_coupling,
+    mm.afferent_coupling,
+    mm.instability
+FROM modules m
+JOIN package_versions pv ON m.package_version_id = pv.id
+LEFT JOIN module_namespaces ns ON m.namespace_id = ns.id
+LEFT JOIN module_metrics mm ON mm.module_id = m.id;
+
+-- Declaration with full context
+CREATE OR REPLACE VIEW declaration_details AS
+SELECT
+    d.id,
+    d.name AS declaration_name,
+    d.kind,
+    d.type_signature,
+    d.comments,
+    m.name AS module_name,
+    pv.name AS package_name,
+    pv.version AS package_version,
+    dm.total_coupling,
+    dm.coupling_intensity
+FROM declarations d
+JOIN modules m ON d.module_id = m.id
+JOIN package_versions pv ON m.package_version_id = pv.id
+LEFT JOIN declaration_metrics dm ON dm.declaration_id = d.id;
+
+-- Type class instances
+CREATE OR REPLACE VIEW type_class_instances AS
+SELECT
+    cd.id AS instance_id,
+    cd.name AS instance_name,
+    cd.type_signature AS instance_type,
+    d.name AS class_name,
+    m.name AS module_name,
+    pv.name AS package_name,
+    pv.version AS package_version
+FROM child_declarations cd
+JOIN declarations d ON cd.declaration_id = d.id
+JOIN modules m ON d.module_id = m.id
+JOIN package_versions pv ON m.package_version_id = pv.id
+WHERE cd.kind = 'instance';
 "#;
 
 /// Initialize the database schema
 pub fn init_schema(conn: &Connection) -> Result<()> {
     conn.execute_batch(SCHEMA_SQL)?;
+    // Views created separately to handle DuckDB quirks
+    conn.execute_batch(VIEWS_SQL)?;
     Ok(())
 }
 
@@ -134,14 +373,29 @@ pub fn init_schema(conn: &Connection) -> Result<()> {
 pub fn drop_all_tables(conn: &Connection) -> Result<()> {
     conn.execute_batch(
         r#"
+        DROP VIEW IF EXISTS type_class_instances;
+        DROP VIEW IF EXISTS declaration_details;
+        DROP VIEW IF EXISTS module_details;
+        DROP VIEW IF EXISTS snapshot_package_summary;
+        DROP VIEW IF EXISTS namespace_stats;
+        DROP TABLE IF EXISTS declaration_metrics;
+        DROP TABLE IF EXISTS module_metrics;
+        DROP TABLE IF EXISTS module_commits;
+        DROP TABLE IF EXISTS commits;
+        DROP TABLE IF EXISTS function_calls;
         DROP TABLE IF EXISTS child_declarations;
         DROP TABLE IF EXISTS declarations;
+        DROP TABLE IF EXISTS module_reexports;
+        DROP TABLE IF EXISTS module_imports;
         DROP TABLE IF EXISTS modules;
+        DROP TABLE IF EXISTS module_namespaces;
         DROP TABLE IF EXISTS snapshot_packages;
-        DROP TABLE IF EXISTS package_dependencies;
-        DROP TABLE IF EXISTS package_versions;
         DROP TABLE IF EXISTS snapshots;
         DROP TABLE IF EXISTS projects;
+        DROP TABLE IF EXISTS package_dependencies;
+        DROP TABLE IF EXISTS package_set_members;
+        DROP TABLE IF EXISTS package_versions;
+        DROP TABLE IF EXISTS package_sets;
         DROP TABLE IF EXISTS metadata;
     "#,
     )?;
@@ -182,6 +436,12 @@ pub fn get_stats(conn: &Connection) -> Result<DbStats> {
         })
         .unwrap_or(0);
 
+    let namespace_count: i64 = conn
+        .query_row("SELECT COUNT(*) FROM module_namespaces", [], |row| {
+            row.get(0)
+        })
+        .unwrap_or(0);
+
     // Get project details for breakdown
     let project_details = get_project_details(conn).unwrap_or_default();
 
@@ -193,6 +453,7 @@ pub fn get_stats(conn: &Connection) -> Result<DbStats> {
         declaration_count,
         child_count,
         dependency_count,
+        namespace_count,
         project_details,
     })
 }
@@ -242,6 +503,7 @@ pub struct DbStats {
     pub declaration_count: i64,
     pub child_count: i64,
     pub dependency_count: i64,
+    pub namespace_count: i64,
     pub project_details: Vec<ProjectDetail>,
 }
 
@@ -269,6 +531,7 @@ impl DbStats {
         lines.push(format!("  {} modules", self.module_count));
         lines.push(format!("  {} declarations", self.declaration_count));
         lines.push(format!("  {} child declarations", self.child_count));
+        lines.push(format!("  {} namespaces", self.namespace_count));
         lines.push(format!("  {} dependencies", self.dependency_count));
 
         lines.join("\n")
