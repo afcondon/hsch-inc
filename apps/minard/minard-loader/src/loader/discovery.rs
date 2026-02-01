@@ -4,17 +4,24 @@ use walkdir::WalkDir;
 use crate::error::{LoaderError, Result};
 
 /// Discovered project structure
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ProjectDiscovery {
     pub project_path: PathBuf,
     pub spago_lock_path: PathBuf,
     pub output_dir: PathBuf,
     pub docs_json_files: Vec<PathBuf>,
+    /// Relative name when discovered via scan (e.g., "showcases/hypo-punter")
+    pub relative_name: Option<String>,
 }
 
 impl ProjectDiscovery {
     /// Discover a PureScript project at the given path
     pub fn discover(project_path: &Path) -> Result<Self> {
+        Self::discover_with_name(project_path, None)
+    }
+
+    /// Discover a PureScript project with an optional relative name
+    pub fn discover_with_name(project_path: &Path, relative_name: Option<String>) -> Result<Self> {
         if !project_path.exists() {
             return Err(LoaderError::ProjectNotFound(project_path.to_path_buf()));
         }
@@ -37,6 +44,7 @@ impl ProjectDiscovery {
             spago_lock_path,
             output_dir,
             docs_json_files,
+            relative_name,
         })
     }
 
@@ -44,6 +52,63 @@ impl ProjectDiscovery {
     pub fn module_count(&self) -> usize {
         self.docs_json_files.len()
     }
+
+    /// Get the project name (relative name if set, otherwise directory name)
+    pub fn project_name(&self) -> String {
+        self.relative_name.clone().unwrap_or_else(|| {
+            self.project_path
+                .file_name()
+                .and_then(|n| n.to_str())
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| "unknown".to_string())
+        })
+    }
+}
+
+/// Discover all PureScript projects in a directory tree
+pub fn discover_all(root: &Path) -> Vec<ProjectDiscovery> {
+    let mut projects = Vec::new();
+
+    // Walk directory tree looking for spago.lock files
+    for entry in WalkDir::new(root)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_name() == "spago.lock")
+    {
+        let spago_lock_path = entry.path();
+        let project_path = match spago_lock_path.parent() {
+            Some(p) => p,
+            None => continue,
+        };
+
+        // Check if this project has an output directory with docs.json files
+        let output_dir = project_path.join("output");
+        if !output_dir.exists() {
+            continue;
+        }
+
+        // Compute relative name from root
+        let relative_name = project_path
+            .strip_prefix(root)
+            .ok()
+            .and_then(|p| p.to_str())
+            .map(|s| s.to_string())
+            .filter(|s| !s.is_empty());
+
+        match ProjectDiscovery::discover_with_name(project_path, relative_name) {
+            Ok(discovery) => {
+                // Only include projects that have at least one docs.json
+                if !discovery.docs_json_files.is_empty() {
+                    projects.push(discovery);
+                }
+            }
+            Err(_) => continue,
+        }
+    }
+
+    // Sort by project name for consistent ordering
+    projects.sort_by(|a, b| a.project_name().cmp(&b.project_name()));
+    projects
 }
 
 /// Find all docs.json files in the output directory

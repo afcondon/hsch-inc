@@ -25,7 +25,7 @@ pub enum Commands {
 
     /// Load a PureScript project into the database
     Load {
-        /// Path to the PureScript project directory
+        /// Path to the PureScript project directory (or root for --scan)
         project_path: PathBuf,
 
         /// Path to database file
@@ -33,8 +33,16 @@ pub enum Commands {
         database: PathBuf,
 
         /// Project name (defaults to directory name)
+        #[arg(short = 'p', long)]
+        project: Option<String>,
+
+        /// Snapshot label (defaults to git ref or "manual")
         #[arg(short, long)]
-        name: Option<String>,
+        label: Option<String>,
+
+        /// Scan for all spago.lock files in subdirectories
+        #[arg(long)]
+        scan: bool,
 
         /// Verbose output
         #[arg(short, long)]

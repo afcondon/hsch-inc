@@ -3,6 +3,8 @@ use std::sync::atomic::{AtomicI64, Ordering};
 /// Thread-safe ID generator for parallel processing
 #[derive(Debug)]
 pub struct IdGenerator {
+    project_counter: AtomicI64,
+    snapshot_counter: AtomicI64,
     package_counter: AtomicI64,
     module_counter: AtomicI64,
     declaration_counter: AtomicI64,
@@ -12,6 +14,8 @@ pub struct IdGenerator {
 impl IdGenerator {
     pub fn new() -> Self {
         Self {
+            project_counter: AtomicI64::new(0),
+            snapshot_counter: AtomicI64::new(0),
             package_counter: AtomicI64::new(0),
             module_counter: AtomicI64::new(0),
             declaration_counter: AtomicI64::new(0),
@@ -20,11 +24,29 @@ impl IdGenerator {
     }
 
     /// Initialize counters from existing database max IDs
-    pub fn init_from_db(&self, max_package: i64, max_module: i64, max_decl: i64, max_child: i64) {
+    pub fn init_from_db(
+        &self,
+        max_project: i64,
+        max_snapshot: i64,
+        max_package: i64,
+        max_module: i64,
+        max_decl: i64,
+        max_child: i64,
+    ) {
+        self.project_counter.store(max_project, Ordering::SeqCst);
+        self.snapshot_counter.store(max_snapshot, Ordering::SeqCst);
         self.package_counter.store(max_package, Ordering::SeqCst);
         self.module_counter.store(max_module, Ordering::SeqCst);
         self.declaration_counter.store(max_decl, Ordering::SeqCst);
         self.child_counter.store(max_child, Ordering::SeqCst);
+    }
+
+    pub fn next_project_id(&self) -> i64 {
+        self.project_counter.fetch_add(1, Ordering::SeqCst) + 1
+    }
+
+    pub fn next_snapshot_id(&self) -> i64 {
+        self.snapshot_counter.fetch_add(1, Ordering::SeqCst) + 1
     }
 
     pub fn next_package_id(&self) -> i64 {

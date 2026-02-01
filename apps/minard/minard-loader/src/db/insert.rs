@@ -1,7 +1,86 @@
 use duckdb::{params, Connection};
 
 use crate::error::Result;
-use crate::model::{ChildDeclaration, Declaration, Module, PackageDependency, PackageVersion};
+use crate::model::{
+    ChildDeclaration, Declaration, Module, PackageDependency, PackageVersion, Project, Snapshot,
+    SnapshotPackage,
+};
+
+/// Insert or get a project, returning its ID
+pub fn get_or_create_project(
+    conn: &Connection,
+    id: i64,
+    name: &str,
+    repo_path: Option<&str>,
+) -> Result<i64> {
+    // First try to find existing project
+    let existing: std::result::Result<i64, _> = conn.query_row(
+        "SELECT id FROM projects WHERE name = ?",
+        params![name],
+        |row| row.get(0),
+    );
+
+    match existing {
+        Ok(id) => Ok(id),
+        Err(duckdb::Error::QueryReturnedNoRows) => {
+            // Insert new project
+            conn.execute(
+                "INSERT INTO projects (id, name, repo_path) VALUES (?, ?, ?)",
+                params![id, name, repo_path],
+            )?;
+            Ok(id)
+        }
+        Err(e) => Err(e.into()),
+    }
+}
+
+/// Insert a project
+pub fn insert_project(conn: &Connection, project: &Project) -> Result<()> {
+    conn.execute(
+        "INSERT OR IGNORE INTO projects (id, name, repo_path, description) VALUES (?, ?, ?, ?)",
+        params![
+            project.id,
+            project.name,
+            project.repo_path,
+            project.description
+        ],
+    )?;
+    Ok(())
+}
+
+/// Insert a snapshot
+pub fn insert_snapshot(conn: &Connection, snapshot: &Snapshot) -> Result<()> {
+    conn.execute(
+        "INSERT OR IGNORE INTO snapshots (id, project_id, git_hash, git_ref, label) VALUES (?, ?, ?, ?, ?)",
+        params![
+            snapshot.id,
+            snapshot.project_id,
+            snapshot.git_hash,
+            snapshot.git_ref,
+            snapshot.label
+        ],
+    )?;
+    Ok(())
+}
+
+/// Insert snapshot package associations
+pub fn insert_snapshot_packages(conn: &Connection, packages: &[SnapshotPackage]) -> Result<()> {
+    let mut stmt = conn.prepare(
+        "INSERT OR IGNORE INTO snapshot_packages (snapshot_id, package_version_id, source, is_direct)
+         VALUES (?, ?, ?, ?)",
+    )?;
+
+    for pkg in packages {
+        stmt.execute(params![
+            pkg.snapshot_id,
+            pkg.package_version_id,
+            pkg.source,
+            pkg.is_direct
+        ])?;
+    }
+
+    Ok(())
+}
 
 /// Insert a batch of package versions
 pub fn insert_package_versions(conn: &Connection, packages: &[PackageVersion]) -> Result<()> {
@@ -24,6 +103,31 @@ pub fn insert_package_versions(conn: &Connection, packages: &[PackageVersion]) -
     }
 
     Ok(())
+}
+
+/// Insert package versions and return map of (name, version) -> actual ID
+/// This handles the case where packages may already exist with different IDs
+pub fn insert_package_versions_with_ids(
+    conn: &Connection,
+    packages: &[PackageVersion],
+) -> Result<std::collections::HashMap<(String, String), i64>> {
+    use std::collections::HashMap;
+
+    // First insert all packages (ignoring duplicates)
+    insert_package_versions(conn, packages)?;
+
+    // Then query back all actual IDs
+    let mut result = HashMap::new();
+    let mut stmt = conn.prepare(
+        "SELECT id, name, version FROM package_versions WHERE name = ? AND version = ?",
+    )?;
+
+    for pkg in packages {
+        let id: i64 = stmt.query_row(params![&pkg.name, &pkg.version], |row| row.get(0))?;
+        result.insert((pkg.name.clone(), pkg.version.clone()), id);
+    }
+
+    Ok(result)
 }
 
 /// Insert a batch of package dependencies
@@ -136,7 +240,20 @@ pub fn insert_child_declarations(conn: &Connection, children: &[ChildDeclaration
 }
 
 /// Get max IDs from existing database tables
-pub fn get_max_ids(conn: &Connection) -> Result<(i64, i64, i64, i64)> {
+/// Returns (max_project, max_snapshot, max_package, max_module, max_decl, max_child)
+pub fn get_max_ids(conn: &Connection) -> Result<(i64, i64, i64, i64, i64, i64)> {
+    let max_proj: i64 = conn
+        .query_row("SELECT COALESCE(MAX(id), 0) FROM projects", [], |row| {
+            row.get(0)
+        })
+        .unwrap_or(0);
+
+    let max_snap: i64 = conn
+        .query_row("SELECT COALESCE(MAX(id), 0) FROM snapshots", [], |row| {
+            row.get(0)
+        })
+        .unwrap_or(0);
+
     let max_pkg: i64 = conn
         .query_row(
             "SELECT COALESCE(MAX(id), 0) FROM package_versions",
@@ -167,7 +284,7 @@ pub fn get_max_ids(conn: &Connection) -> Result<(i64, i64, i64, i64)> {
         )
         .unwrap_or(0);
 
-    Ok((max_pkg, max_mod, max_decl, max_child))
+    Ok((max_proj, max_snap, max_pkg, max_mod, max_decl, max_child))
 }
 
 /// Get existing package ID by name and version
