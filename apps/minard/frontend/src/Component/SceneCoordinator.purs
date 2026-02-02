@@ -53,7 +53,6 @@ import CE2.Data.Loader as Loader
 import CE2.Scene (Scene(..), parentScene, sceneLabel)
 import CE2.Viz.PackageSetTreemap as PackageSetTreemap
 import CE2.Viz.ModuleTreemap as ModuleTreemap
-import CE2.Viz.ScaleTransition as ScaleTransition
 import CE2.Viz.ModuleBeeswarm as ModuleBeeswarm
 import CE2.Viz.ModuleBubblePack as ModuleBubblePack
 import CE2.Viz.DependencyMatrix as DependencyMatrix
@@ -250,36 +249,32 @@ render state =
       colors = themeColors theme
   in HH.div
     [ HP.class_ (HH.ClassName "scene-coordinator")
-    , HP.style $ "display: flex; min-height: 100vh;"
+    -- Note: MUST use height: 100vh (not min-height) for flex-grow to work with the child's height: 0 pattern
+    , HP.style $ "display: flex; flex-direction: column; height: 100vh; background: " <> colors.background <> "; transition: background 0.5s ease;"
     ]
-    [ -- Powers of Ten depth strip (left side)
-      renderDepthStrip state
+    [ -- Header bar (thin, info-dense)
+      renderHeaderBar state
 
-      -- Main content area
+      -- 3-color tab strip (between header and viz)
+    , renderColorTabStrip state
+
+      -- Scene-specific visualization (fills remaining space)
+      -- Note: height: 0 + flex: 1 allows flex-grow to work properly with children that use height: 100%
     , HH.div
-        [ HP.class_ (HH.ClassName "scene-main-content")
-        , HP.style $ "flex: 1; background: " <> colors.background <> "; transition: background 0.5s ease; position: relative;"
+        [ HP.id "viz"
+        , HP.class_ (HH.ClassName "scene-viz-container")
+        , HP.style "flex: 1; position: relative; overflow: hidden; height: 0; min-height: 0;"
         ]
-        [ -- Navigation header (streamlined)
-          renderNavigationHeader state
+        [ renderScene state ]
 
-          -- Scene-specific visualization
-        , HH.div
-            [ HP.id "viz"
-            , HP.class_ (HH.ClassName "scene-viz-container")
-            ]
-            [ renderScene state ]
-        ]
+      -- Footer bar (persistent, shows stats and selection)
+    , renderFooterBar state
 
       -- Slide-out panel (for source/documentation)
     , HH.slot _slideOutPanel unit SlideOutPanel.component
         { initiallyOpen: false }
         HandleSlideOutPanelOutput
     ]
-
--- =============================================================================
--- Powers of Ten Depth Strip
--- =============================================================================
 
 -- | Determine which depth level the current scene is at
 -- | 0 = Galaxy (registry overview), 1 = Solar System (package details), 2 = Module (code level)
@@ -291,172 +286,6 @@ sceneDepthLevel = case _ of
   PkgTreemap _ -> 2
   PkgModuleBeeswarm _ -> 2
   OverlayChordMatrix -> 1
-
--- | Render the "Powers of Ten" depth indicator strip
--- | A thin vertical strip on the left showing the three zoom levels
--- | with the current level highlighted via text opacity
-renderDepthStrip :: forall m. State -> H.ComponentHTML Action Slots m
-renderDepthStrip state =
-  let
-    currentLevel = sceneDepthLevel state.scene
-
-    -- Colors for each level (from Types.purs themeColors)
-    galaxyBg = "#0E4C8A"      -- Blueprint blue
-    solarBg = "#F5F0E6"       -- Beige
-    moduleBg = "#FAFAFA"      -- Paperwhite
-
-    -- Text opacity: 1.0 for current level, 0.3 for inactive
-    textOpacity level = if level == currentLevel then "1.0" else "0.3"
-
-    -- Style for each segment
-    segmentStyle level bgColor textColor =
-      "flex: 1; display: flex; align-items: center; justify-content: center; "
-      <> "background: " <> bgColor <> "; "
-      <> "color: " <> textColor <> "; "
-      <> "font-size: 10px; font-weight: 500; letter-spacing: 0.5px; "
-      <> "writing-mode: vertical-rl; text-orientation: mixed; "
-      <> "transform: rotate(180deg); "  -- Rotate text to read bottom-to-top
-      <> "opacity: " <> textOpacity level <> "; "
-      <> "transition: opacity 0.3s ease;"
-
-  in HH.div
-    [ HP.class_ (HH.ClassName "depth-strip")
-    , HP.style $ "width: 2rem; display: flex; flex-direction: column; "
-        <> "box-shadow: 2px 0 8px rgba(0,0,0,0.1);"
-    ]
-    [ -- Level 0: Galaxy (top) - white text on blue
-      HH.div
-        [ HP.class_ (HH.ClassName "depth-level depth-galaxy")
-        , HP.style $ segmentStyle 0 galaxyBg "white"
-        ]
-        [ HH.text "GALAXY" ]
-
-    -- Level 1: Solar System (middle) - black text on beige
-    , HH.div
-        [ HP.class_ (HH.ClassName "depth-level depth-solar")
-        , HP.style $ segmentStyle 1 solarBg "black"
-        ]
-        [ HH.text "SOLAR" ]
-
-    -- Level 2: Module (bottom) - black text on paperwhite
-    , HH.div
-        [ HP.class_ (HH.ClassName "depth-level depth-module")
-        , HP.style $ segmentStyle 2 moduleBg "black"
-        ]
-        [ HH.text "MODULE" ]
-    ]
-
--- | Navigation header - streamlined for teaser path
--- | Shows canonical state code prominently for precise communication
-renderNavigationHeader :: forall m. State -> H.ComponentHTML Action Slots m
-renderNavigationHeader state =
-  let stateCode = canonicalStateCode state
-      panelSuffix = if state.panelOpen then "+P" else ""
-  in HH.div
-    [ HP.class_ (HH.ClassName "scene-nav-header floating-panel floating-panel--top-left")
-    , HP.style "top: 140px;"
-    ]
-    [ -- State code badge (prominent, for debugging/communication)
-      HH.div
-        [ HP.class_ (HH.ClassName "state-code-badge")
-        , HP.style "background: #333; color: #0f0; font-family: monospace; font-size: 14px; font-weight: bold; padding: 4px 8px; border-radius: 4px; margin-bottom: 8px; display: inline-block;"
-        ]
-        [ HH.text $ stateCode <> panelSuffix ]
-
-      -- Top row: Back button + Scene label + Forward button
-    , HH.div
-        [ HP.class_ (HH.ClassName "nav-top-row")
-        , HP.style "display: flex; align-items: center; gap: 8px;"
-        ]
-        [ -- Back button (visible when not at root)
-          if canGoBack state.scene
-            then HH.button
-              [ HE.onClick \_ -> NavigateBack
-              , HP.class_ (HH.ClassName "nav-back-button")
-              , HP.style "padding: 4px 8px; font-size: 12px; cursor: pointer;"
-              ]
-              [ HH.text "← Back" ]
-            else HH.text ""
-
-          -- Scene label
-        , HH.span
-            [ HP.class_ (HH.ClassName "scene-label")
-            , HP.style "font-weight: bold;"
-            ]
-            [ HH.text $ sceneLabel state.scene ]
-
-          -- Scene info (package count, etc.)
-        , renderSceneInfo state
-
-          -- Forward/"+" button (for next level of detail)
-        , if canGoForward state.scene
-            then HH.button
-              [ HE.onClick \_ -> NavigateForward
-              , HP.class_ (HH.ClassName "nav-forward-button")
-              , HP.style "padding: 4px 8px; font-size: 12px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px;"
-              ]
-              [ HH.text $ forwardLabel state.scene ]
-            else HH.text ""
-        ]
-
-    -- Scope buttons (for GalaxyBeeswarm and SolarSwarm)
-    , if state.scene == GalaxyBeeswarm || state.scene == SolarSwarm
-        then HH.div
-          [ HP.class_ (HH.ClassName "scope-controls")
-          , HP.style "margin-top: 8px; border-top: 1px solid #ddd; padding-top: 8px;"
-          ]
-          [ HH.div
-              [ HP.style "font-size: 10px; color: #666; margin-bottom: 4px;" ]
-              [ HH.text "Scope (GUP):" ]
-          , HH.div
-              [ HP.style "display: flex; flex-wrap: wrap; gap: 4px;" ]
-              (renderScopeButtons state)
-          ]
-        else HH.text ""
-
-    -- Focal package indicator (for SolarSwarm with focal set)
-    , case state.focalPackage of
-        Just focalName | state.scene == SolarSwarm ->
-          HH.div
-            [ HP.class_ (HH.ClassName "focal-controls")
-            , HP.style "margin-top: 8px; border-top: 1px solid #ddd; padding-top: 8px; display: flex; align-items: center; gap: 8px;"
-            ]
-            [ HH.span
-                [ HP.style "font-size: 11px; color: #666;" ]
-                [ HH.text "Focal:" ]
-            , HH.span
-                [ HP.style "font-size: 12px; font-weight: 500; color: #0E4C8A;" ]
-                [ HH.text focalName ]
-            , HH.button
-                [ HE.onClick \_ -> SetFocalPackage Nothing
-                , HP.style "padding: 2px 6px; font-size: 10px; cursor: pointer; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; color: #666;"
-                ]
-                [ HH.text "× Clear" ]
-            ]
-        _ -> HH.text ""
-
-    -- View mode buttons (for SolarSwarm and PkgTreemap)
-    , if state.scene == SolarSwarm || isPackageTreemap state.scene
-        then HH.div
-          [ HP.class_ (HH.ClassName "view-mode-controls")
-          , HP.style "margin-top: 8px; border-top: 1px solid #ddd; padding-top: 8px;"
-          ]
-          [ HH.div
-              [ HP.style "font-size: 10px; color: #666; margin-bottom: 4px;" ]
-              [ HH.text "View:" ]
-          , HH.div
-              [ HP.style "display: flex; flex-wrap: wrap; gap: 4px;" ]
-              (renderViewModeButtons state)
-          ]
-        else HH.text ""
-
-    -- Navigation hint
-    , HH.div
-        [ HP.class_ (HH.ClassName "nav-hint")
-        , HP.style "margin-top: 8px; font-size: 11px; color: #666; font-style: italic;"
-        ]
-        [ HH.text $ navigationHint state.scene ]
-    ]
 
 -- | Check if we can navigate back (not at root)
 canGoBack :: Scene -> Boolean
@@ -472,146 +301,243 @@ canGoForward (PkgTreemap _) = true     -- → PkgModuleBeeswarm
 canGoForward (PkgModuleBeeswarm _) = false  -- End of path
 canGoForward OverlayChordMatrix = false
 
--- | Label for forward button based on current scene
-forwardLabel :: Scene -> String
-forwardLabel GalaxyTreemap = "→ Beeswarm"
-forwardLabel GalaxyBeeswarm = "+ Details"
-forwardLabel SolarSwarm = "+ Modules"       -- Navigate to focal package treemap
-forwardLabel (PkgTreemap _) = "+ Beeswarm"
-forwardLabel _ = "+"
-
--- | Navigation hint for current scene
-navigationHint :: Scene -> String
-navigationHint GalaxyTreemap = "Click \"→ Beeswarm\" for animated transition to package swarm"
-navigationHint GalaxyBeeswarm = "Scope buttons filter in place (GUP), \"+\" navigates to module details"
-navigationHint SolarSwarm = "Click a package to set focal, \"+\" navigates to focal package modules"
-navigationHint (PkgTreemap pkg) = "Modules in " <> pkg <> " sized by LOC"
-navigationHint (PkgModuleBeeswarm pkg) = "Module dependencies in " <> pkg <> " (topo order)"
-navigationHint OverlayChordMatrix = "Module dependency matrix overlay"
-
 -- | Check if scene is a package treemap
 isPackageTreemap :: Scene -> Boolean
 isPackageTreemap (PkgTreemap _) = true
 isPackageTreemap _ = false
 
--- | Render scope buttons for beeswarm views (GUP filtering)
-renderScopeButtons :: forall m. State -> Array (H.ComponentHTML Action Slots m)
-renderScopeButtons state =
-  [ scopeButton AllPackages "All (568)" "Full package registry"
-  , scopeButton ProjectOnly "Project (~25)" "Just project packages"
-  , scopeButton ProjectWithDeps "Project+Deps" "Project + direct deps"
-  , scopeButton ProjectWithTransitive "Transitive" "Full transitive closure"
-  ]
-  where
-  scopeButton targetScope label tooltip =
-    HH.button
-      [ HE.onClick \_ -> SetScope targetScope
-      , HP.class_ (HH.ClassName $ "scope-btn" <> if state.scope == targetScope then " active" else "")
-      , HP.style $ "padding: 2px 6px; font-size: 10px; border-radius: 3px; cursor: pointer; "
-          <> "border: 1px solid " <> (if state.scope == targetScope then "#28a745" else "#ccc") <> "; "
-          <> "background: " <> (if state.scope == targetScope then "#28a745" else "#fff") <> "; "
-          <> "color: " <> (if state.scope == targetScope then "#fff" else "#333") <> ";"
-      , HP.title tooltip
-      ]
-      [ HH.text label ]
+-- =============================================================================
+-- Header, Tab Strip, and Footer
+-- =============================================================================
 
--- | Render view mode buttons for scenes that support multiple views
-renderViewModeButtons :: forall m. State -> Array (H.ComponentHTML Action Slots m)
-renderViewModeButtons state =
+-- | Render the header bar (thin, info-dense, subtle)
+renderHeaderBar :: forall m. State -> H.ComponentHTML Action Slots m
+renderHeaderBar state =
   let
-    -- Labels depend on scene
-    primaryLabel = case state.scene of
-      SolarSwarm -> "Swarm"
-      PkgTreemap _ -> "Treemap"
-      _ -> "Primary"
-    primaryTooltip = case state.scene of
-      SolarSwarm -> "Packages with modules inside"
-      PkgTreemap _ -> "Modules sized by LOC"
-      _ -> "Default view"
-  in
-    [ viewModeButton PrimaryView primaryLabel primaryTooltip
-    , viewModeButton ChordView "Chord" "Dependencies as chord diagram"
-    , viewModeButton MatrixView "Matrix" "Dependencies as adjacency matrix"
+    theme = themeForScene state.scene
+    -- Use inverted colors for header text based on theme
+    textColor = if theme == BlueprintTheme then "rgba(255,255,255,0.9)" else "rgba(0,0,0,0.8)"
+    bgColor = if theme == BlueprintTheme then "rgba(0,0,0,0.2)" else "rgba(255,255,255,0.5)"
+  in HH.div
+    [ HP.class_ (HH.ClassName "scene-header-bar")
+    , HP.style $ "height: 32px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; "
+        <> "background: " <> bgColor <> "; color: " <> textColor <> "; "
+        <> "font-size: 12px; backdrop-filter: blur(4px);"
     ]
-  where
-  viewModeButton targetMode label tooltip =
-    let isActive = state.viewMode == targetMode
-    in HH.button
-      [ HE.onClick \_ -> SetViewMode targetMode
-      , HP.class_ (HH.ClassName $ "view-mode-btn" <> if isActive then " active" else "")
-      , HP.style $ "padding: 2px 6px; font-size: 10px; border-radius: 3px; cursor: pointer; "
-          <> "border: 1px solid " <> (if isActive then "#0E4C8A" else "#ccc") <> "; "
-          <> "background: " <> (if isActive then "#0E4C8A" else "#fff") <> "; "
-          <> "color: " <> (if isActive then "#fff" else "#333") <> ";"
-      , HP.title tooltip
-      ]
-      [ HH.text label ]
+    [ -- Left: Back button + Scene name
+      HH.div
+        [ HP.style "display: flex; align-items: center; gap: 12px;" ]
+        [ -- Back button (subtle)
+          if canGoBack state.scene
+            then HH.button
+              [ HE.onClick \_ -> NavigateBack
+              , HP.style $ "background: none; border: none; color: " <> textColor <> "; cursor: pointer; font-size: 14px; opacity: 0.7;"
+              ]
+              [ HH.text "←" ]
+            else HH.text ""
+        -- Scene label
+        , HH.span
+            [ HP.style "font-weight: 600; letter-spacing: 0.5px;" ]
+            [ HH.text $ sceneLabel state.scene ]
+        -- State code (tiny, for debugging)
+        , HH.span
+            [ HP.style $ "font-family: monospace; font-size: 10px; opacity: 0.5; color: " <> textColor <> ";" ]
+            [ HH.text $ "[" <> canonicalStateCode state <> "]" ]
+        ]
 
--- | Scene info display (streamlined)
-renderSceneInfo :: forall m. State -> H.ComponentHTML Action Slots m
-renderSceneInfo state = case state.scene of
+      -- Center: Count info
+    , HH.div
+        [ HP.style "display: flex; align-items: center; gap: 8px; opacity: 0.8;" ]
+        [ renderHeaderCounts state ]
+
+      -- Right: Forward/detail button + scope indicator
+    , HH.div
+        [ HP.style "display: flex; align-items: center; gap: 12px;" ]
+        [ -- Scope indicator (if applicable)
+          if state.scene == GalaxyBeeswarm || state.scene == SolarSwarm
+            then HH.span
+              [ HP.style "font-size: 10px; opacity: 0.7;" ]
+              [ HH.text $ "scope: " <> scopeName state.scope ]
+            else HH.text ""
+          -- Forward button
+        , if canGoForward state.scene
+            then HH.button
+              [ HE.onClick \_ -> NavigateForward
+              , HP.style $ "background: none; border: none; color: " <> textColor <> "; cursor: pointer; font-size: 14px; opacity: 0.7;"
+              ]
+              [ HH.text "→" ]
+            else HH.text ""
+        ]
+    ]
+
+-- | Render the 3-color tab strip (thin horizontal band between header and viz)
+-- | The colors correspond to the three zoom levels (Galaxy/Solar/Module)
+-- | Current level's color will visually blend with the background
+renderColorTabStrip :: forall m. State -> H.ComponentHTML Action Slots m
+renderColorTabStrip state =
+  let
+    currentLevel = sceneDepthLevel state.scene
+    -- Heights: current level slightly taller to create "tab" effect
+    segmentHeight level = if level == currentLevel then "5px" else "3px"
+  in HH.div
+    [ HP.class_ (HH.ClassName "color-tab-strip")
+    , HP.style "display: flex; width: 100%;"
+    ]
+    [ -- Galaxy segment (blue)
+      HH.div
+        [ HP.style $ "flex: 1; height: " <> segmentHeight 0 <> "; background: #0E4C8A; transition: height 0.3s ease;" ]
+        []
+    -- Solar segment (beige)
+    , HH.div
+        [ HP.style $ "flex: 1; height: " <> segmentHeight 1 <> "; background: #F5F0E6; transition: height 0.3s ease;" ]
+        []
+    -- Module segment (paperwhite)
+    , HH.div
+        [ HP.style $ "flex: 1; height: " <> segmentHeight 2 <> "; background: #FAFAFA; transition: height 0.3s ease;" ]
+        []
+    ]
+
+-- | Render the footer bar (persistent, shows stats and selection info)
+renderFooterBar :: forall m. State -> H.ComponentHTML Action Slots m
+renderFooterBar state =
+  let
+    theme = themeForScene state.scene
+    textColor = if theme == BlueprintTheme then "rgba(255,255,255,0.8)" else "rgba(0,0,0,0.7)"
+    bgColor = if theme == BlueprintTheme then "rgba(0,0,0,0.3)" else "rgba(0,0,0,0.05)"
+  in HH.div
+    [ HP.class_ (HH.ClassName "scene-footer-bar")
+    , HP.style $ "height: 28px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; "
+        <> "background: " <> bgColor <> "; color: " <> textColor <> "; "
+        <> "font-size: 11px; backdrop-filter: blur(4px);"
+    ]
+    [ -- Left: Total stats
+      HH.div
+        [ HP.style "display: flex; align-items: center; gap: 16px;" ]
+        [ renderFooterStats state ]
+
+      -- Center: Selection info (if any)
+    , HH.div
+        [ HP.style "display: flex; align-items: center; gap: 8px;" ]
+        [ renderSelectionInfo state ]
+
+      -- Right: View mode / controls
+    , HH.div
+        [ HP.style "display: flex; align-items: center; gap: 8px;" ]
+        [ renderFooterControls state ]
+    ]
+
+-- | Header counts based on scene
+renderHeaderCounts :: forall m. State -> H.ComponentHTML Action Slots m
+renderHeaderCounts state = case state.scene of
   GalaxyTreemap ->
     case state.packageSetData of
-      Just psData -> HH.span
-        [ HP.class_ (HH.ClassName "scene-info")
-        , HP.style "font-size: 11px; color: #666;"
-        ]
-        [ HH.text $ " | " <> show (Array.length psData.packages) <> " packages" ]
-      Nothing -> HH.text ""
+      Just psData -> HH.span_
+        [ HH.text $ show (Array.length psData.packages) <> " packages" ]
+      Nothing -> HH.text "Loading..."
 
   GalaxyBeeswarm ->
     case state.packageSetData of
       Just psData ->
         let visibleCount = countVisiblePackages state.scope psData.packages
-        in HH.span
-          [ HP.class_ (HH.ClassName "scene-info")
-          , HP.style "font-size: 11px; color: #666;"
-          ]
-          [ HH.text $ " | " <> show visibleCount <> " visible"
-              <> (if visibleCount < Array.length psData.packages
-                  then " (of " <> show (Array.length psData.packages) <> ")"
-                  else "")
-          ]
-      Nothing -> HH.text ""
+        in HH.span_
+          [ HH.text $ show visibleCount <> " / " <> show (Array.length psData.packages) <> " packages" ]
+      Nothing -> HH.text "Loading..."
 
   SolarSwarm ->
     case state.modelData of
-      Just model -> HH.span
-        [ HP.class_ (HH.ClassName "scene-info")
-        , HP.style "font-size: 11px; color: #666;"
-        ]
-        [ HH.text $ " | " <> show model.packageCount <> " packages, "
-            <> show model.moduleCount <> " modules" ]
-      Nothing -> HH.text ""
+      Just model -> HH.span_
+        [ HH.text $ show model.packageCount <> " pkgs • " <> show model.moduleCount <> " modules" ]
+      Nothing -> HH.text "Loading..."
 
   PkgTreemap pkg ->
     case state.v2Data of
       Just v2 ->
         let moduleCount = Array.length $ Array.filter (\m -> m.package.name == pkg) v2.modules
-        in HH.span
-          [ HP.class_ (HH.ClassName "scene-info")
-          , HP.style "font-size: 11px; color: #666;"
-          ]
-          [ HH.text $ " | " <> show moduleCount <> " modules" ]
-      Nothing -> HH.text ""
+        in HH.span_
+          [ HH.text $ pkg <> " • " <> show moduleCount <> " modules" ]
+      Nothing -> HH.text "Loading..."
 
   PkgModuleBeeswarm pkg ->
     case state.v2Data of
       Just v2 ->
         let moduleCount = Array.length $ Array.filter (\m -> m.package.name == pkg) v2.modules
-        in HH.span
-          [ HP.class_ (HH.ClassName "scene-info")
-          , HP.style "font-size: 11px; color: #666;"
-          ]
-          [ HH.text $ " | " <> show moduleCount <> " modules (flow)" ]
-      Nothing -> HH.text ""
+        in HH.span_
+          [ HH.text $ pkg <> " • " <> show moduleCount <> " modules (flow)" ]
+      Nothing -> HH.text "Loading..."
 
   OverlayChordMatrix ->
-    HH.span
-      [ HP.class_ (HH.ClassName "scene-info")
-      , HP.style "font-size: 11px; color: #666;"
-      ]
-      [ HH.text " | overlay" ]
+    HH.span_ [ HH.text "Dependency overlay" ]
+
+-- | Footer stats (total counts)
+renderFooterStats :: forall m. State -> H.ComponentHTML Action Slots m
+renderFooterStats state =
+  case state.packageSetData of
+    Just psData ->
+      HH.span_
+        [ HH.text $ show (Array.length psData.packages) <> " total packages in registry" ]
+    Nothing ->
+      case state.modelData of
+        Just model ->
+          HH.span_
+            [ HH.text $ show model.packageCount <> " packages • " <> show model.moduleCount <> " modules" ]
+        Nothing -> HH.text ""
+
+-- | Selection info (hovered/selected item)
+renderSelectionInfo :: forall m. State -> H.ComponentHTML Action Slots m
+renderSelectionInfo state =
+  case state.hoveredPackage of
+    Just pkgName ->
+      HH.span
+        [ HP.style "font-weight: 500;" ]
+        [ HH.text $ "▸ " <> pkgName ]
+    Nothing ->
+      case state.hoveredModule of
+        Just { moduleName } ->
+          HH.span
+            [ HP.style "font-weight: 500;" ]
+            [ HH.text $ "▸ " <> moduleName ]
+        Nothing ->
+          HH.span
+            [ HP.style "opacity: 0.5; font-style: italic;" ]
+            [ HH.text "hover for details" ]
+
+-- | Footer controls (view mode, scope)
+renderFooterControls :: forall m. State -> H.ComponentHTML Action Slots m
+renderFooterControls state =
+  let
+    btnStyle isActive = "padding: 2px 6px; font-size: 9px; border-radius: 2px; cursor: pointer; "
+      <> "border: 1px solid " <> (if isActive then "#fff" else "rgba(255,255,255,0.3)") <> "; "
+      <> "background: " <> (if isActive then "rgba(255,255,255,0.2)" else "transparent") <> "; "
+      <> "color: inherit;"
+  in
+    if state.scene == SolarSwarm || isPackageTreemap state.scene
+      then HH.div
+        [ HP.style "display: flex; gap: 4px;" ]
+        [ HH.button
+            [ HE.onClick \_ -> SetViewMode PrimaryView
+            , HP.style $ btnStyle (state.viewMode == PrimaryView)
+            ]
+            [ HH.text "Primary" ]
+        , HH.button
+            [ HE.onClick \_ -> SetViewMode ChordView
+            , HP.style $ btnStyle (state.viewMode == ChordView)
+            ]
+            [ HH.text "Chord" ]
+        , HH.button
+            [ HE.onClick \_ -> SetViewMode MatrixView
+            , HP.style $ btnStyle (state.viewMode == MatrixView)
+            ]
+            [ HH.text "Matrix" ]
+        ]
+      else HH.text ""
+
+-- | Scope name for display
+scopeName :: BeeswarmScope -> String
+scopeName = case _ of
+  AllPackages -> "all"
+  ProjectOnly -> "project"
+  ProjectWithDeps -> "+deps"
+  ProjectWithTransitive -> "+transitive"
 
 -- | Render the current scene using child component slots
 -- | Streamlined to 6 scenes for teaser navigation
@@ -852,17 +778,36 @@ handleAction = case _ of
       GalaxyTreemap -> do
         -- Capture treemap cell positions for hero transition
         log "[SceneCoordinator] Capturing treemap positions for transition"
-        positions <- liftEffect $ PackageSetTreemap.getCellPositions C.galaxyTreemapContainer
-        log $ "[SceneCoordinator] Captured " <> show (Array.length positions) <> " positions"
-        H.modify_ _ { capturedPositions = Just positions }
+        case state.packageSetData of
+          Just psData -> do
+            let theme = themeForScene state.scene
+                config :: PackageSetTreemap.Config
+                config =
+                  { containerSelector: C.galaxyTreemapContainer
+                  , width: 1650.0
+                  , height: 900.0
+                  , projectPackages: Set.fromFoldable projectPackages
+                  , transitivePackages: computeTransitivePackages psData.packages
+                  , theme: theme
+                  , cellContents: CellCircle
+                  }
+                positions = PackageSetTreemap.computeCellPositions config psData.packages
+            log $ "[SceneCoordinator] Captured " <> show (Array.length positions) <> " positions"
+            H.modify_ _ { capturedPositions = Just positions }
+          Nothing -> do
+            log "[SceneCoordinator] No package data available for positions"
         handleAction (NavigateTo GalaxyBeeswarm)
 
       GalaxyBeeswarm -> do
-        -- Capture beeswarm positions for SolarSwarm transition
+        -- Capture beeswarm positions for SolarSwarm transition via Query
         log "[SceneCoordinator] Capturing beeswarm positions for SolarSwarm transition"
-        positions <- liftEffect $ ScaleTransition.getCurrentPositionsByName "#galaxy-beeswarm-container"
-        log $ "[SceneCoordinator] Captured " <> show (Array.length positions) <> " positions from beeswarm"
-        H.modify_ _ { capturedPositions = Just positions }
+        mPositions <- H.request _galaxyBeeswarmViz unit GalaxyBeeswarmViz.GetPositions
+        case mPositions of
+          Just positions -> do
+            log $ "[SceneCoordinator] Captured " <> show (Array.length positions) <> " positions from beeswarm"
+            H.modify_ _ { capturedPositions = Just positions }
+          Nothing -> do
+            log "[SceneCoordinator] Failed to get beeswarm positions via Query"
         handleAction (NavigateTo SolarSwarm)
 
       SolarSwarm -> do
@@ -1420,128 +1365,6 @@ countVisiblePackages scope packages = case scope of
   -- Check if package is a direct dependency of any project package
   isDirectDep name = Array.any (\p ->
     Set.member p.name projectSet && Array.elem name p.depends) packages
-
--- =============================================================================
--- Package Neighborhood
--- =============================================================================
-
--- | Result of computing a package's neighborhood
-type PackageNeighborhoodInfo =
-  { depsCount :: Int
-  , dependentsCount :: Int
-  }
-
--- | Compute package neighborhood info for display
-computePackageNeighborhood :: String -> V2Data -> PackageNeighborhoodInfo
-computePackageNeighborhood pkgName v2 =
-  let
-    -- Build module name -> package name mapping
-    moduleToPackage :: Map String String
-    moduleToPackage = Map.fromFoldable $
-      v2.modules <#> \m -> Tuple m.name m.package.name
-
-    -- Build imports map: moduleId -> imported module names
-    importsMap :: Map Int (Array String)
-    importsMap = Map.fromFoldable $
-      v2.imports <#> \mi -> Tuple mi.moduleId mi.imports
-
-    -- Build package -> modules mapping
-    packageToModules :: Map String (Array Loader.V2ModuleListItem)
-    packageToModules = foldl addModule Map.empty v2.modules
-      where
-      addModule acc mod =
-        Map.alter (Just <<< Array.cons mod <<< fromMaybe []) mod.package.name acc
-
-    -- Find packages this package depends on
-    depPkgNames :: Set String
-    depPkgNames =
-      let
-        pkgModules = fromMaybe [] $ Map.lookup pkgName packageToModules
-      in
-        foldl findDeps Set.empty pkgModules
-      where
-      findDeps acc mod =
-        let
-          moduleImports = fromMaybe [] $ Map.lookup mod.id importsMap
-          importedPkgs = Array.mapMaybe (\impName -> Map.lookup impName moduleToPackage) moduleImports
-          externalDeps = Array.filter (_ /= pkgName) importedPkgs
-        in
-          Set.union acc (Set.fromFoldable externalDeps)
-
-    -- Find packages that depend on this package (dependents)
-    dependentPkgNames :: Set String
-    dependentPkgNames = foldl findDependents Set.empty v2.modules
-      where
-      findDependents acc mod
-        | mod.package.name == pkgName = acc
-        | otherwise =
-            let
-              moduleImports = fromMaybe [] $ Map.lookup mod.id importsMap
-              importedPkgs = Set.fromFoldable $ Array.mapMaybe (\impName -> Map.lookup impName moduleToPackage) moduleImports
-            in
-              if Set.member pkgName importedPkgs
-                then Set.insert mod.package.name acc
-                else acc
-  in
-    { depsCount: Set.size depPkgNames
-    , dependentsCount: Set.size dependentPkgNames
-    }
-
--- | Filter V2 data to a package and its neighborhood (deps + dependents)
-filterToPackageNeighborhood :: V2Data -> String -> V2Data
-filterToPackageNeighborhood v2 pkgName =
-  let
-    moduleToPackage :: Map String String
-    moduleToPackage = Map.fromFoldable $
-      v2.modules <#> \m -> Tuple m.name m.package.name
-
-    importsMap :: Map Int (Array String)
-    importsMap = Map.fromFoldable $
-      v2.imports <#> \mi -> Tuple mi.moduleId mi.imports
-
-    packageToModules :: Map String (Array Loader.V2ModuleListItem)
-    packageToModules = foldl addModule Map.empty v2.modules
-      where
-      addModule acc mod =
-        Map.alter (Just <<< Array.cons mod <<< fromMaybe []) mod.package.name acc
-
-    depPkgNames :: Set String
-    depPkgNames =
-      let
-        pkgModules = fromMaybe [] $ Map.lookup pkgName packageToModules
-      in
-        foldl findDeps Set.empty pkgModules
-      where
-      findDeps acc mod =
-        let
-          moduleImports = fromMaybe [] $ Map.lookup mod.id importsMap
-          importedPkgs = Array.mapMaybe (\impName -> Map.lookup impName moduleToPackage) moduleImports
-          externalDeps = Array.filter (_ /= pkgName) importedPkgs
-        in
-          Set.union acc (Set.fromFoldable externalDeps)
-
-    dependentPkgNames :: Set String
-    dependentPkgNames = foldl findDependents Set.empty v2.modules
-      where
-      findDependents acc mod
-        | mod.package.name == pkgName = acc
-        | otherwise =
-            let
-              moduleImports = fromMaybe [] $ Map.lookup mod.id importsMap
-              importedPkgs = Set.fromFoldable $ Array.mapMaybe (\impName -> Map.lookup impName moduleToPackage) moduleImports
-            in
-              if Set.member pkgName importedPkgs
-                then Set.insert mod.package.name acc
-                else acc
-
-    allRelevantNames = Set.insert pkgName (Set.union depPkgNames dependentPkgNames)
-    filteredPkgs = Array.filter (\p -> Set.member p.name allRelevantNames) v2.packages
-    pkgIds = Set.fromFoldable $ map _.id filteredPkgs
-    filteredMods = Array.filter (\m -> Set.member m.package.id pkgIds) v2.modules
-    filteredModIds = Set.fromFoldable $ map _.id filteredMods
-    filteredImps = Array.filter (\imp -> Set.member imp.moduleId filteredModIds) v2.imports
-  in
-    { packages: filteredPkgs, modules: filteredMods, imports: filteredImps }
 
 -- =============================================================================
 -- Module Import Maps (for coordinated hover highlighting)
