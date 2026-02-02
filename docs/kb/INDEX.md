@@ -66,7 +66,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Beads Visualization Showcase | planned | `docs/kb/plans/beads-viz-showcase.md` | beads, visualization, force-graph, hats, showcase |
 | Code Explorer Evolution | active | `docs/kb/plans/code-explorer-evolution.md` | code-explorer, cli, visualization, halogen, developer-tools |
 
-## Research (15 documents)
+## Research (16 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
@@ -84,6 +84,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Catana → HATS Diagram Derivation | active | `docs/kb/research/catana-hats-diagram-derivation.md` | catana, recursion-schemes, hats, type-directed, meta-visualization |
 | Grid Snapping in Force Layouts | active | `docs/kb/research/grid-snapping-force-layouts.md` | force-layout, grid, d3, layout-enhancement, value-add |
 | SSRS Integration for HATS | active | `docs/kb/research/ssrs-hats-integration.md` | recursion-schemes, ssrs, hats, hylograph, stack-safety |
+| Booklet Printing Automation | research | `docs/kb/research/booklet-printing-automation.md` | macos, printing, automation, pdf |
 
 ## Reference (10 documents)
 
