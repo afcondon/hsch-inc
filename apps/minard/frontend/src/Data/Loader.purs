@@ -89,6 +89,13 @@ module CE2.Data.Loader
   -- Module declaration stats (for bubble pack)
   , V2ModuleDeclarationStats
   , fetchV2ModuleDeclarationStats
+  -- Polyglot summary (for sunburst)
+  , PolyglotSummary
+  , PolyglotBackend
+  , PolyglotProject
+  , PolyglotPackage
+  , FfiLoc
+  , fetchPolyglotSummary
   ) where
 
 import Prelude
@@ -1862,3 +1869,61 @@ fetchV2ModuleDeclarationStats = do
     response :: V2ModuleDeclarationStatsResponse <- decodeJson json # mapLeft printJsonDecodeError
     Right response.stats
 
+-- =============================================================================
+-- Polyglot Summary (for sunburst visualization)
+-- =============================================================================
+
+-- | FFI LOC breakdown by backend
+type FfiLoc =
+  { js :: Int
+  , erlang :: Int
+  , python :: Int
+  , lua :: Int
+  }
+
+-- | Package in polyglot summary
+type PolyglotPackage =
+  { id :: Int
+  , name :: String
+  , version :: String
+  , source :: String
+  , value :: Int        -- For sunburst sizing (totalLoc with minimum)
+  , totalLoc :: Int
+  , moduleCount :: Int
+  , ffiFileCount :: Int
+  , ffiLoc :: FfiLoc
+  }
+
+-- | Project in polyglot summary
+type PolyglotProject =
+  { id :: Int
+  , name :: String
+  , backend :: String
+  , packageCount :: Int
+  , children :: Array PolyglotPackage
+  , ffiLoc :: FfiLoc
+  }
+
+-- | Backend in polyglot summary
+type PolyglotBackend =
+  { name :: String
+  , displayName :: String
+  , totalLoc :: Int
+  , packageCount :: Int
+  , children :: Array PolyglotProject
+  }
+
+-- | Full polyglot summary (hierarchical: root -> backends -> projects -> packages)
+type PolyglotSummary =
+  { name :: String
+  , children :: Array PolyglotBackend
+  , backendCount :: Int
+  , projectCount :: Int
+  , packageCount :: Int
+  }
+
+-- | Fetch polyglot summary for sunburst visualization
+fetchPolyglotSummary :: Aff (Either String PolyglotSummary)
+fetchPolyglotSummary = do
+  result <- fetchJson (apiBaseUrl <> "/api/v2/polyglot-summary")
+  pure $ result >>= \json -> decodeJson json # mapLeft printJsonDecodeError

@@ -24,6 +24,8 @@ module API.Unified
   , getNamespace
   -- Declarations
   , searchDeclarations
+  -- Polyglot
+  , getPolyglotSummary
   ) where
 
 import Prelude
@@ -464,3 +466,59 @@ getModuleDeclarationStats db = do
   ok' jsonHeaders json
 
 foreign import buildModuleDeclarationStatsJson :: Array Foreign -> String
+
+-- =============================================================================
+-- GET /api/v2/polyglot-summary
+-- =============================================================================
+
+-- | Get polyglot summary for sunburst visualization
+-- | Returns hierarchical data: backends -> projects -> packages
+getPolyglotSummary :: Database -> Aff Response
+getPolyglotSummary db = do
+  -- Get all projects with their backends
+  projects <- queryAll db """
+    SELECT
+      p.id as project_id,
+      p.name as project_name,
+      COALESCE(p.primary_backend, 'js') as backend,
+      COUNT(DISTINCT sp.package_version_id) as package_count,
+      COALESCE(SUM(pv.loc_ffi_js), 0) as ffi_js_loc,
+      COALESCE(SUM(pv.loc_ffi_erlang), 0) as ffi_erlang_loc,
+      COALESCE(SUM(pv.loc_ffi_python), 0) as ffi_python_loc,
+      COALESCE(SUM(pv.loc_ffi_lua), 0) as ffi_lua_loc,
+      COALESCE(SUM(pv.loc_ffi_rust), 0) as ffi_rust_loc
+    FROM projects p
+    LEFT JOIN snapshots s ON s.project_id = p.id
+    LEFT JOIN snapshot_packages sp ON sp.snapshot_id = s.id
+    LEFT JOIN package_versions pv ON pv.id = sp.package_version_id
+    GROUP BY p.id, p.name, p.primary_backend
+    ORDER BY p.primary_backend, p.name
+  """
+
+  -- Get packages per project for hierarchy
+  packages <- queryAll db """
+    SELECT DISTINCT
+      p.id as project_id,
+      pv.id as package_id,
+      pv.name as package_name,
+      pv.version as package_version,
+      pv.source as package_source,
+      COALESCE(pv.loc_ffi_js, 0) as ffi_js_loc,
+      COALESCE(pv.loc_ffi_erlang, 0) as ffi_erlang_loc,
+      COALESCE(pv.loc_ffi_python, 0) as ffi_python_loc,
+      COALESCE(pv.loc_ffi_lua, 0) as ffi_lua_loc,
+      COALESCE(pv.loc_ffi_rust, 0) as ffi_rust_loc,
+      COALESCE(pv.ffi_file_count, 0) as ffi_file_count,
+      (SELECT COALESCE(SUM(m.loc), 0) FROM modules m WHERE m.package_version_id = pv.id) as total_loc,
+      (SELECT COUNT(*) FROM modules m WHERE m.package_version_id = pv.id) as module_count
+    FROM projects p
+    JOIN snapshots s ON s.project_id = p.id
+    JOIN snapshot_packages sp ON sp.snapshot_id = s.id
+    JOIN package_versions pv ON pv.id = sp.package_version_id
+    ORDER BY p.id, pv.name
+  """
+
+  let json = buildPolyglotSummaryJson projects packages
+  ok' jsonHeaders json
+
+foreign import buildPolyglotSummaryJson :: Array Foreign -> Array Foreign -> String

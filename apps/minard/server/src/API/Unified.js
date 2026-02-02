@@ -295,3 +295,124 @@ export const buildAllImportsJson = (rows) => {
   const imports = Array.from(moduleImports.values());
   return JSON.stringify({ imports, count: imports.length });
 };
+
+// =============================================================================
+// Polyglot Summary (for sunburst visualization)
+// =============================================================================
+
+export const buildPolyglotSummaryJson = (projectRows) => (packageRows) => {
+  // Build hierarchical structure: backend -> project -> packages
+  const backends = new Map();
+
+  // Process projects
+  for (const row of (projectRows || [])) {
+    const backend = row.backend || 'js';
+    const projectId = Number(row.project_id);
+
+    if (!backends.has(backend)) {
+      backends.set(backend, {
+        name: backend,
+        displayName: getBackendDisplayName(backend),
+        projects: new Map(),
+        totalLoc: 0,
+        packageCount: 0
+      });
+    }
+
+    const backendData = backends.get(backend);
+    backendData.projects.set(projectId, {
+      id: projectId,
+      name: row.project_name,
+      backend,
+      packageCount: Number(row.package_count) || 0,
+      packages: [],
+      ffiLoc: {
+        js: Number(row.ffi_js_loc) || 0,
+        erlang: Number(row.ffi_erlang_loc) || 0,
+        python: Number(row.ffi_python_loc) || 0,
+        lua: Number(row.ffi_lua_loc) || 0,
+        rust: Number(row.ffi_rust_loc) || 0
+      }
+    });
+  }
+
+  // Process packages and add to their projects
+  for (const row of (packageRows || [])) {
+    const projectId = Number(row.project_id);
+
+    // Find which backend this project belongs to
+    for (const [, backendData] of backends) {
+      if (backendData.projects.has(projectId)) {
+        const project = backendData.projects.get(projectId);
+        const pkgLoc = Number(row.total_loc) || 0;
+
+        project.packages.push({
+          id: Number(row.package_id),
+          name: row.package_name,
+          version: row.package_version,
+          source: row.package_source,
+          totalLoc: pkgLoc,
+          moduleCount: Number(row.module_count) || 0,
+          ffiFileCount: Number(row.ffi_file_count) || 0,
+          ffiLoc: {
+            js: Number(row.ffi_js_loc) || 0,
+            erlang: Number(row.ffi_erlang_loc) || 0,
+            python: Number(row.ffi_python_loc) || 0,
+            lua: Number(row.ffi_lua_loc) || 0,
+            rust: Number(row.ffi_rust_loc) || 0
+          }
+        });
+
+        backendData.totalLoc += pkgLoc;
+        backendData.packageCount += 1;
+        break;
+      }
+    }
+  }
+
+  // Convert to final structure for D3 sunburst
+  // Format: { name: "root", children: [{ name: "js", children: [...] }] }
+  const children = Array.from(backends.values()).map(backend => ({
+    name: backend.name,
+    displayName: backend.displayName,
+    totalLoc: backend.totalLoc,
+    packageCount: backend.packageCount,
+    children: Array.from(backend.projects.values()).map(project => ({
+      name: project.name,
+      id: project.id,
+      backend: project.backend,
+      packageCount: project.packageCount,
+      ffiLoc: project.ffiLoc,
+      children: project.packages.map(pkg => ({
+        name: pkg.name,
+        id: pkg.id,
+        version: pkg.version,
+        source: pkg.source,
+        value: Math.max(pkg.totalLoc, 100), // Minimum size for visibility
+        totalLoc: pkg.totalLoc,
+        moduleCount: pkg.moduleCount,
+        ffiFileCount: pkg.ffiFileCount,
+        ffiLoc: pkg.ffiLoc
+      }))
+    }))
+  }));
+
+  return JSON.stringify({
+    name: "polyglot",
+    children,
+    backendCount: backends.size,
+    projectCount: projectRows ? projectRows.length : 0,
+    packageCount: packageRows ? packageRows.length : 0
+  });
+};
+
+function getBackendDisplayName(backend) {
+  const names = {
+    'js': 'JavaScript',
+    'erlang': 'Erlang (Purerl)',
+    'python': 'Python (PurePy)',
+    'lua': 'Lua (PsLua)',
+    'rust': 'Rust/WASM'
+  };
+  return names[backend] || backend;
+}

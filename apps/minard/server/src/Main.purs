@@ -70,6 +70,8 @@ data Route
   | V2ListNamespaces
   | V2GetNamespace String
   | V2SearchDeclarations String
+  -- Polyglot
+  | V2PolyglotSummary
   -- Site Explorer
   | SiteExplorerRoutes Int
   | SiteExplorerAnnotations
@@ -127,6 +129,8 @@ route = root $ sum
   , "V2ListNamespaces": path "api/v2/namespaces" noArgs
   , "V2GetNamespace": path "api/v2/namespaces" segment
   , "V2SearchDeclarations": path "api/v2/declarations/search" segment
+  -- Polyglot
+  , "V2PolyglotSummary": path "api/v2/polyglot-summary" noArgs
   -- Site Explorer
   , "SiteExplorerRoutes": path "api/site-explorer/routes" (int segment)
   , "SiteExplorerAnnotations": path "api/site-explorer/annotations" noArgs
@@ -140,7 +144,7 @@ route = root $ sum
 -- =============================================================================
 
 dbPath :: String
-dbPath = "./database/ce-unified.duckdb"
+dbPath = "./database/test-polyglot.duckdb"
 
 -- =============================================================================
 -- Main
@@ -235,6 +239,8 @@ main = launchAff_ do
     V2ListNamespaces -> Unified.listNamespaces db
     V2GetNamespace nsPath -> Unified.getNamespace db nsPath
     V2SearchDeclarations query -> Unified.searchDeclarations db query
+    -- Polyglot
+    V2PolyglotSummary -> Unified.getPolyglotSummary db
     -- Site Explorer
     SiteExplorerRoutes snapshotId -> SiteExplorer.listRoutes db snapshotId
     SiteExplorerAnnotations -> case method of
