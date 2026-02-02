@@ -44,3 +44,4 @@ erl_crash.dump
 # - purescript-lua/
 # - purescript-lua-package-sets/
 # - purescript-python-new/
+apps/minard/
