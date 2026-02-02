@@ -172,12 +172,12 @@ npm-install-embedding-explorer:
 	@echo "Installing npm dependencies for embedding-explorer..."
 	cd "$(SHOWCASES)/hypo-punter" && npm install --ignore-scripts
 
-# Embedding Explorer Python backend (run from workspace root for correct path resolution)
+# Embedding Explorer Python backend (standalone workspace)
 ee-server: npm-install-embedding-explorer
 	@echo "Building ee-server (PurePy)..."
-	cd "$(SHOWCASES)/hypo-punter" && spago build -p ee-server
+	cd "$(SHOWCASES)/hypo-punter/ee-server" && spago build
 	@echo "Transpiling to Python..."
-	cd "$(SHOWCASES)/hypo-punter" && $(PUREPY) output ee-server/output-py
+	cd "$(SHOWCASES)/hypo-punter/ee-server" && $(PUREPY) output output-py
 	@echo "Copying FFI files..."
 	cp "$(SHOWCASES)/hypo-punter/ee-server/src/Data/UMAP.py" \
 	   "$(SHOWCASES)/hypo-punter/ee-server/output-py/data_u_m_a_p_foreign.py"
@@ -186,12 +186,12 @@ ee-server: npm-install-embedding-explorer
 	cp "$(SHOWCASES)/hypo-punter/ee-server/src/Server/Flask.py" \
 	   "$(SHOWCASES)/hypo-punter/ee-server/output-py/server_flask_foreign.py"
 
-# Grid Explorer Python backend (run from workspace root for correct path resolution)
+# Grid Explorer Python backend (standalone workspace)
 ge-server: npm-install-embedding-explorer
 	@echo "Building ge-server (PurePy)..."
-	cd "$(SHOWCASES)/hypo-punter" && spago build -p ge-server
+	cd "$(SHOWCASES)/hypo-punter/ge-server" && spago build
 	@echo "Transpiling to Python..."
-	cd "$(SHOWCASES)/hypo-punter" && $(PUREPY) output ge-server/output-py
+	cd "$(SHOWCASES)/hypo-punter/ge-server" && $(PUREPY) output output-py
 	@echo "Copying FFI files..."
 	cp "$(SHOWCASES)/hypo-punter/ge-server/src/Grid/PowerFlow.py" \
 	   "$(SHOWCASES)/hypo-punter/ge-server/output-py/grid_power_flow_foreign.py"

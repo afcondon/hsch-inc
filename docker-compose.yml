@@ -88,11 +88,11 @@ services:
     build:
       context: ./showcases/hypo-punter/ee-server
     ports:
-      - "5081:5081"
+      - "5081:8081"
     networks:
       - polyglot
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5081/')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8081/')"]
       interval: 30s
       timeout: 10s
       start_period: 5s
@@ -113,11 +113,11 @@ services:
     build:
       context: ./showcases/hypo-punter/ge-server
     ports:
-      - "5082:5082"
+      - "5082:8082"
     networks:
       - polyglot
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5082/')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8082/')"]
       interval: 30s
       timeout: 10s
       start_period: 5s
