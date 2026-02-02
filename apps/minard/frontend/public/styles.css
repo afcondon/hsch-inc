@@ -1845,6 +1845,24 @@ select.project-dropdown:focus {
   transition: fill 0.15s ease-out, stroke 0.15s ease-out, stroke-width 0.15s ease-out;
 }
 
+/* Ensure text labels stay white on blueprint theme during all highlight states */
+.treemap-package text {
+  fill: rgba(255, 255, 255, 0.5) !important;
+  transition: fill 0.15s ease-out;
+}
+
+.treemap-package.highlight-primary text {
+  fill: rgba(255, 255, 255, 0.95) !important;
+}
+
+.treemap-package.highlight-related text {
+  fill: rgba(255, 255, 255, 0.8) !important;
+}
+
+.treemap-package.highlight-dimmed text {
+  fill: rgba(255, 255, 255, 0.2) !important;
+}
+
 /* Primary: The hovered package - bright stroke for visibility on dark theme */
 .treemap-package.highlight-primary rect {
   stroke: #ffc040 !important;
@@ -1887,22 +1905,36 @@ select.project-dropdown:focus {
    ============================================================================= */
 
 /* Primary: The hovered package - solid dark fill for visibility */
-.package-set-swarm circle.highlight-primary {
+.package-set-beeswarm circle.highlight-primary {
   fill: #333 !important;
   stroke: #000 !important;
   stroke-width: 3px !important;
   filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.4));
 }
 
-/* Related: Dependencies of hovered package - blue highlight */
-.package-set-swarm circle.highlight-related {
+/* Related: Generic related highlight (fallback) - blue highlight */
+.package-set-beeswarm circle.highlight-related {
   stroke: #2196F3 !important;
   stroke-width: 2.5px !important;
   filter: drop-shadow(0 0 4px rgba(33, 150, 243, 0.5));
 }
 
+/* Upstream: Dependencies of hovered (things hovered depends on) - green (leaves on topograph) */
+.package-set-beeswarm circle.highlight-upstream {
+  stroke: #22c55e !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.5));
+}
+
+/* Downstream: Dependents of hovered (things that depend on hovered) - blue (roots on topograph) */
+.package-set-beeswarm circle.highlight-downstream {
+  stroke: #3b82f6 !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
+}
+
 /* Dimmed: Unrelated packages - reduced opacity */
-.package-set-swarm circle.highlight-dimmed {
+.package-set-beeswarm circle.highlight-dimmed {
   opacity: 0.25 !important;
   filter: none !important;
 }
