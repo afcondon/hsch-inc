@@ -3,8 +3,8 @@ use std::collections::HashMap;
 
 use crate::error::Result;
 use crate::model::{
-    ChildDeclaration, Declaration, Module, ModuleNamespace, PackageDependency, PackageVersion,
-    Project, Snapshot, SnapshotPackage,
+    Backend, ChildDeclaration, Declaration, Module, ModuleNamespace, PackageDependency,
+    PackageVersion, Project, Snapshot, SnapshotPackage,
 };
 
 /// Insert or get a project, returning its ID
@@ -13,6 +13,7 @@ pub fn get_or_create_project(
     id: i64,
     name: &str,
     repo_path: Option<&str>,
+    primary_backend: Backend,
 ) -> Result<i64> {
     // First try to find existing project
     let existing: std::result::Result<i64, _> = conn.query_row(
@@ -22,12 +23,19 @@ pub fn get_or_create_project(
     );
 
     match existing {
-        Ok(id) => Ok(id),
+        Ok(id) => {
+            // Update backend if project already exists
+            conn.execute(
+                "UPDATE projects SET primary_backend = ? WHERE id = ?",
+                params![primary_backend.as_str(), id],
+            )?;
+            Ok(id)
+        }
         Err(duckdb::Error::QueryReturnedNoRows) => {
             // Insert new project
             conn.execute(
-                "INSERT INTO projects (id, name, repo_path) VALUES (?, ?, ?)",
-                params![id, name, repo_path],
+                "INSERT INTO projects (id, name, repo_path, primary_backend) VALUES (?, ?, ?, ?)",
+                params![id, name, repo_path, primary_backend.as_str()],
             )?;
             Ok(id)
         }
@@ -38,12 +46,14 @@ pub fn get_or_create_project(
 /// Insert a project
 pub fn insert_project(conn: &Connection, project: &Project) -> Result<()> {
     conn.execute(
-        "INSERT OR IGNORE INTO projects (id, name, repo_path, description) VALUES (?, ?, ?, ?)",
+        "INSERT OR IGNORE INTO projects (id, name, repo_path, description, primary_backend)
+         VALUES (?, ?, ?, ?, ?)",
         params![
             project.id,
             project.name,
             project.repo_path,
-            project.description
+            project.description,
+            project.primary_backend.as_str()
         ],
     )?;
     Ok(())
@@ -87,8 +97,9 @@ pub fn insert_snapshot_packages(conn: &Connection, packages: &[SnapshotPackage])
 pub fn insert_package_versions(conn: &Connection, packages: &[PackageVersion]) -> Result<()> {
     let mut stmt = conn.prepare(
         "INSERT OR IGNORE INTO package_versions
-         (id, name, version, description, license, repository, source)
-         VALUES (?, ?, ?, ?, ?, ?, ?)",
+         (id, name, version, description, license, repository, source,
+          loc_ffi_js, loc_ffi_erlang, loc_ffi_python, loc_ffi_lua, ffi_file_count)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     )?;
 
     for pkg in packages {
@@ -100,6 +111,11 @@ pub fn insert_package_versions(conn: &Connection, packages: &[PackageVersion]) -
             pkg.license,
             pkg.repository,
             pkg.source,
+            pkg.loc_ffi_js,
+            pkg.loc_ffi_erlang,
+            pkg.loc_ffi_python,
+            pkg.loc_ffi_lua,
+            pkg.ffi_file_count,
         ])?;
     }
 
@@ -474,4 +490,43 @@ pub fn get_package_id(conn: &Connection, name: &str, version: &str) -> Result<Op
         Err(duckdb::Error::QueryReturnedNoRows) => Ok(None),
         Err(e) => Err(e.into()),
     }
+}
+
+/// FFI statistics for a package
+#[derive(Debug, Default)]
+pub struct FfiStats {
+    pub loc_js: i32,
+    pub loc_erlang: i32,
+    pub loc_python: i32,
+    pub loc_lua: i32,
+    pub loc_rust: i32,
+    pub file_count: i32,
+}
+
+/// Update FFI statistics for a package
+pub fn update_package_ffi_stats(
+    conn: &Connection,
+    package_version_id: i64,
+    stats: &FfiStats,
+) -> Result<()> {
+    conn.execute(
+        "UPDATE package_versions SET
+         loc_ffi_js = ?,
+         loc_ffi_erlang = ?,
+         loc_ffi_python = ?,
+         loc_ffi_lua = ?,
+         loc_ffi_rust = ?,
+         ffi_file_count = ?
+         WHERE id = ?",
+        params![
+            stats.loc_js,
+            stats.loc_erlang,
+            stats.loc_python,
+            stats.loc_lua,
+            stats.loc_rust,
+            stats.file_count,
+            package_version_id
+        ],
+    )?;
+    Ok(())
 }

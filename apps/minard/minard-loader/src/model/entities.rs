@@ -1,4 +1,44 @@
 use serde_json::Value;
+use std::fmt;
+
+/// Backend/target language for a PureScript project
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Backend {
+    #[default]
+    JavaScript,  // Default PS target
+    Erlang,      // purerl
+    Python,      // purepy
+    Lua,         // pslua
+    Rust,        // Rust/WASM (for projects with Cargo.toml)
+}
+
+impl Backend {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Backend::JavaScript => "js",
+            Backend::Erlang => "erlang",
+            Backend::Python => "python",
+            Backend::Lua => "lua",
+            Backend::Rust => "rust",
+        }
+    }
+
+    pub fn from_str(s: &str) -> Self {
+        match s.to_lowercase().as_str() {
+            "erlang" | "purerl" | "erl" => Backend::Erlang,
+            "python" | "purepy" | "py" => Backend::Python,
+            "lua" | "pslua" => Backend::Lua,
+            "rust" | "wasm" => Backend::Rust,
+            _ => Backend::JavaScript,
+        }
+    }
+}
+
+impl fmt::Display for Backend {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
 
 /// A project - a codebase being analyzed
 #[derive(Debug, Clone)]
@@ -7,6 +47,7 @@ pub struct Project {
     pub name: String,
     pub repo_path: Option<String>,
     pub description: Option<String>,
+    pub primary_backend: Backend,
 }
 
 /// A snapshot - a point-in-time analysis of a project
@@ -38,6 +79,12 @@ pub struct PackageVersion {
     pub license: Option<String>,
     pub repository: Option<String>,
     pub source: String, // "registry" | "local" | "git"
+    // FFI statistics (polyglot support)
+    pub loc_ffi_js: Option<i32>,
+    pub loc_ffi_erlang: Option<i32>,
+    pub loc_ffi_python: Option<i32>,
+    pub loc_ffi_lua: Option<i32>,
+    pub ffi_file_count: Option<i32>,
 }
 
 /// A module namespace - hierarchical path like Data.Array.NonEmpty

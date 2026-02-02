@@ -9,7 +9,7 @@ use crate::db::{
     get_max_ids, get_or_create_namespace, get_or_create_project, insert_child_declarations,
     insert_declarations, insert_modules, insert_package_dependencies,
     insert_package_versions_with_ids, insert_snapshot, insert_snapshot_packages,
-    package_has_modules, IdGenerator,
+    package_has_modules, update_package_ffi_stats, IdGenerator,
 };
 use super::postload::{
     compute_topo_layers, insert_module_imports, insert_function_calls, collect_git_data,
@@ -27,6 +27,7 @@ use crate::registry::{
     get_registry_packages_to_load, load_registry_modules_from_output,
 };
 
+use super::detect::scan_ffi_files;
 use super::discovery::ProjectDiscovery;
 
 /// Main load pipeline
@@ -69,9 +70,10 @@ impl LoadPipeline {
 
         if self.verbose {
             eprintln!(
-                "Found {} docs.json files in {}",
+                "Found {} docs.json files in {} (backend: {})",
                 discovery.module_count(),
-                discovery.output_dir.display()
+                discovery.output_dir.display(),
+                discovery.primary_backend
             );
         }
 
@@ -83,6 +85,7 @@ impl LoadPipeline {
             project_id,
             project_name,
             discovery.project_path.to_str(),
+            discovery.primary_backend,
         )?;
 
         // Phase 2: Get git info and create snapshot
@@ -124,6 +127,12 @@ impl LoadPipeline {
                 license: None,
                 repository: None,
                 source: pkg_info.source.clone(),
+                // FFI stats will be populated by post-load phase
+                loc_ffi_js: None,
+                loc_ffi_erlang: None,
+                loc_ffi_python: None,
+                loc_ffi_lua: None,
+                ffi_file_count: None,
             });
         }
 
@@ -180,6 +189,12 @@ impl LoadPipeline {
             license: None,
             repository: None,
             source: "workspace".to_string(),
+            // FFI stats will be populated by post-load phase
+            loc_ffi_js: None,
+            loc_ffi_erlang: None,
+            loc_ffi_python: None,
+            loc_ffi_lua: None,
+            ffi_file_count: None,
         };
         let workspace_id_map = insert_package_versions_with_ids(conn, &[workspace_pkg.clone()])?;
         let workspace_pkg_id = *workspace_id_map
@@ -368,6 +383,23 @@ impl LoadPipeline {
             Ok((commits, _links)) => stats.commits_loaded = commits,
             Err(e) if self.verbose => eprintln!("Warning: Failed to collect git data: {}", e),
             _ => {}
+        }
+
+        // Phase 8b: Scan FFI files for polyglot statistics
+        progress.set_message("Scanning FFI files...");
+        let ffi_stats = scan_ffi_files(&discovery.project_path);
+        if ffi_stats.file_count > 0 {
+            if self.verbose {
+                eprintln!(
+                    "  FFI: {} files ({} JS, {} Erlang, {} Python, {} Lua LOC)",
+                    ffi_stats.file_count,
+                    ffi_stats.loc_js,
+                    ffi_stats.loc_erlang,
+                    ffi_stats.loc_python,
+                    ffi_stats.loc_lua
+                );
+            }
+            let _ = update_package_ffi_stats(conn, workspace_pkg_id, &ffi_stats);
         }
 
         // Phase 9: Update metrics

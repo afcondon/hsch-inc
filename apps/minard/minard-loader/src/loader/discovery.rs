@@ -1,7 +1,9 @@
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
+use super::detect::detect_backend;
 use crate::error::{LoaderError, Result};
+use crate::model::Backend;
 
 /// Discovered project structure
 #[derive(Debug, Clone)]
@@ -12,6 +14,8 @@ pub struct ProjectDiscovery {
     pub docs_json_files: Vec<PathBuf>,
     /// Relative name when discovered via scan (e.g., "showcases/hypo-punter")
     pub relative_name: Option<String>,
+    /// Detected primary backend for the project
+    pub primary_backend: Backend,
 }
 
 impl ProjectDiscovery {
@@ -39,12 +43,16 @@ impl ProjectDiscovery {
         // Find all docs.json files in output directory
         let docs_json_files = find_docs_json_files(&output_dir);
 
+        // Detect primary backend
+        let primary_backend = detect_backend(project_path);
+
         Ok(Self {
             project_path: project_path.to_path_buf(),
             spago_lock_path,
             output_dir,
             docs_json_files,
             relative_name,
+            primary_backend,
         })
     }
 

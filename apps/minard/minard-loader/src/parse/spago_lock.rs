@@ -36,7 +36,32 @@ pub struct BuildConfig {
 pub struct PackageSet {
     pub address: Option<PackageSetAddress>,
     pub compiler: Option<String>,
-    pub content: Option<HashMap<String, String>>,
+    /// Content can be either:
+    /// - Registry style: HashMap<String, String> (package -> version)
+    /// - Git package set (purerl): HashMap<String, GitPackageInfo> (package -> {repo, version, deps})
+    #[serde(default)]
+    pub content: PackageSetContent,
+}
+
+/// Flexible content field that accepts both registry and git package set formats
+#[derive(Debug, Default, Deserialize)]
+#[serde(untagged)]
+pub enum PackageSetContent {
+    #[default]
+    Empty,
+    /// Registry-style: package name -> version string
+    Registry(HashMap<String, String>),
+    /// Git package set (purerl): package name -> {repo, version, dependencies}
+    GitPackageSet(HashMap<String, GitPackageSetEntry>),
+}
+
+/// Entry in a git-based package set (e.g., purerl)
+#[derive(Debug, Deserialize)]
+pub struct GitPackageSetEntry {
+    pub repo: String,
+    pub version: String,
+    #[serde(default)]
+    pub dependencies: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]

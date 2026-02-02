@@ -2,8 +2,8 @@ use duckdb::Connection;
 
 use crate::error::Result;
 
-/// SQL schema for minard-loader (M3)
-/// Matches unified-schema.sql v3.0 exactly
+/// SQL schema for minard-loader (M3.1 - Polyglot Support)
+/// v3.1: Added primary_backend to projects, FFI LOC columns to package_versions
 const SCHEMA_SQL: &str = r#"
 -- =============================================================================
 -- REGISTRY LAYER
@@ -27,6 +27,13 @@ CREATE TABLE IF NOT EXISTS package_versions (
     license         VARCHAR,
     repository      VARCHAR,
     source          VARCHAR DEFAULT 'registry',
+    -- FFI statistics (polyglot support v3.2)
+    loc_ffi_js      INTEGER DEFAULT 0,
+    loc_ffi_erlang  INTEGER DEFAULT 0,
+    loc_ffi_python  INTEGER DEFAULT 0,
+    loc_ffi_lua     INTEGER DEFAULT 0,
+    loc_ffi_rust    INTEGER DEFAULT 0,
+    ffi_file_count  INTEGER DEFAULT 0,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(name, version)
 );
@@ -54,6 +61,7 @@ CREATE TABLE IF NOT EXISTS projects (
     repo_path       VARCHAR,
     description     TEXT,
     package_set_id  INTEGER REFERENCES package_sets(id),
+    primary_backend VARCHAR DEFAULT 'js',  -- 'js' | 'erlang' | 'python' | 'lua'
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -250,7 +258,7 @@ CREATE TABLE IF NOT EXISTS metadata (
     value   VARCHAR
 );
 
-INSERT OR REPLACE INTO metadata (key, value) VALUES ('schema_version', '3.0');
+INSERT OR REPLACE INTO metadata (key, value) VALUES ('schema_version', '3.1');
 INSERT OR REPLACE INTO metadata (key, value) VALUES ('created_at', CURRENT_TIMESTAMP);
 "#;
 
@@ -359,6 +367,37 @@ JOIN declarations d ON cd.declaration_id = d.id
 JOIN modules m ON d.module_id = m.id
 JOIN package_versions pv ON m.package_version_id = pv.id
 WHERE cd.kind = 'instance';
+
+-- Polyglot summary view (v3.2)
+CREATE OR REPLACE VIEW polyglot_summary AS
+SELECT
+    p.id AS project_id,
+    p.name AS project_name,
+    p.primary_backend,
+    COUNT(DISTINCT pv.id) AS package_count,
+    COALESCE(SUM(m.loc), 0) AS total_loc_purescript,
+    COALESCE(SUM(pv.loc_ffi_js), 0) AS total_loc_js,
+    COALESCE(SUM(pv.loc_ffi_erlang), 0) AS total_loc_erlang,
+    COALESCE(SUM(pv.loc_ffi_python), 0) AS total_loc_python,
+    COALESCE(SUM(pv.loc_ffi_lua), 0) AS total_loc_lua,
+    COALESCE(SUM(pv.loc_ffi_rust), 0) AS total_loc_rust,
+    COALESCE(SUM(pv.ffi_file_count), 0) AS total_ffi_files
+FROM projects p
+JOIN snapshots s ON s.project_id = p.id
+JOIN snapshot_packages sp ON sp.snapshot_id = s.id
+JOIN package_versions pv ON sp.package_version_id = pv.id
+LEFT JOIN modules m ON m.package_version_id = pv.id
+GROUP BY p.id, p.name, p.primary_backend;
+
+-- Backend distribution view (v3.2)
+CREATE OR REPLACE VIEW backend_distribution AS
+SELECT
+    primary_backend,
+    COUNT(DISTINCT project_id) AS project_count,
+    SUM(total_loc_purescript) AS total_purescript_loc,
+    SUM(total_loc_js + total_loc_erlang + total_loc_python + total_loc_lua + total_loc_rust) AS total_ffi_loc
+FROM polyglot_summary
+GROUP BY primary_backend;
 "#;
 
 /// Initialize the database schema
@@ -461,21 +500,22 @@ pub fn get_stats(conn: &Connection) -> Result<DbStats> {
 /// Get detailed project/snapshot information
 fn get_project_details(conn: &Connection) -> Result<Vec<ProjectDetail>> {
     let mut stmt = conn.prepare(
-        "SELECT p.name, COUNT(s.id) as snapshot_count,
+        "SELECT p.name, p.primary_backend, COUNT(s.id) as snapshot_count,
                 (SELECT git_ref FROM snapshots WHERE project_id = p.id ORDER BY snapshot_at DESC LIMIT 1) as latest_ref,
                 (SELECT SUBSTRING(git_hash, 1, 7) FROM snapshots WHERE project_id = p.id ORDER BY snapshot_at DESC LIMIT 1) as latest_hash
          FROM projects p
          LEFT JOIN snapshots s ON s.project_id = p.id
-         GROUP BY p.id, p.name
+         GROUP BY p.id, p.name, p.primary_backend
          ORDER BY p.name",
     )?;
 
     let rows = stmt.query_map([], |row| {
         Ok(ProjectDetail {
             name: row.get(0)?,
-            snapshot_count: row.get(1)?,
-            latest_ref: row.get(2)?,
-            latest_hash: row.get(3)?,
+            backend: row.get::<_, Option<String>>(1)?.unwrap_or_else(|| "js".to_string()),
+            snapshot_count: row.get(2)?,
+            latest_ref: row.get(3)?,
+            latest_hash: row.get(4)?,
         })
     })?;
 
@@ -489,6 +529,7 @@ fn get_project_details(conn: &Connection) -> Result<Vec<ProjectDetail>> {
 #[derive(Debug, Clone)]
 pub struct ProjectDetail {
     pub name: String,
+    pub backend: String,
     pub snapshot_count: i64,
     pub latest_ref: Option<String>,
     pub latest_hash: Option<String>,
@@ -520,9 +561,14 @@ impl DbStats {
                     (None, Some(hash)) => format!("latest: {}", hash),
                     (None, None) => "no snapshots".to_string(),
                 };
+                let backend_tag = if proj.backend != "js" {
+                    format!(" [{}]", proj.backend)
+                } else {
+                    String::new()
+                };
                 lines.push(format!(
-                    "    {}: {} snapshots ({})",
-                    proj.name, proj.snapshot_count, latest
+                    "    {}{}: {} snapshots ({})",
+                    proj.name, backend_tag, proj.snapshot_count, latest
                 ));
             }
         }
