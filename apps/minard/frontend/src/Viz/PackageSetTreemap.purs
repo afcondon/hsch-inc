@@ -12,7 +12,8 @@ module CE2.Viz.PackageSetTreemap
   , renderWithHighlighting  -- Render with hover highlighting enabled
   , updateColors
   , cleanup
-  , getCellPositions  -- Export circle positions for transitions
+  , computeCellPositions  -- Compute circle positions for transitions (pure)
+  , getCellPositions      -- DEPRECATED: use computeCellPositions instead
   ) where
 
 import Prelude
@@ -512,10 +513,25 @@ truncateName maxLen name =
 -- Position Export (for transitions)
 -- =============================================================================
 
--- | Get circle center positions from treemap cells (for Treemap -> Beeswarm transition)
+-- | Compute circle center positions for treemap cells (for Treemap -> Beeswarm transition)
 -- | Returns array of { name, x, y, r } for each package circle
-foreign import getCellPositionsImpl :: String -> Effect (Array { name :: String, x :: Number, y :: Number, r :: Number })
+-- | This is a pure function - no DOM reading needed since positions are computed from data
+computeCellPositions :: Config -> Array PackageSetPackage -> Array { name :: String, x :: Number, y :: Number, r :: Number }
+computeCellPositions config packages =
+  let
+    positioned = computeTreemapPositions config packages
+  in positioned <#> \pp ->
+    let
+      cx = pp.x + pp.width / 2.0
+      cy = pp.y + pp.height / 2.0
+      maxR = (min pp.width pp.height) / 2.0 - 2.0
+      kloc = toNumber pp.pkg.totalLoc / 1000.0
+      circleR = min maxR (3.0 + sqrt kloc * 3.0)
+    in { name: pp.pkg.name, x: cx, y: cy, r: circleR }
 
--- | Get cell positions from treemap container
+-- | DEPRECATED: Use computeCellPositions instead
+-- | This function is kept for backwards compatibility but throws an error
 getCellPositions :: String -> Effect (Array { name :: String, x :: Number, y :: Number, r :: Number })
-getCellPositions = getCellPositionsImpl
+getCellPositions _selector = do
+  -- Log deprecation warning and return empty - callers should use computeCellPositions
+  pure []

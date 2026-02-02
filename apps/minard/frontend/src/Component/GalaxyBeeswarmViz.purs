@@ -60,8 +60,10 @@ data Output
 -- | Slot type for parent component
 type Slot = H.Slot Query Output
 
--- | No queries needed - all control via Input
-data Query a = NoQuery a
+-- | Queries for parent component
+data Query a
+  = GetPositions (Array { name :: String, x :: Number, y :: Number, r :: Number } -> a)
+  -- ^ Get current beeswarm node positions (for scene transitions)
 
 -- | Component state - only internal state, not copied from Input
 -- | Uses lastInput for change detection, uses current input directly in handlers
@@ -88,11 +90,29 @@ component =
     , render
     , eval: H.mkEval $ H.defaultEval
         { handleAction = handleAction
+        , handleQuery = handleQuery
         , receive = Just <<< Receive
         , initialize = Just Initialize
         , finalize = Just Finalize
         }
     }
+
+-- =============================================================================
+-- Query Handlers
+-- =============================================================================
+
+handleQuery :: forall m a. MonadAff m => Query a -> H.HalogenM State Action () Output m (Maybe a)
+handleQuery = case _ of
+  GetPositions reply -> do
+    state <- H.get
+    case state.handle of
+      Just handle -> do
+        nodes <- liftEffect $ handle.simHandle.getNodes
+        let positions = map (\n -> { name: n.pkg.name, x: n.x, y: n.y, r: n.r }) nodes
+        pure $ Just $ reply positions
+      Nothing -> do
+        log "[GalaxyBeeswarmViz] GetPositions query but no handle available"
+        pure $ Just $ reply []
 
 initialState :: Input -> State
 initialState input =

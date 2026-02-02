@@ -477,29 +477,8 @@ renderSVGContainerHATS config = do
         , staticStr "class" "package-set-beeswarm"
         , staticStr "preserveAspectRatio" "xMidYMid meet"
         ]
-        [ -- Title
+        [ -- Left axis label
           elem Text
-            [ staticStr "x" "0"
-            , staticNum "y" (-config.height / 2.0 + 25.0)
-            , staticStr "text-anchor" "middle"
-            , staticStr "font-size" "14"
-            , staticStr "font-weight" "bold"
-            , staticStr "fill" "#333"
-            , staticStr "textContent" "PureScript Package Registry (568 packages by dependency depth)"
-            ]
-            []
-        -- Subtitle
-        , elem Text
-            [ staticStr "x" "0"
-            , staticNum "y" (-config.height / 2.0 + 42.0)
-            , staticStr "text-anchor" "middle"
-            , staticStr "font-size" "11"
-            , staticStr "fill" "#666"
-            , staticStr "textContent" "Color: publish date (older amber → newer teal)"
-            ]
-            []
-        -- Left axis label
-        , elem Text
             [ staticNum "x" (-config.width / 2.0 + 60.0)
             , staticNum "y" (config.height / 2.0 - 15.0)
             , staticStr "font-size" "11"
@@ -553,8 +532,10 @@ packageNodeHATS config node =
                  { identify: node.pkg.name
                  , classify: \hoveredPkg ->
                      if node.pkg.name == hoveredPkg then Primary
-                     else if Array.elem hoveredPkg node.dependsOn then Related      -- I depend on hovered
-                     else if Array.elem hoveredPkg node.dependedOnBy then Related   -- Hovered depends on me
+                     -- If hoveredPkg depends on me, I'm upstream (green)
+                     else if Array.elem hoveredPkg node.dependedOnBy then Upstream
+                     -- If I depend on hoveredPkg, I'm downstream (blue)
+                     else if Array.elem hoveredPkg node.dependsOn then Downstream
                      else Dimmed
                  , group: Nothing  -- Global coordination
                  }
