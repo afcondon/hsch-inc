@@ -101,11 +101,12 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Presentation Planning | active | `visualisation libraries/purescript-psd3-selection/docs/PRESENTATION-PLANNING.md` | presentation, planning |
 | Documentation TOC | active | `apps/shaped-steer/docs/DOCUMENTATION-TOC.md` | documentation, diátaxis |
 
-## How-To (9 documents)
+## How-To (10 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
 | Focus Management for Claude Sessions | active | `docs/kb/howto/focus-management.md` | docker, workflow, claude, deployment, profiles |
+| SVG Rendering in Halogen | active | `docs/kb/howto/halogen-svg-rendering.md` | halogen, svg, namespace, visualization |
 | HATS Animation Patterns | active | `docs/kb/howto/hats-animation-patterns.md` | HATS, animation, transitions, interpolation, requestAnimationFrame |
 | HATS Componentization Patterns | active | `docs/kb/howto/hats-componentization.md` | HATS, componentization, MetaHATS, map-forEach, chrome |
 | HATS Brushing Guide | active | `docs/kb/howto/hats-brushing.md` | HATS, brushing, coordinated-interaction, SPLOM |
@@ -133,8 +134,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 65 documents
-- **Active**: 56
+- **Total**: 66 documents
+- **Active**: 57
 - **Planned**: 3
 - **Implemented**: 5
 - **Superseded/Stale**: 1

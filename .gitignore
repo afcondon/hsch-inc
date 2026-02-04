@@ -24,7 +24,7 @@ docs/**/.DS_Store
 !apps/
 apps/*
 !apps/minard/
-!apps/psd3-blog/
+!apps/hylographic/
 
 # Ignore common junk
 .DS_Store

@@ -301,6 +301,19 @@ services:
       timeout: 3s
       retries: 3
 
+  # Hylographic (Visualization Blog)
+  hylographic:
+    profiles: ["showcases", "full"]
+    build:
+      context: ./apps/hylographic
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
   # ============================================================
   # LIBRARY DOCUMENTATION SITES
   # ============================================================
