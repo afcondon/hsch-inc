@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "test:browser": "spago bundle-app -m Test.Browser --to test/dist/bundle.js",
+    "test:serve": "static test"
+  },
+  "devDependencies": {
+    "node-static": "^0.7.11"
+  }
+}

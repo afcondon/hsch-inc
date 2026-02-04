@@ -1,0 +1,17 @@
+{
+  "name": "colors",
+  "version": "7.0.1",
+  "license": "MIT",
+  "location": {
+    "githubOwner": "purescript-contrib",
+    "githubRepo": "purescript-colors"
+  },
+  "dependencies": {
+    "arrays": ">=7.0.0 <8.0.0",
+    "integers": ">=6.0.0 <7.0.0",
+    "lists": ">=7.0.0 <8.0.0",
+    "numbers": ">=9.0.0 <10.0.0",
+    "partial": ">=4.0.0 <5.0.0",
+    "strings": ">=6.0.0 <7.0.0"
+  }
+}
