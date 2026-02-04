@@ -20,10 +20,11 @@ docs/**/.DS_Store
 # Track spikes (experimental explorations)
 !spikes/
 
-# Track minard app (Code Cartography - formerly corrode-expel)
+# Track apps
 !apps/
 apps/*
 !apps/minard/
+!apps/psd3-blog/
 
 # Ignore common junk
 .DS_Store
