@@ -278,24 +278,33 @@ The `.claude-focus` file at the repo root tells Claude which services matter for
 
 ### Available Profiles
 
-| Profile | Services | Use Case |
-|---------|----------|----------|
-| `core` | edge, website | Minimal baseline (~2 containers) |
-| `minard` | + minard-frontend, minard-backend, site-explorer | Code cartography work |
-| `tidal` | + tidal-frontend, tidal-backend | Music/algorave work |
-| `hypo` | + ee-*, ge-* | Embedding/Grid explorer work |
-| `sankey` | + sankey | Sankey editor work |
-| `wasm` | + wasm-demo | Rust/WASM work |
-| `libs` | + lib-* | Library documentation sites |
-| `showcases` | + optics, zoo, layouts, hylograph | Other showcases |
-| `full` | Everything | Full stack (~20 containers) |
+| Profile | Services | Target | Use Case |
+|---------|----------|--------|----------|
+| `core` | edge, website | local | Minimal baseline (~2 containers) |
+| `minard` | + minard-frontend, minard-backend, site-explorer | local | Code cartography work |
+| `tidal` | + tidal-frontend, tidal-backend | local | Music/algorave work |
+| `hypo` | + ee-*, ge-* | local | Embedding/Grid explorer work |
+| `sankey` | + sankey | local | Sankey editor work |
+| `wasm` | + wasm-demo | local | Rust/WASM work |
+| `libs` | + lib-* | local | Library documentation sites |
+| `showcases` | + optics, zoo, layouts, hylograph | local | Other showcases |
+| `full` | Everything | **remote** | Full stack on MacMini |
+
+### Deployment Targets
+
+The focus file includes a `target` field:
+- **`target: local`** - Deploy to local Docker on MacBook Pro (default for most profiles)
+- **`target: remote`** - Deploy to MacMini Docker (for `focus-full`)
+
+**Why `focus-full` deploys to MacMini**: Running 20+ containers locally consumes ~15GB memory. The full stack runs on MacMini; build locally, deploy remotely.
 
 ### Commands
 
 ```bash
-make focus-minard   # Switch to minard profile
-make focus-status   # Show current focus
-make focus-stop     # Stop all containers
+make focus-minard   # Switch to minard profile (local)
+make focus-full     # Switch to full profile (remote - MacMini)
+make focus-status   # Show current focus and target
+make focus-stop     # Stop all local containers
 ```
 
 ### Claude: Required Behavior

@@ -35,17 +35,30 @@ make focus-stop
 
 ## Available Profiles
 
-| Profile | Containers | Use Case |
-|---------|------------|----------|
-| `core` | edge, website | Minimal baseline (~2) |
-| `minard` | + minard-frontend, minard-backend, site-explorer | Code cartography |
-| `tidal` | + tidal-frontend, tidal-backend | Music/algorave |
-| `hypo` | + ee-*, ge-* | Embedding/Grid explorers |
-| `sankey` | + sankey | Sankey editor |
-| `wasm` | + wasm-demo | Rust/WASM work |
-| `libs` | + lib-* | Library documentation sites |
-| `showcases` | + optics, zoo, layouts, hylograph | Other showcases |
-| `full` | Everything | Full stack (~20) |
+| Profile | Containers | Target | Use Case |
+|---------|------------|--------|----------|
+| `core` | edge, website | local | Minimal baseline (~2) |
+| `minard` | + minard-frontend, minard-backend, site-explorer | local | Code cartography |
+| `tidal` | + tidal-frontend, tidal-backend | local | Music/algorave |
+| `hypo` | + ee-*, ge-* | local | Embedding/Grid explorers |
+| `sankey` | + sankey | local | Sankey editor |
+| `wasm` | + wasm-demo | local | Rust/WASM work |
+| `libs` | + lib-* | local | Library documentation sites |
+| `showcases` | + optics, zoo, layouts, hylograph | local | Other showcases |
+| `full` | Everything | **remote** | Full stack on MacMini |
+
+## Deployment Targets
+
+The `.claude-focus` file includes a `target` field that determines where deployments go:
+
+- **`target: local`** - Deploy to local Docker on MacBook Pro
+- **`target: remote`** - Deploy to MacMini (for `focus-full`)
+
+When `target: remote`:
+- `/deploy <service>` deploys to MacMini by default
+- Local Docker containers are stopped
+- Test URL is `http://100.101.177.83/...`
+- Build happens locally, deploy goes to MacMini
 
 ## How It Works
 
@@ -90,16 +103,22 @@ Services not in the current profile return 502 (informative, not broken).
 ## Workflow Example
 
 ```bash
-# Morning: working on minard
+# Morning: working on minard (local)
 make focus-minard
 # Start Claude session, work on code cartography
+# Deploys go to local Docker, test at http://localhost/code/
 
-# Afternoon: switch to tidal
+# Afternoon: switch to tidal (local)
 make focus-tidal
 # Restart Claude session, work on music features
+# Deploys go to local Docker, test at http://localhost/tidal/
 
-# Need everything for integration testing
+# Need full stack for integration testing (remote)
 make focus-full
+# Restart Claude session
+# Local containers stopped
+# Builds happen locally, deploys go to MacMini
+# Test at http://100.101.177.83/
 ```
 
 ## Memory Impact

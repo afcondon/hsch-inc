@@ -913,6 +913,7 @@ focus-core:
 	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "profile: core" >> .claude-focus
+	@echo "target: local" >> .claude-focus
 	@echo "test_url: http://localhost/" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "services:" >> .claude-focus
@@ -921,7 +922,7 @@ focus-core:
 	@docker compose down --remove-orphans 2>/dev/null || true
 	@docker compose --profile core up -d
 	@echo ""
-	@echo "Focus set to: core"
+	@echo "Focus set to: core (local)"
 	@echo "Test URL: http://localhost/"
 	@docker compose ps
 
@@ -937,6 +938,7 @@ focus-minard:
 	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "profile: minard" >> .claude-focus
+	@echo "target: local" >> .claude-focus
 	@echo "test_url: http://localhost/code/" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "services:" >> .claude-focus
@@ -948,7 +950,7 @@ focus-minard:
 	@docker compose down --remove-orphans 2>/dev/null || true
 	@docker compose --profile minard up -d
 	@echo ""
-	@echo "Focus set to: minard"
+	@echo "Focus set to: minard (local)"
 	@echo "Test URL: http://localhost/code/"
 	@docker compose ps
 
@@ -964,6 +966,7 @@ focus-tidal:
 	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "profile: tidal" >> .claude-focus
+	@echo "target: local" >> .claude-focus
 	@echo "test_url: http://localhost/tidal/" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "services:" >> .claude-focus
@@ -974,7 +977,7 @@ focus-tidal:
 	@docker compose down --remove-orphans 2>/dev/null || true
 	@docker compose --profile tidal up -d
 	@echo ""
-	@echo "Focus set to: tidal"
+	@echo "Focus set to: tidal (local)"
 	@echo "Test URL: http://localhost/tidal/"
 	@docker compose ps
 
@@ -990,6 +993,7 @@ focus-hypo:
 	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "profile: hypo" >> .claude-focus
+	@echo "target: local" >> .claude-focus
 	@echo "test_url: http://localhost/ee/" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "services:" >> .claude-focus
@@ -1002,7 +1006,7 @@ focus-hypo:
 	@docker compose down --remove-orphans 2>/dev/null || true
 	@docker compose --profile hypo up -d
 	@echo ""
-	@echo "Focus set to: hypo"
+	@echo "Focus set to: hypo (local)"
 	@echo "Test URLs: http://localhost/ee/  http://localhost/ge/"
 	@docker compose ps
 
@@ -1018,6 +1022,7 @@ focus-sankey:
 	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "profile: sankey" >> .claude-focus
+	@echo "target: local" >> .claude-focus
 	@echo "test_url: http://localhost/sankey/" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "services:" >> .claude-focus
@@ -1027,7 +1032,7 @@ focus-sankey:
 	@docker compose down --remove-orphans 2>/dev/null || true
 	@docker compose --profile sankey up -d
 	@echo ""
-	@echo "Focus set to: sankey"
+	@echo "Focus set to: sankey (local)"
 	@echo "Test URL: http://localhost/sankey/"
 	@docker compose ps
 
@@ -1043,6 +1048,7 @@ focus-wasm:
 	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "profile: wasm" >> .claude-focus
+	@echo "target: local" >> .claude-focus
 	@echo "test_url: http://localhost/wasm/" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "services:" >> .claude-focus
@@ -1052,7 +1058,7 @@ focus-wasm:
 	@docker compose down --remove-orphans 2>/dev/null || true
 	@docker compose --profile wasm up -d
 	@echo ""
-	@echo "Focus set to: wasm"
+	@echo "Focus set to: wasm (local)"
 	@echo "Test URL: http://localhost/wasm/"
 	@docker compose ps
 
@@ -1068,6 +1074,7 @@ focus-libs:
 	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "profile: libs" >> .claude-focus
+	@echo "target: local" >> .claude-focus
 	@echo "test_url: http://localhost/psd3/selection/" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "services:" >> .claude-focus
@@ -1081,7 +1088,7 @@ focus-libs:
 	@docker compose down --remove-orphans 2>/dev/null || true
 	@docker compose --profile libs up -d
 	@echo ""
-	@echo "Focus set to: libs"
+	@echo "Focus set to: libs (local)"
 	@echo "Test URL: http://localhost/psd3/selection/"
 	@docker compose ps
 
@@ -1097,6 +1104,7 @@ focus-showcases:
 	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "profile: showcases" >> .claude-focus
+	@echo "target: local" >> .claude-focus
 	@echo "test_url: http://localhost/" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "services:" >> .claude-focus
@@ -1109,13 +1117,13 @@ focus-showcases:
 	@docker compose down --remove-orphans 2>/dev/null || true
 	@docker compose --profile showcases up -d
 	@echo ""
-	@echo "Focus set to: showcases"
+	@echo "Focus set to: showcases (local)"
 	@echo "Test URL: http://localhost/"
 	@docker compose ps
 
-# Focus: Full stack (everything)
+# Focus: Full stack (everything) - DEPLOYS TO MACMINI, NOT LOCAL
 focus-full:
-	@echo "Switching focus to: full"
+	@echo "Switching focus to: full (REMOTE - MacMini)"
 	@echo "# .claude-focus - Current Development Focus" > .claude-focus
 	@echo "#" >> .claude-focus
 	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
@@ -1123,25 +1131,39 @@ focus-full:
 	@echo "#" >> .claude-focus
 	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
 	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# NOTE: Full stack deploys to MacMini, NOT local Docker!" >> .claude-focus
+	@echo "# Build locally with make, deploy with /deploy <service> remote" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "profile: full" >> .claude-focus
-	@echo "test_url: http://localhost/" >> .claude-focus
+	@echo "target: remote" >> .claude-focus
+	@echo "remote_host: andrew@100.101.177.83" >> .claude-focus
+	@echo "remote_path: ~/psd3" >> .claude-focus
+	@echo "test_url: http://100.101.177.83/" >> .claude-focus
 	@echo "" >> .claude-focus
 	@echo "services:" >> .claude-focus
-	@echo "  - all (full stack)" >> .claude-focus
+	@echo "  - all (full stack on MacMini)" >> .claude-focus
 	@docker compose down --remove-orphans 2>/dev/null || true
-	@docker compose --profile full up -d
 	@echo ""
-	@echo "Focus set to: full (all services)"
-	@echo "Test URL: http://localhost/"
-	@docker compose ps
+	@echo "============================================"
+	@echo "Focus set to: full (REMOTE - MacMini)"
+	@echo "============================================"
+	@echo ""
+	@echo "Local containers stopped. Builds happen locally, deploy to MacMini:"
+	@echo "  1. make <target>                    # Build locally"
+	@echo "  2. /deploy <service> remote         # Deploy to MacMini"
+	@echo "  3. Test at http://100.101.177.83/"
+	@echo ""
+	@echo "Or deploy everything:"
+	@echo "  /deploy all remote"
+	@echo ""
 
 # Show current focus
 focus-status:
 	@echo "Current focus:"
 	@echo "=============="
 	@if [ -f .claude-focus ]; then \
-		grep -E "^profile:|^test_url:" .claude-focus; \
+		grep -E "^profile:|^target:|^test_url:" .claude-focus; \
 		echo ""; \
 		echo "Services:"; \
 		grep -A 20 "^services:" .claude-focus | grep "  -" | head -10; \
@@ -1149,7 +1171,7 @@ focus-status:
 		echo "No focus set (run 'make focus-<profile>')"; \
 	fi
 	@echo ""
-	@echo "Running containers:"
+	@echo "Running local containers:"
 	@docker compose ps --format "table {{.Name}}\t{{.Status}}" 2>/dev/null || echo "  (none)"
 
 # Stop all containers (no focus)
@@ -1157,7 +1179,8 @@ focus-stop:
 	@echo "Stopping all containers..."
 	@docker compose down --remove-orphans
 	@echo "profile: none" > .claude-focus
-	@echo "All containers stopped"
+	@echo "target: none" >> .claude-focus
+	@echo "All local containers stopped"
 
 # ============================================================================
 # HELP
