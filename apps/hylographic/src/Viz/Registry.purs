@@ -9,8 +9,11 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Halogen.Svg.Elements as SE
+import Halogen.Svg.Attributes as SA
 
 import Hylographic.Viz.MetaHATS as MetaHATS
+import Hylographic.Viz.LSystemPlant as LSystemPlant
 
 -- | Registry of available visualization components
 -- | Each component takes no input and produces no output
@@ -22,6 +25,7 @@ lookupViz name = case name of
   "ForceDemo" -> Just forceDemo
   "HelloViz" -> Just helloViz
   "MetaHATS" -> Just MetaHATS.component
+  "LSystemPlant" -> Just LSystemPlant.component
   _ -> Nothing
 
 -- | List of available visualization names (for documentation)
@@ -30,6 +34,7 @@ availableVizNames =
   [ "HelloViz"
   , "ForceDemo"
   , "MetaHATS"
+  , "LSystemPlant"
   ]
 
 -- =============================================================================
@@ -43,23 +48,22 @@ helloViz = H.mkComponent
   , render: \_ ->
       HH.div
         [ HP.classes [ HH.ClassName "viz-container", HH.ClassName "viz-hello" ] ]
-        [ HH.element (HH.ElemName "svg")
-            [ HP.attr (HH.AttrName "viewBox") "0 0 200 100"
-            , HP.attr (HH.AttrName "width") "200"
-            , HP.attr (HH.AttrName "height") "100"
+        [ SE.svg
+            [ SA.viewBox 0.0 0.0 200.0 100.0
+            , SA.width 200.0
+            , SA.height 100.0
             ]
-            [ HH.element (HH.ElemName "circle")
-                [ HP.attr (HH.AttrName "cx") "50"
-                , HP.attr (HH.AttrName "cy") "50"
-                , HP.attr (HH.AttrName "r") "40"
-                , HP.attr (HH.AttrName "fill") "#0066cc"
+            [ SE.circle
+                [ SA.cx 50.0
+                , SA.cy 50.0
+                , SA.r 40.0
+                , SA.fill (SA.Named "#0066cc")
                 ]
-                []
-            , HH.element (HH.ElemName "text")
-                [ HP.attr (HH.AttrName "x") "120"
-                , HP.attr (HH.AttrName "y") "55"
-                , HP.attr (HH.AttrName "text-anchor") "middle"
-                , HP.attr (HH.AttrName "fill") "#333"
+            , SE.text
+                [ SA.x 120.0
+                , SA.y 55.0
+                , SA.textAnchor SA.AnchorMiddle
+                , SA.fill (SA.Named "#333")
                 ]
                 [ HH.text "Hello!" ]
             ]
@@ -74,66 +78,31 @@ forceDemo = H.mkComponent
   , render: \_ ->
       HH.div
         [ HP.classes [ HH.ClassName "viz-container", HH.ClassName "viz-force-demo" ] ]
-        [ HH.element (HH.ElemName "svg")
-            [ HP.attr (HH.AttrName "viewBox") "0 0 300 200"
-            , HP.attr (HH.AttrName "width") "300"
-            , HP.attr (HH.AttrName "height") "200"
+        [ SE.svg
+            [ SA.viewBox 0.0 0.0 300.0 200.0
+            , SA.width 300.0
+            , SA.height 200.0
             ]
-            [ -- Three connected circles
-              HH.element (HH.ElemName "line")
-                [ HP.attr (HH.AttrName "x1") "75"
-                , HP.attr (HH.AttrName "y1") "100"
-                , HP.attr (HH.AttrName "x2") "150"
-                , HP.attr (HH.AttrName "y2") "60"
-                , HP.attr (HH.AttrName "stroke") "#ccc"
-                , HP.attr (HH.AttrName "stroke-width") "2"
+            [ -- Three connected circles (lines first, then circles on top)
+              SE.line
+                [ SA.x1 75.0, SA.y1 100.0, SA.x2 150.0, SA.y2 60.0
+                , SA.stroke (SA.Named "#ccc"), SA.strokeWidth 2.0
                 ]
-                []
-            , HH.element (HH.ElemName "line")
-                [ HP.attr (HH.AttrName "x1") "150"
-                , HP.attr (HH.AttrName "y1") "60"
-                , HP.attr (HH.AttrName "x2") "225"
-                , HP.attr (HH.AttrName "y2") "100"
-                , HP.attr (HH.AttrName "stroke") "#ccc"
-                , HP.attr (HH.AttrName "stroke-width") "2"
+            , SE.line
+                [ SA.x1 150.0, SA.y1 60.0, SA.x2 225.0, SA.y2 100.0
+                , SA.stroke (SA.Named "#ccc"), SA.strokeWidth 2.0
                 ]
-                []
-            , HH.element (HH.ElemName "line")
-                [ HP.attr (HH.AttrName "x1") "75"
-                , HP.attr (HH.AttrName "y1") "100"
-                , HP.attr (HH.AttrName "x2") "225"
-                , HP.attr (HH.AttrName "y2") "100"
-                , HP.attr (HH.AttrName "stroke") "#ccc"
-                , HP.attr (HH.AttrName "stroke-width") "2"
+            , SE.line
+                [ SA.x1 75.0, SA.y1 100.0, SA.x2 225.0, SA.y2 100.0
+                , SA.stroke (SA.Named "#ccc"), SA.strokeWidth 2.0
                 ]
-                []
-            , HH.element (HH.ElemName "circle")
-                [ HP.attr (HH.AttrName "cx") "75"
-                , HP.attr (HH.AttrName "cy") "100"
-                , HP.attr (HH.AttrName "r") "25"
-                , HP.attr (HH.AttrName "fill") "#0066cc"
-                ]
-                []
-            , HH.element (HH.ElemName "circle")
-                [ HP.attr (HH.AttrName "cx") "150"
-                , HP.attr (HH.AttrName "cy") "60"
-                , HP.attr (HH.AttrName "r") "25"
-                , HP.attr (HH.AttrName "fill") "#cc6600"
-                ]
-                []
-            , HH.element (HH.ElemName "circle")
-                [ HP.attr (HH.AttrName "cx") "225"
-                , HP.attr (HH.AttrName "cy") "100"
-                , HP.attr (HH.AttrName "r") "25"
-                , HP.attr (HH.AttrName "fill") "#00cc66"
-                ]
-                []
-            , HH.element (HH.ElemName "text")
-                [ HP.attr (HH.AttrName "x") "150"
-                , HP.attr (HH.AttrName "y") "170"
-                , HP.attr (HH.AttrName "text-anchor") "middle"
-                , HP.attr (HH.AttrName "fill") "#666"
-                , HP.attr (HH.AttrName "font-size") "12"
+            , SE.circle [ SA.cx 75.0, SA.cy 100.0, SA.r 25.0, SA.fill (SA.Named "#0066cc") ]
+            , SE.circle [ SA.cx 150.0, SA.cy 60.0, SA.r 25.0, SA.fill (SA.Named "#cc6600") ]
+            , SE.circle [ SA.cx 225.0, SA.cy 100.0, SA.r 25.0, SA.fill (SA.Named "#00cc66") ]
+            , SE.text
+                [ SA.x 150.0, SA.y 170.0
+                , SA.textAnchor SA.AnchorMiddle
+                , SA.fill (SA.Named "#666")
                 ]
                 [ HH.text "Force Demo (static preview)" ]
             ]

@@ -8,6 +8,8 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Halogen.Svg.Elements as SE
+import Halogen.Svg.Attributes as SA
 
 -- | MetaHATS component shows both HATS code and its visualization side by side.
 -- | This demonstrates the "meta" aspect - seeing the code AND the output together.
@@ -81,20 +83,19 @@ circleExample =
 
 circleViz :: forall m. H.ComponentHTML Unit () m
 circleViz =
-  HH.element (HH.ElemName "svg")
-    [ HP.attr (HH.AttrName "viewBox") "0 0 200 150"
-    , HP.attr (HH.AttrName "width") "200"
-    , HP.attr (HH.AttrName "height") "150"
+  SE.svg
+    [ SA.viewBox 0.0 0.0 200.0 150.0
+    , SA.width 200.0
+    , SA.height 150.0
     ]
-    [ HH.element (HH.ElemName "circle")
-        [ HP.attr (HH.AttrName "cx") "100"
-        , HP.attr (HH.AttrName "cy") "75"
-        , HP.attr (HH.AttrName "r") "50"
-        , HP.attr (HH.AttrName "fill") "#0066cc"
-        , HP.attr (HH.AttrName "stroke") "#003366"
-        , HP.attr (HH.AttrName "stroke-width") "2"
+    [ SE.circle
+        [ SA.cx 100.0
+        , SA.cy 75.0
+        , SA.r 50.0
+        , SA.fill (SA.Named "#0066cc")
+        , SA.stroke (SA.Named "#003366")
+        , SA.strokeWidth 2.0
         ]
-        []
     ]
 
 -- =============================================================================
@@ -123,54 +124,14 @@ foldExample =
 
 foldViz :: forall m. H.ComponentHTML Unit () m
 foldViz =
-  HH.element (HH.ElemName "svg")
-    [ HP.attr (HH.AttrName "viewBox") "0 0 240 120"
-    , HP.attr (HH.AttrName "width") "240"
-    , HP.attr (HH.AttrName "height") "120"
+  SE.svg
+    [ SA.viewBox 0.0 0.0 240.0 120.0
+    , SA.width 240.0
+    , SA.height 120.0
     ]
-    [ -- Bar 1
-      HH.element (HH.ElemName "rect")
-        [ HP.attr (HH.AttrName "x") "10"
-        , HP.attr (HH.AttrName "y") "90"
-        , HP.attr (HH.AttrName "width") "40"
-        , HP.attr (HH.AttrName "height") "10"
-        , HP.attr (HH.AttrName "fill") "#0066cc"
-        ]
-        []
-    , -- Bar 2
-      HH.element (HH.ElemName "rect")
-        [ HP.attr (HH.AttrName "x") "55"
-        , HP.attr (HH.AttrName "y") "75"
-        , HP.attr (HH.AttrName "width") "40"
-        , HP.attr (HH.AttrName "height") "25"
-        , HP.attr (HH.AttrName "fill") "#0066cc"
-        ]
-        []
-    , -- Bar 3
-      HH.element (HH.ElemName "rect")
-        [ HP.attr (HH.AttrName "x") "100"
-        , HP.attr (HH.AttrName "y") "60"
-        , HP.attr (HH.AttrName "width") "40"
-        , HP.attr (HH.AttrName "height") "40"
-        , HP.attr (HH.AttrName "fill") "#0066cc"
-        ]
-        []
-    , -- Bar 4
-      HH.element (HH.ElemName "rect")
-        [ HP.attr (HH.AttrName "x") "145"
-        , HP.attr (HH.AttrName "y") "70"
-        , HP.attr (HH.AttrName "width") "40"
-        , HP.attr (HH.AttrName "height") "30"
-        , HP.attr (HH.AttrName "fill") "#0066cc"
-        ]
-        []
-    , -- Bar 5
-      HH.element (HH.ElemName "rect")
-        [ HP.attr (HH.AttrName "x") "190"
-        , HP.attr (HH.AttrName "y") "50"
-        , HP.attr (HH.AttrName "width") "40"
-        , HP.attr (HH.AttrName "height") "50"
-        , HP.attr (HH.AttrName "fill") "#0066cc"
-        ]
-        []
+    [ SE.rect [ SA.x 10.0, SA.y 90.0, SA.width 40.0, SA.height 10.0, SA.fill (SA.Named "#0066cc") ]
+    , SE.rect [ SA.x 55.0, SA.y 75.0, SA.width 40.0, SA.height 25.0, SA.fill (SA.Named "#0066cc") ]
+    , SE.rect [ SA.x 100.0, SA.y 60.0, SA.width 40.0, SA.height 40.0, SA.fill (SA.Named "#0066cc") ]
+    , SE.rect [ SA.x 145.0, SA.y 70.0, SA.width 40.0, SA.height 30.0, SA.fill (SA.Named "#0066cc") ]
+    , SE.rect [ SA.x 190.0, SA.y 50.0, SA.width 40.0, SA.height 50.0, SA.fill (SA.Named "#0066cc") ]
     ]

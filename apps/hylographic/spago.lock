@@ -22,12 +22,16 @@
             "html-parser-halogen",
             "hylograph-d3-kernel",
             "hylograph-graph",
+            "hylograph-prim-zoo-mosh",
             "hylograph-selection",
             "hylograph-simulation",
             "hylograph-simulation-core",
             "hylograph-simulation-halogen",
+            "integers",
             "maybe",
+            "ordered-collections",
             "prelude",
+            "random",
             "routing",
             "strings",
             "web-dom",
@@ -79,6 +83,7 @@
             "hylograph-d3-kernel",
             "hylograph-graph",
             "hylograph-layout",
+            "hylograph-prim-zoo-mosh",
             "hylograph-selection",
             "hylograph-simulation",
             "hylograph-simulation-core",
@@ -710,6 +715,9 @@
       },
       "hylograph-layout": {
         "path": "../../visualisation libraries/purescript-hylograph-layout"
+      },
+      "hylograph-prim-zoo-mosh": {
+        "path": "../../showcases/psd3-prim-zoo-mosh"
       },
       "hylograph-selection": {
         "path": "../../visualisation libraries/purescript-hylograph-selection"
@@ -1364,6 +1372,29 @@
         "tree-rose",
         "tuples",
         "unsafe-coerce"
+      ]
+    },
+    "hylograph-prim-zoo-mosh": {
+      "type": "local",
+      "path": "../../showcases/psd3-prim-zoo-mosh",
+      "dependencies": [
+        "aff",
+        "arrays",
+        "console",
+        "effect",
+        "foldable-traversable",
+        "free",
+        "halogen",
+        "hylograph-graph",
+        "hylograph-selection",
+        "integers",
+        "lists",
+        "maybe",
+        "ordered-collections",
+        "prelude",
+        "strings",
+        "transformers",
+        "tuples"
       ]
     },
     "hylograph-selection": {

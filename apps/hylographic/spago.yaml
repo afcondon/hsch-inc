@@ -18,6 +18,8 @@ workspace:
       path: "../../visualisation libraries/purescript-hylograph-simulation-core"
     hylograph-d3-kernel:
       path: "../../visualisation libraries/purescript-hylograph-d3-kernel"
+    hylograph-prim-zoo-mosh:
+      path: "../../showcases/psd3-prim-zoo-mosh"
     html-parser-halogen:
       git: https://github.com/afcondon/purescript-html-parser-halogen.git
       ref: esmodules
@@ -48,8 +50,11 @@ package:
     - halogen-subscriptions
     - halogen-svg-elems
     - html-parser-halogen
+    - integers
     - maybe
+    - ordered-collections
     - prelude
+    - random
     - routing
     - strings
     - web-dom
@@ -62,3 +67,5 @@ package:
     - hylograph-simulation-halogen
     - hylograph-simulation-core
     - hylograph-d3-kernel
+    # L-System visualization from Zoo
+    - hylograph-prim-zoo-mosh

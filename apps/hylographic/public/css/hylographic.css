@@ -82,6 +82,30 @@ body {
   width: 100%;
 }
 
+/* L-System background plant */
+.lsystem-background {
+  position: fixed;
+  bottom: 0;
+  left: -50vw;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.25;
+}
+
+.lsystem-background .lsystem-svg {
+  display: block;
+  width: 150vw;
+  height: 180vh;
+  max-width: none;
+}
+
+/* Ensure content is above the plant */
+.hylographic__header,
+.hylographic__main {
+  position: relative;
+  z-index: 1;
+}
+
 /* Force index (landing page) */
 .force-index {
   height: 100%;
