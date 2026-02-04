@@ -136,6 +136,7 @@ Hylograph (formerly PSD3) is a **type-safe data visualization ecosystem** that p
 │   └── wasm-force-demo/            # Rust WASM + PureScript
 │
 ├── apps/                           # Full applications (not showcases)
+│   ├── hylographic/                # Visualization-first blog platform
 │   └── shaped-steer/               # Spreadsheet/build/WASM app
 │
 ├── _external/                      # Music ecosystem (separate project)
@@ -364,6 +365,50 @@ The `site/` directory contains demo and documentation infrastructure:
 **Status**: In development
 **Vision**: Unifies spreadsheets, charting, build systems, databases with WASM calculations
 **Note**: Not a showcase - this is a standalone product exploring "typed feedback loops"
+
+### Hylographic (`apps/hylographic`)
+**Purpose**: Visualization-first blogging platform for PSD3/Hylograph documentation
+**Status**: Early implementation (added Feb 2026)
+**Technologies**: Halogen, hylograph-simulation, marked.js, Prism.js
+
+**Architecture**:
+```
+Halogen App
+├── Router (hash-based routing)
+├── /           → ForceIndex (force-directed article graph)
+├── /post/:slug → ArticleViewer (markdown + embedded viz)
+└── L-System plant background (regenerates on route change)
+```
+
+**Key Features**:
+- **Force-directed article index**: Articles displayed as interactive graph nodes using hylograph-simulation
+- **Embedded visualizations**: Markdown supports `{{viz:ComponentName}}` syntax for inline Halogen components
+- **Component registry**: HelloViz, ForceDemo, MetaHATS, LSystemPlant (extensible)
+- **Runtime markdown**: Fetches `/blog/posts/{slug}.md` at runtime via marked.js
+- **Syntax highlighting**: Prism.js for code blocks (PureScript, JavaScript, etc.)
+- **Jan Tschichold aesthetic**: Minimal design, generous whitespace, content-first
+
+**Key Source Files**:
+| File | Purpose |
+|------|---------|
+| `src/Main.purs` | Root component, router, L-system background |
+| `src/Blog/ArticleViewer.purs` | Markdown fetch/parse, viz embedding |
+| `src/Blog/ForceIndex.purs` | Force-directed article graph |
+| `src/Blog/ContentParser.purs` | Parses `{{viz:Name}}` from HTML |
+| `src/Viz/Registry.purs` | Maps component names → Halogen components |
+| `src/Viz/LSystemPlant.purs` | Fractal plant background decoration |
+
+**Content Model**:
+```purescript
+type ArticleMetadata = { slug :: Slug, title :: String, date :: String, tags :: Array String }
+```
+
+**Embedding Syntax**:
+- `{{viz:HelloViz}}` → Halogen component from registry
+- Standard markdown code fences → Prism-highlighted blocks
+
+**Build**: `spago bundle` → `public/bundle.js`
+**Deployment**: Docker (nginx Alpine), single-page app with SPA routing
 
 ---
 
@@ -643,5 +688,5 @@ make deps-graph       # Show library dependency order
 
 ---
 
-*Last updated: January 2026*
+*Last updated: February 2026*
 *Backends: JavaScript (default), Erlang (purerl), Python (purepy), Rust/WASM*
