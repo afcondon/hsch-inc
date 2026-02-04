@@ -464,6 +464,32 @@ The build system auto-discovers tools:
 
 Run `make check-tools` to verify your setup, then `make test-prereqs` to run the toolchain tests.
 
+### Deployment Policy
+
+**Always use full Docker deployment.** Never spin up ad-hoc HTTP servers for testing.
+
+| Target | Machine | Port | Usage |
+|--------|---------|------|-------|
+| **Local** (default) | MacBook Pro | 80 | `docker compose up -d` |
+| **Remote** | MacMini | 80 | rsync + SSH docker commands |
+
+**Local Docker Workflow:**
+```bash
+make <target>                                    # Build artifact
+docker compose build --no-cache <service>        # Rebuild container
+docker compose up -d <service>                   # Start container
+# Test at http://localhost/<path>
+```
+
+**Remote Workflow:**
+```bash
+make <target>                                    # Build locally
+rsync -avz --delete <local>/ andrew@100.101.177.83:~/psd3/<remote>/
+ssh andrew@100.101.177.83 "cd ~/psd3 && /usr/local/bin/docker compose build --no-cache <service> && /usr/local/bin/docker compose up -d <service>"
+```
+
+**Key rule:** Containers bake in files at build time. Always rebuild containers after code changes.
+
 ---
 
 ## FFI Patterns
@@ -569,19 +595,26 @@ make dashboard
 make all
 ```
 
-### Running Showcase Apps
+### Running Showcase Apps (Docker)
+
+All apps run via Docker on port 80. Default is local Docker on MacBook Pro.
+
 ```bash
-# Sankey Editor (with build deps visualization)
-make serve-sankey
-# Open http://localhost:8089/?data=build-deps.json
+# Build and deploy locally
+make <target>
+docker compose build --no-cache <service>
+docker compose up -d <service>
 
-# Code Explorer (needs backend + frontend)
-make serve-code-explorer-backend &
-make serve-code-explorer
+# Example: Minard
+make app-minard
+docker compose build --no-cache minard-frontend minard-backend
+docker compose up -d minard-frontend minard-backend
+# Access at http://localhost/code/
 
-# Tidal (needs Erlang backend + frontend)
-make serve-tidal-backend &  # Starts rebar3 shell
-make serve-tidal
+# Example: Full stack
+docker compose up -d
+# Access website at http://localhost/
+# Access showcases at http://localhost/code/, /ee/, /ge/, /tidal/, /sankey/, /wasm/
 ```
 
 ### Adding Python FFI

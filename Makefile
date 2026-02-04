@@ -890,6 +890,276 @@ docker-deploy:
 	@echo "Access at: http://$(HOST)/"
 
 # ============================================================================
+# FOCUS MANAGEMENT (for Claude Code sessions)
+# ============================================================================
+# Switch development focus to a specific profile. This:
+# 1. Updates .claude-focus (Claude reads this at session start)
+# 2. Stops all containers
+# 3. Starts only the containers for the selected profile
+#
+# Usage: make focus-minard  (before starting a Claude session)
+
+.PHONY: focus-core focus-minard focus-tidal focus-hypo focus-sankey focus-wasm focus-libs focus-showcases focus-full focus-status focus-stop
+
+# Focus: Core only (edge + website)
+focus-core:
+	@echo "Switching focus to: core"
+	@echo "# .claude-focus - Current Development Focus" > .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
+	@echo "# Run \`make focus-<profile>\` to switch focus." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
+	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "profile: core" >> .claude-focus
+	@echo "test_url: http://localhost/" >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "services:" >> .claude-focus
+	@echo "  - edge" >> .claude-focus
+	@echo "  - website" >> .claude-focus
+	@docker compose down --remove-orphans 2>/dev/null || true
+	@docker compose --profile core up -d
+	@echo ""
+	@echo "Focus set to: core"
+	@echo "Test URL: http://localhost/"
+	@docker compose ps
+
+# Focus: Minard (Code Cartography)
+focus-minard:
+	@echo "Switching focus to: minard"
+	@echo "# .claude-focus - Current Development Focus" > .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
+	@echo "# Run \`make focus-<profile>\` to switch focus." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
+	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "profile: minard" >> .claude-focus
+	@echo "test_url: http://localhost/code/" >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "services:" >> .claude-focus
+	@echo "  - edge" >> .claude-focus
+	@echo "  - website" >> .claude-focus
+	@echo "  - minard-frontend" >> .claude-focus
+	@echo "  - minard-backend" >> .claude-focus
+	@echo "  - site-explorer" >> .claude-focus
+	@docker compose down --remove-orphans 2>/dev/null || true
+	@docker compose --profile minard up -d
+	@echo ""
+	@echo "Focus set to: minard"
+	@echo "Test URL: http://localhost/code/"
+	@docker compose ps
+
+# Focus: Tidal (Tilted Radio)
+focus-tidal:
+	@echo "Switching focus to: tidal"
+	@echo "# .claude-focus - Current Development Focus" > .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
+	@echo "# Run \`make focus-<profile>\` to switch focus." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
+	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "profile: tidal" >> .claude-focus
+	@echo "test_url: http://localhost/tidal/" >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "services:" >> .claude-focus
+	@echo "  - edge" >> .claude-focus
+	@echo "  - website" >> .claude-focus
+	@echo "  - tidal-frontend" >> .claude-focus
+	@echo "  - tidal-backend" >> .claude-focus
+	@docker compose down --remove-orphans 2>/dev/null || true
+	@docker compose --profile tidal up -d
+	@echo ""
+	@echo "Focus set to: tidal"
+	@echo "Test URL: http://localhost/tidal/"
+	@docker compose ps
+
+# Focus: Hypo-Punter (EE + GE)
+focus-hypo:
+	@echo "Switching focus to: hypo"
+	@echo "# .claude-focus - Current Development Focus" > .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
+	@echo "# Run \`make focus-<profile>\` to switch focus." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
+	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "profile: hypo" >> .claude-focus
+	@echo "test_url: http://localhost/ee/" >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "services:" >> .claude-focus
+	@echo "  - edge" >> .claude-focus
+	@echo "  - website" >> .claude-focus
+	@echo "  - ee-frontend" >> .claude-focus
+	@echo "  - ee-backend" >> .claude-focus
+	@echo "  - ge-frontend" >> .claude-focus
+	@echo "  - ge-backend" >> .claude-focus
+	@docker compose down --remove-orphans 2>/dev/null || true
+	@docker compose --profile hypo up -d
+	@echo ""
+	@echo "Focus set to: hypo"
+	@echo "Test URLs: http://localhost/ee/  http://localhost/ge/"
+	@docker compose ps
+
+# Focus: Sankey Editor
+focus-sankey:
+	@echo "Switching focus to: sankey"
+	@echo "# .claude-focus - Current Development Focus" > .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
+	@echo "# Run \`make focus-<profile>\` to switch focus." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
+	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "profile: sankey" >> .claude-focus
+	@echo "test_url: http://localhost/sankey/" >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "services:" >> .claude-focus
+	@echo "  - edge" >> .claude-focus
+	@echo "  - website" >> .claude-focus
+	@echo "  - sankey" >> .claude-focus
+	@docker compose down --remove-orphans 2>/dev/null || true
+	@docker compose --profile sankey up -d
+	@echo ""
+	@echo "Focus set to: sankey"
+	@echo "Test URL: http://localhost/sankey/"
+	@docker compose ps
+
+# Focus: WASM Demo
+focus-wasm:
+	@echo "Switching focus to: wasm"
+	@echo "# .claude-focus - Current Development Focus" > .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
+	@echo "# Run \`make focus-<profile>\` to switch focus." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
+	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "profile: wasm" >> .claude-focus
+	@echo "test_url: http://localhost/wasm/" >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "services:" >> .claude-focus
+	@echo "  - edge" >> .claude-focus
+	@echo "  - website" >> .claude-focus
+	@echo "  - wasm-demo" >> .claude-focus
+	@docker compose down --remove-orphans 2>/dev/null || true
+	@docker compose --profile wasm up -d
+	@echo ""
+	@echo "Focus set to: wasm"
+	@echo "Test URL: http://localhost/wasm/"
+	@docker compose ps
+
+# Focus: Library documentation sites
+focus-libs:
+	@echo "Switching focus to: libs"
+	@echo "# .claude-focus - Current Development Focus" > .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
+	@echo "# Run \`make focus-<profile>\` to switch focus." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
+	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "profile: libs" >> .claude-focus
+	@echo "test_url: http://localhost/psd3/selection/" >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "services:" >> .claude-focus
+	@echo "  - edge" >> .claude-focus
+	@echo "  - website" >> .claude-focus
+	@echo "  - lib-selection" >> .claude-focus
+	@echo "  - lib-simulation" >> .claude-focus
+	@echo "  - lib-layout" >> .claude-focus
+	@echo "  - lib-graph" >> .claude-focus
+	@echo "  - lib-music" >> .claude-focus
+	@docker compose down --remove-orphans 2>/dev/null || true
+	@docker compose --profile libs up -d
+	@echo ""
+	@echo "Focus set to: libs"
+	@echo "Test URL: http://localhost/psd3/selection/"
+	@docker compose ps
+
+# Focus: Other showcases
+focus-showcases:
+	@echo "Switching focus to: showcases"
+	@echo "# .claude-focus - Current Development Focus" > .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
+	@echo "# Run \`make focus-<profile>\` to switch focus." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
+	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "profile: showcases" >> .claude-focus
+	@echo "test_url: http://localhost/" >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "services:" >> .claude-focus
+	@echo "  - edge" >> .claude-focus
+	@echo "  - website" >> .claude-focus
+	@echo "  - optics" >> .claude-focus
+	@echo "  - zoo" >> .claude-focus
+	@echo "  - layouts" >> .claude-focus
+	@echo "  - hylograph" >> .claude-focus
+	@docker compose down --remove-orphans 2>/dev/null || true
+	@docker compose --profile showcases up -d
+	@echo ""
+	@echo "Focus set to: showcases"
+	@echo "Test URL: http://localhost/"
+	@docker compose ps
+
+# Focus: Full stack (everything)
+focus-full:
+	@echo "Switching focus to: full"
+	@echo "# .claude-focus - Current Development Focus" > .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# This file tells Claude which services matter for this session." >> .claude-focus
+	@echo "# Run \`make focus-<profile>\` to switch focus." >> .claude-focus
+	@echo "#" >> .claude-focus
+	@echo "# CLAUDE: You MUST read this file at session start and before any build/deploy." >> .claude-focus
+	@echo "# Only build/deploy services listed here unless the user explicitly overrides." >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "profile: full" >> .claude-focus
+	@echo "test_url: http://localhost/" >> .claude-focus
+	@echo "" >> .claude-focus
+	@echo "services:" >> .claude-focus
+	@echo "  - all (full stack)" >> .claude-focus
+	@docker compose down --remove-orphans 2>/dev/null || true
+	@docker compose --profile full up -d
+	@echo ""
+	@echo "Focus set to: full (all services)"
+	@echo "Test URL: http://localhost/"
+	@docker compose ps
+
+# Show current focus
+focus-status:
+	@echo "Current focus:"
+	@echo "=============="
+	@if [ -f .claude-focus ]; then \
+		grep -E "^profile:|^test_url:" .claude-focus; \
+		echo ""; \
+		echo "Services:"; \
+		grep -A 20 "^services:" .claude-focus | grep "  -" | head -10; \
+	else \
+		echo "No focus set (run 'make focus-<profile>')"; \
+	fi
+	@echo ""
+	@echo "Running containers:"
+	@docker compose ps --format "table {{.Name}}\t{{.Status}}" 2>/dev/null || echo "  (none)"
+
+# Stop all containers (no focus)
+focus-stop:
+	@echo "Stopping all containers..."
+	@docker compose down --remove-orphans
+	@echo "profile: none" > .claude-focus
+	@echo "All containers stopped"
+
+# ============================================================================
 # HELP
 # ============================================================================
 
@@ -952,6 +1222,19 @@ help:
 	@echo "  make docker-status  - Show container status"
 	@echo "  make docker-prepare - Build apps + Docker images"
 	@echo "  make docker-deploy HOST=user@host - Deploy remotely"
+	@echo ""
+	@echo "Focus targets (for Claude Code sessions):"
+	@echo "  make focus-core   - Edge + website only (~2 containers)"
+	@echo "  make focus-minard - Code cartography"
+	@echo "  make focus-tidal  - Tilted Radio music editor"
+	@echo "  make focus-hypo   - Hypo-Punter EE/GE explorers"
+	@echo "  make focus-sankey - Sankey editor"
+	@echo "  make focus-wasm   - WASM force demo"
+	@echo "  make focus-libs   - Library documentation sites"
+	@echo "  make focus-showcases - Other showcase apps"
+	@echo "  make focus-full   - Everything (~20 containers)"
+	@echo "  make focus-status - Show current focus"
+	@echo "  make focus-stop   - Stop all containers"
 	@echo ""
 	@echo "Utility targets:"
 	@echo "  make check-tools  - Verify prerequisites"

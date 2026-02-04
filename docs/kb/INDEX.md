@@ -101,10 +101,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Presentation Planning | active | `visualisation libraries/purescript-psd3-selection/docs/PRESENTATION-PLANNING.md` | presentation, planning |
 | Documentation TOC | active | `apps/shaped-steer/docs/DOCUMENTATION-TOC.md` | documentation, diátaxis |
 
-## How-To (8 documents)
+## How-To (9 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Focus Management for Claude Sessions | active | `docs/kb/howto/focus-management.md` | docker, workflow, claude, deployment, profiles |
 | HATS Animation Patterns | active | `docs/kb/howto/hats-animation-patterns.md` | HATS, animation, transitions, interpolation, requestAnimationFrame |
 | HATS Componentization Patterns | active | `docs/kb/howto/hats-componentization.md` | HATS, componentization, MetaHATS, map-forEach, chrome |
 | HATS Brushing Guide | active | `docs/kb/howto/hats-brushing.md` | HATS, brushing, coordinated-interaction, SPLOM |
@@ -132,8 +133,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 64 documents
-- **Active**: 55
+- **Total**: 65 documents
+- **Active**: 56
 - **Planned**: 3
 - **Implemented**: 5
 - **Superseded/Stale**: 1
@@ -145,6 +146,6 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 3. **Algorithmic Music** - Tidal patterns, Erlang backend, modular synth
 4. **Visualization** - D3-style declarative system (psd3-selection, graph, tree)
 5. **Multi-Backend** - JS, Python (PurePy), Erlang (purerl), Lua (pslua), WASM, Haskell (proposed)
-6. **DevOps** - Docker, deployment, test infrastructure
+6. **DevOps & Workflow** - Docker profiles, focus management, deployment automation, Claude session tooling
 7. **Interactive Development** - Playgrounds, REPL alternatives, typed feedback loops, refinement types
 8. **Recursion Schemes** - Hylomorphism-based visualization, L-systems, type-directed diagrams

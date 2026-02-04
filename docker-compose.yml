@@ -3,10 +3,21 @@
 # Runs all showcases behind the Scuppered Ligature edge layer
 #
 # Usage:
-#   docker-compose build        # Build all images
-#   docker-compose up -d        # Start all services
-#   docker-compose logs -f      # Follow logs
-#   docker-compose down         # Stop all services
+#   docker compose --profile <name> up -d    # Start a profile
+#   docker compose --profile full up -d      # Start everything
+#   docker compose down --remove-orphans     # Stop all services
+#   docker compose logs -f                   # Follow logs
+#
+# Profiles:
+#   core      - Edge router + website only (minimal baseline)
+#   minard    - Code cartography (edge + website + minard)
+#   tidal     - Tilted Radio music editor (edge + website + tidal)
+#   hypo      - Hypo-Punter EE/GE explorers (edge + website + ee + ge)
+#   sankey    - Sankey editor (edge + website + sankey)
+#   wasm      - WASM force demo (edge + website + wasm)
+#   libs      - Library documentation sites (edge + website + lib-*)
+#   showcases - Other showcase apps (optics, zoo, layouts, hylograph)
+#   full      - Everything
 #
 # Routes (via edge layer at port 80):
 #   /           - Polyglot PureScript home (website)
@@ -24,6 +35,7 @@ services:
   # EDGE LAYER (Lua/Nginx)
   # ============================================================
   edge:
+    profiles: ["core", "minard", "tidal", "hypo", "sankey", "wasm", "libs", "showcases", "full"]
     build:
       context: ./showcases/scuppered-ligature
       dockerfile: docker/Dockerfile
@@ -43,6 +55,7 @@ services:
   # CORE SERVICES
   # ============================================================
   website:
+    profiles: ["core", "minard", "tidal", "hypo", "sankey", "wasm", "libs", "showcases", "full"]
     build:
       context: ./site/website
     networks:
@@ -57,6 +70,7 @@ services:
   # TILTED RADIO (Erlang + JavaScript)
   # ============================================================
   tidal-backend:
+    profiles: ["tidal", "full"]
     build:
       context: ./showcases/psd3-tilted-radio/purerl-tidal
     ports:
@@ -71,6 +85,7 @@ services:
       retries: 3
 
   tidal-frontend:
+    profiles: ["tidal", "full"]
     build:
       context: ./showcases/psd3-tilted-radio/purescript-psd3-tidal
     networks:
@@ -85,6 +100,7 @@ services:
   # HYPO-PUNTER (Python + JavaScript)
   # ============================================================
   ee-backend:
+    profiles: ["hypo", "full"]
     build:
       context: ./showcases/hypo-punter/ee-server
     ports:
@@ -99,6 +115,7 @@ services:
       retries: 3
 
   ee-frontend:
+    profiles: ["hypo", "full"]
     build:
       context: ./showcases/hypo-punter/ee-website
     networks:
@@ -110,6 +127,7 @@ services:
       retries: 3
 
   ge-backend:
+    profiles: ["hypo", "full"]
     build:
       context: ./showcases/hypo-punter/ge-server
     ports:
@@ -124,6 +142,7 @@ services:
       retries: 3
 
   ge-frontend:
+    profiles: ["hypo", "full"]
     build:
       context: ./showcases/hypo-punter/ge-website
     networks:
@@ -138,6 +157,7 @@ services:
   # ARID KEYSTONE (JS only)
   # ============================================================
   sankey:
+    profiles: ["sankey", "full"]
     build:
       context: ./showcases/psd3-arid-keystone
     networks:
@@ -152,6 +172,7 @@ services:
   # MINARD - Code Cartography (Node.js + JavaScript)
   # ============================================================
   minard-backend:
+    profiles: ["minard", "full"]
     build:
       context: ./apps/minard
       dockerfile: server/Dockerfile
@@ -167,6 +188,7 @@ services:
       retries: 3
 
   minard-frontend:
+    profiles: ["minard", "full"]
     build:
       context: ./apps/minard/frontend
     networks:
@@ -181,6 +203,7 @@ services:
   # WASM FORCE DEMO (Rust/WASM + JavaScript)
   # ============================================================
   wasm-demo:
+    profiles: ["wasm", "full"]
     build:
       context: ./showcases/wasm-force-demo
     networks:
@@ -195,6 +218,7 @@ services:
   # ADDITIONAL PURESCRIPT SHOWCASES
   # ============================================================
   optics:
+    profiles: ["showcases", "full"]
     build:
       context: ./showcases/emptier-coinage
     networks:
@@ -206,6 +230,7 @@ services:
       retries: 3
 
   zoo:
+    profiles: ["showcases", "full"]
     build:
       context: ./showcases/psd3-prim-zoo-mosh
     networks:
@@ -216,29 +241,32 @@ services:
       timeout: 3s
       retries: 3
 
-  honeycomb:
-    build:
-      context: ./showcases/psd3-honeycomb
-    networks:
-      - polyglot
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
+  # honeycomb:
+  #   profiles: ["showcases", "full"]
+  #   build:
+  #     context: ./showcases/psd3-honeycomb
+  #   networks:
+  #     - polyglot
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+  #     interval: 30s
+  #     timeout: 3s
+  #     retries: 3
 
-  anscombe:
-    build:
-      context: ./visualisation libraries/psd3-anscombe-quartet
-    networks:
-      - polyglot
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
+  # anscombe:
+  #   profiles: ["showcases", "full"]
+  #   build:
+  #     context: ./visualisation libraries/psd3-anscombe-quartet
+  #   networks:
+  #     - polyglot
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+  #     interval: 30s
+  #     timeout: 3s
+  #     retries: 3
 
   layouts:
+    profiles: ["showcases", "full"]
     build:
       context: ./showcases/allergy-outlay
     networks:
@@ -250,6 +278,7 @@ services:
       retries: 3
 
   hylograph:
+    profiles: ["showcases", "full"]
     build:
       context: ./showcases/hylograph-app
     networks:
@@ -261,6 +290,7 @@ services:
       retries: 3
 
   site-explorer:
+    profiles: ["minard", "full"]
     build:
       context: ./apps/minard/site-explorer
     networks:
@@ -275,6 +305,7 @@ services:
   # LIBRARY DOCUMENTATION SITES
   # ============================================================
   lib-selection:
+    profiles: ["libs", "full"]
     build:
       context: ./site/lib-selection
     networks:
@@ -286,6 +317,7 @@ services:
       retries: 3
 
   lib-simulation:
+    profiles: ["libs", "full"]
     build:
       context: ./site/lib-simulation
     networks:
@@ -297,6 +329,7 @@ services:
       retries: 3
 
   lib-layout:
+    profiles: ["libs", "full"]
     build:
       context: ./site/lib-layout
     networks:
@@ -308,6 +341,7 @@ services:
       retries: 3
 
   lib-graph:
+    profiles: ["libs", "full"]
     build:
       context: ./site/lib-graph
     networks:
@@ -319,6 +353,7 @@ services:
       retries: 3
 
   lib-music:
+    profiles: ["libs", "full"]
     build:
       context: ./site/lib-music
     networks:

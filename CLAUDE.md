@@ -216,6 +216,137 @@ Before assuming browser caching:
 3. Check Makefile for the actual `--outfile` path
 4. Run `make <target>` not raw `spago bundle`
 
+## Deployment Policy (MANDATORY)
+
+**Always use full Docker deployment.** Never spin up ad-hoc HTTP servers (`python -m http.server`, etc.) for testing. This eliminates:
+- PID file management and stale processes
+- Port conflicts requiring `lsof` to debug
+- Bundles going to wrong locations
+- Confusion about which URL to test
+
+### Two Deployment Targets
+
+| Target | Machine | Port | Command |
+|--------|---------|------|---------|
+| **Local** (default) | MacBook Pro | 80 | `docker compose up -d` |
+| **Remote** | MacMini | 80 | rsync + SSH docker commands |
+
+**Default is always local Docker.** The full stack runs on the MacBook Pro.
+
+### Local Deployment Workflow
+
+```bash
+# 1. Build the artifact
+make <target>           # e.g., make app-minard, make website
+
+# 2. Rebuild and restart the container
+docker compose build --no-cache <service>
+docker compose up -d <service>
+
+# 3. Test at http://localhost/<path>
+```
+
+### Remote Deployment Workflow
+
+```bash
+# 1. Build locally
+make <target>
+
+# 2. Rsync to MacMini
+rsync -avz --delete <local-path>/ andrew@100.101.177.83:~/psd3/<remote-path>/
+
+# 3. Rebuild container on MacMini
+ssh andrew@100.101.177.83 "cd ~/psd3 && /usr/local/bin/docker compose build --no-cache <service> && /usr/local/bin/docker compose up -d <service>"
+```
+
+### Key Points
+
+- **Containers bake in files at build time** - rsync updates host files but container has old files until rebuilt
+- **Always rebuild containers after code changes** - never assume rsync alone is sufficient
+- **Use cache busters** - verify `bundle.js?v=<timestamp>` in index.html matches what's served
+- **Local Docker is the source of truth** for testing - if it works locally, deploy to remote
+
+## Focus Management (MANDATORY)
+
+The `.claude-focus` file at the repo root tells Claude which services matter for the current session. **You MUST read this file at session start and before any build/deploy operation.**
+
+### How It Works
+
+1. User runs `make focus-<profile>` before starting a Claude session
+2. This updates `.claude-focus` and starts only the relevant containers
+3. Claude reads `.claude-focus` to understand which services to build/deploy
+
+### Available Profiles
+
+| Profile | Services | Use Case |
+|---------|----------|----------|
+| `core` | edge, website | Minimal baseline (~2 containers) |
+| `minard` | + minard-frontend, minard-backend, site-explorer | Code cartography work |
+| `tidal` | + tidal-frontend, tidal-backend | Music/algorave work |
+| `hypo` | + ee-*, ge-* | Embedding/Grid explorer work |
+| `sankey` | + sankey | Sankey editor work |
+| `wasm` | + wasm-demo | Rust/WASM work |
+| `libs` | + lib-* | Library documentation sites |
+| `showcases` | + optics, zoo, layouts, hylograph | Other showcases |
+| `full` | Everything | Full stack (~20 containers) |
+
+### Commands
+
+```bash
+make focus-minard   # Switch to minard profile
+make focus-status   # Show current focus
+make focus-stop     # Stop all containers
+```
+
+### Claude: Required Behavior
+
+1. **At session start**: Read `.claude-focus` to understand scope
+2. **Before building**: Only build services listed in the focus file
+3. **Before deploying**: Only deploy/rebuild containers in the focus file
+4. **If user asks for something outside focus**: Ask if they want to switch profiles
+
+## Absolute Prohibitions (MANDATORY)
+
+The following actions are **NEVER acceptable**, regardless of convenience or perceived helpfulness:
+
+### 1. NO Ad-Hoc HTTP Servers
+
+**Never** run `python -m http.server`, `npx serve`, `php -S`, `ruby -run`, or any equivalent.
+
+- All serving goes through Docker containers
+- Ad-hoc servers cause port conflicts, stale processes, and deployment confusion
+- If you find yourself wanting to spin up a quick server, **stop** and use Docker instead
+
+### 2. NO Custom Ports
+
+Services are accessed through port 80 via the edge router. **Never** tell the user to visit `:8080`, `:3000`, `:5000`, etc. directly.
+
+- Correct: `http://localhost/code/`
+- Wrong: `http://localhost:3000/`
+
+### 3. NO Deployment Without Reading Focus
+
+Before any build or deploy operation, **read `.claude-focus`**. Only operate on services listed there unless the user explicitly overrides.
+
+### 4. NO Full Stack When Focus Is Set
+
+If `.claude-focus` specifies a profile other than `full`, do not build or deploy services outside that profile. This wastes resources and causes confusion.
+
+### 5. NO Guessing Deployment Details
+
+If you're unsure how to deploy something, **read the `/deploy` skill** or **ask the user**. Do not invent deployment commands based on what "probably works."
+
+### Why These Rules Exist
+
+These prohibitions exist because context loss across sessions has repeatedly led to:
+- Services deployed via ad-hoc servers instead of Docker
+- Port conflicts requiring `lsof` debugging
+- Bundles deployed to wrong locations
+- User confusion about which URL to test
+- Full stack running when only one service was needed
+
+Following these rules ensures consistent, predictable deployments.
+
 ## Session Logging (MANDATORY)
 
 At the end of substantive sessions, update `docs/worklog/YYYY-MM-DD.md`:
