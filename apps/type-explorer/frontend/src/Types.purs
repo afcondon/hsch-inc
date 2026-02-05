@@ -94,8 +94,8 @@ derive instance eqClusterStrategy :: Eq ClusterStrategy
 
 -- | Available visualization views
 data ViewMode
-  = ForceGraphView   -- Force-directed graph of types
-  | MatrixView       -- Interpreter x Expression matrix
+  = ForceGraphView      -- Force-directed graph of types
+  | TypeClassesView     -- Combined: Matrix + TypeClass grid (splitscreen)
 
 derive instance eqViewMode :: Eq ViewMode
 
@@ -122,6 +122,8 @@ type State =
   { types :: Array TypeInfo
   , links :: Array TypeLink
   , instances :: Array InstanceInfo
+  , matrixData :: Maybe InterpreterMatrix
+  , typeClassData :: Maybe TypeClassGridData
   , selectedType :: Maybe Int        -- Selected type id
   , filter :: TypeFilter
   , clusterStrategy :: ClusterStrategy
@@ -136,6 +138,8 @@ initialState =
   { types: []
   , links: []
   , instances: []
+  , matrixData: Nothing
+  , typeClassData: Nothing
   , selectedType: Nothing
   , filter: ShowAllTypes
   , clusterStrategy: ByPackage
@@ -170,32 +174,88 @@ type InterpreterMatrix =
   }
 
 -- =============================================================================
+-- Type Class Grid Types
+-- =============================================================================
+
+-- | Information about a single type class for grid display
+type TypeClassGridInfo =
+  { id :: Int
+  , name :: String
+  , moduleName :: String
+  , packageName :: String
+  , methodCount :: Int
+  , instanceCount :: Int
+  }
+
+-- | Summary statistics for type classes
+type TypeClassSummary =
+  { totalMethods :: Int
+  , totalInstances :: Int
+  }
+
+-- | Full type class grid data
+type TypeClassGridData =
+  { typeClasses :: Array TypeClassGridInfo
+  , count :: Int
+  , summary :: TypeClassSummary
+  }
+
+-- =============================================================================
+-- Node Roles (for coloring)
+-- =============================================================================
+
+-- | Role of a type in the type graph (used for primary node coloring)
+data NodeRole
+  = RoleTypeClass         -- A typeclass definition
+  | RoleInstanceProvider  -- A type that implements typeclasses
+  | RoleSuperclass        -- A typeclass that extends another
+  | RoleReferenced        -- A type that is used/referenced by others
+  | RoleIsolated          -- No significant relationships
+
+derive instance eqNodeRole :: Eq NodeRole
+
+-- =============================================================================
 -- Colors
 -- =============================================================================
 
 -- | Color palette for type visualization
--- | Based on maturity level and type kind
+-- | Primary distinction: Node role (typeclass/instance/reference)
+-- | Secondary distinction: Link type
 colors ::
-  { highMaturity :: String      -- Types with many instances
-  , mediumMaturity :: String    -- Types with some instances
-  , lowMaturity :: String       -- Types with few/no instances
-  , typeClass :: String         -- Type class definitions
+  { -- Node colors by role (primary distinction)
+    typeClass :: String         -- Purple: Type class definitions
+  , instanceProvider :: String  -- Green: Types implementing typeclasses
+  , superclass :: String        -- Pink: Typeclasses that are superclasses
+  , referenced :: String        -- Blue: Types that are referenced
+  , isolated :: String          -- Gray: Types with no relationships
+  -- Link colors
   , linkInstance :: String      -- Instance relationship
   , linkUsage :: String         -- Usage relationship
   , linkModule :: String        -- Same-module relationship
   , linkSuperclass :: String    -- Superclass relationship
+  -- Legacy (kept for compatibility)
+  , highMaturity :: String
+  , mediumMaturity :: String
+  , lowMaturity :: String
   , text :: String
   , bg :: String
   }
 colors =
-  { highMaturity: "#c9a227"     -- Gold (well-specified)
-  , mediumMaturity: "#4a90d9"   -- Blue (partial coverage)
-  , lowMaturity: "#8a8a8a"      -- Gray (under-specified)
-  , typeClass: "#7b4aa0"        -- Purple (class definitions)
+  { -- Node colors by role
+    typeClass: "#7b4aa0"        -- Purple (class definitions)
+  , instanceProvider: "#4caf50" -- Green (types with instances)
+  , superclass: "#e91e63"       -- Pink (superclass typeclasses)
+  , referenced: "#4a90d9"       -- Blue (referenced types)
+  , isolated: "#8a8a8a"         -- Gray (no relationships)
+  -- Link colors
   , linkInstance: "#4caf50"     -- Green
   , linkUsage: "#ff9800"        -- Orange
   , linkModule: "#cccccc"       -- Light gray
   , linkSuperclass: "#e91e63"   -- Pink
+  -- Legacy
+  , highMaturity: "#c9a227"
+  , mediumMaturity: "#4a90d9"
+  , lowMaturity: "#8a8a8a"
   , text: "#1a1a2e"             -- Navy
   , bg: "#faf6ed"               -- Cream
   }

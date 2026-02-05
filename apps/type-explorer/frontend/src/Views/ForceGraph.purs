@@ -27,7 +27,11 @@ import Hylograph.ForceEngine.Types (ForceSpec(..), defaultCollide, defaultLink, 
 import Hylograph.HATS (Tree, elem, forEach, staticStr, staticNum, thunkedNum, thunkedStr, onClick, withBehaviors)
 import Hylograph.HATS.InterpreterTick (rerender)
 import Hylograph.Internal.Selection.Types (ElementType(..))
-import TypeExplorer.Types (TypeInfo, TypeLink, TypeKind(..), LinkType(..), colors)
+import Data.Foldable (foldl)
+import Data.Int as Int
+import Data.Number as Number
+import Data.Set as Set
+import TypeExplorer.Types (TypeInfo, TypeLink, TypeKind(..), LinkType(..), NodeRole(..), colors)
 
 -- =============================================================================
 -- Types
@@ -41,16 +45,18 @@ type ForceConfig =
   , linkDistance :: Number
   , centerX :: Number
   , centerY :: Number
+  , padding :: Number  -- Virtual padding around edges
   }
 
 defaultConfig :: ForceConfig
 defaultConfig =
-  { width: 1000.0
-  , height: 700.0
+  { width: 1200.0
+  , height: 800.0
   , nodeRadius: 12.0
   , linkDistance: 80.0
-  , centerX: 500.0
-  , centerY: 350.0
+  , centerX: 600.0
+  , centerY: 400.0
+  , padding: 80.0  -- Virtual padding for force layout breathing room
   }
 
 -- | Simulation node for a type
@@ -60,8 +66,10 @@ type TypeNode = SimulationNode
   , packageName :: String
   , kind :: TypeKind
   , maturityLevel :: Int
-  , gridX :: Number  -- Target X for ForceXGrid (clustering)
-  , gridY :: Number  -- Target Y for ForceYGrid
+  , role :: NodeRole          -- Role in type graph (for coloring)
+  , componentId :: Int        -- Connected component ID (for grid layout)
+  , gridX :: Number           -- Target X for ForceXGrid (clustering)
+  , gridY :: Number           -- Target Y for ForceYGrid
   )
 
 -- | Link for simulation
@@ -162,37 +170,40 @@ nodesTree config onNodeClick nodes =
         [ thunkedNum "cx" node.x
         , thunkedNum "cy" node.y
         , staticNum "r" radius
-        , staticStr "fill" (maturityColor node.maturityLevel node.kind)
-        , staticStr "stroke" (kindStroke node.kind)
-        , staticNum "stroke-width" (kindStrokeWidth node.kind)
+        , staticStr "fill" (roleColor node.role)
+        , staticStr "stroke" (roleStroke node.role)
+        , staticNum "stroke-width" (roleStrokeWidth node.role)
         , staticStr "class" "node"
         , staticStr "data-type-id" (show node.id)
         , staticStr "cursor" "pointer"
         ] []
 
--- | Get color based on maturity level
-maturityColor :: Int -> TypeKind -> String
-maturityColor level kind = case kind of
-  TypeClassDecl -> colors.typeClass
-  _ -> case level of
-    n | n >= 6 -> colors.highMaturity
-    n | n >= 3 -> colors.mediumMaturity
-    _ -> colors.lowMaturity
+-- | Get color based on node role (primary visual distinction)
+roleColor :: NodeRole -> String
+roleColor = case _ of
+  RoleTypeClass -> colors.typeClass           -- Purple
+  RoleInstanceProvider -> colors.instanceProvider  -- Green
+  RoleSuperclass -> colors.superclass         -- Pink
+  RoleReferenced -> colors.referenced         -- Blue
+  RoleIsolated -> colors.isolated             -- Gray
 
--- | Stroke color for type kind
-kindStroke :: TypeKind -> String
-kindStroke = case _ of
-  TypeClassDecl -> "#5a3a7a"  -- Darker purple
-  NewtypeDecl -> "#666"
-  DataType -> "#444"
-  TypeAlias -> "#888"
+-- | Stroke color for node role
+roleStroke :: NodeRole -> String
+roleStroke = case _ of
+  RoleTypeClass -> "#5a3a7a"     -- Darker purple
+  RoleSuperclass -> "#a01848"    -- Darker pink
+  RoleInstanceProvider -> "#2e7d32" -- Darker green
+  RoleReferenced -> "#1565c0"    -- Darker blue
+  RoleIsolated -> "#555"
 
--- | Stroke width for type kind
-kindStrokeWidth :: TypeKind -> Number
-kindStrokeWidth = case _ of
-  TypeClassDecl -> 3.0
-  NewtypeDecl -> 2.0
+-- | Stroke width for node role
+roleStrokeWidth :: NodeRole -> Number
+roleStrokeWidth = case _ of
+  RoleTypeClass -> 3.0
+  RoleSuperclass -> 2.5
+  RoleInstanceProvider -> 2.0
   _ -> 1.5
+
 
 -- | Labels tree
 labelsTree :: Array TypeNode -> Tree
@@ -215,19 +226,129 @@ shortName name =
     else name
 
 -- =============================================================================
+-- Connected Components (for grid layout of disjoint graphs)
+-- =============================================================================
+
+-- | Find connected components using union-find style approach
+-- | Returns a Map from node id to normalized component id (0, 1, 2, ...)
+findConnectedComponents :: Array TypeInfo -> Array TypeLink -> Map.Map Int Int
+findConnectedComponents types links =
+  let
+    -- Initialize each node in its own component
+    typeIds = map _.id types
+    initialComponents = Map.fromFoldable $ map (\id -> id /\ id) typeIds
+
+    -- Find representative (with path compression simulation)
+    findRoot :: Map.Map Int Int -> Int -> Int
+    findRoot components nodeId =
+      case Map.lookup nodeId components of
+        Just parent | parent == nodeId -> nodeId
+        Just parent -> findRoot components parent
+        Nothing -> nodeId
+
+    -- Union two components
+    unionComponents :: Map.Map Int Int -> TypeLink -> Map.Map Int Int
+    unionComponents components link =
+      let
+        root1 = findRoot components link.source
+        root2 = findRoot components link.target
+      in
+      if root1 == root2
+        then components
+        else Map.insert root2 root1 components
+
+    -- Apply all links to union components
+    mergedComponents = foldl unionComponents initialComponents links
+
+    -- Get raw root for each node
+    rawRoots = map (\nodeId -> nodeId /\ findRoot mergedComponents nodeId) typeIds
+
+    -- Get unique roots and assign normalized IDs (0, 1, 2, ...)
+    uniqueRoots = Array.nub $ map (\(_ /\ root) -> root) rawRoots
+    rootToNormalizedId = Map.fromFoldable $
+      Array.mapWithIndex (\idx root -> root /\ idx) uniqueRoots
+
+    -- Map each node to its normalized component ID
+    normalizeNode (nodeId /\ root) =
+      case Map.lookup root rootToNormalizedId of
+        Just normalizedId -> nodeId /\ normalizedId
+        Nothing -> nodeId /\ 0
+  in
+  Map.fromFoldable $ map normalizeNode rawRoots
+
+-- | Get grid position for a component
+-- | Arranges components in a grid pattern with padding
+getGridPosition :: ForceConfig -> Int -> Int -> { x :: Number, y :: Number }
+getGridPosition config componentId totalComponents =
+  let
+    -- Calculate grid dimensions (roughly square)
+    cols = max 1 (ceil (sqrt (toNumber totalComponents)))
+    rows = max 1 (ceil (toNumber totalComponents / toNumber cols))
+
+    -- Which cell is this component in?
+    col = componentId `mod` cols
+    row = componentId / cols
+
+    -- Usable area after padding
+    usableWidth = config.width - 2.0 * config.padding
+    usableHeight = config.height - 2.0 * config.padding
+
+    -- Center of this cell within usable area
+    x = config.padding + (toNumber col + 0.5) * usableWidth / toNumber cols
+    y = config.padding + (toNumber row + 0.5) * usableHeight / toNumber rows
+  in
+  { x, y }
+  where
+    ceil n = if n == toNumber (floor n) then floor n else floor n + 1
+    floor n = Int.floor n
+    sqrt = Number.sqrt
+    toNumber = Int.toNumber
+
+-- =============================================================================
+-- Role Computation
+-- =============================================================================
+
+-- | Compute the role of each type based on its relationships
+computeNodeRoles :: Array TypeInfo -> Array TypeLink -> Map.Map Int NodeRole
+computeNodeRoles types links =
+  let
+    -- Types that are targets of InstanceOf links (have instances)
+    instanceProviders = Set.fromFoldable $
+      map _.source $ Array.filter (\l -> l.linkType == InstanceOf) links
+
+    -- Types that are targets of Superclass links (are superclasses)
+    superclasses = Set.fromFoldable $
+      map _.target $ Array.filter (\l -> l.linkType == Superclass) links
+
+    -- Types that are referenced by other types
+    referenced = Set.fromFoldable $
+      map _.target $ Array.filter (\l -> l.linkType == TypeReference || l.linkType == UsedIn) links
+
+    -- All nodes that have any link
+    linkedNodes = Set.fromFoldable $
+      (map _.source links) <> (map _.target links)
+
+    computeRole :: TypeInfo -> NodeRole
+    computeRole typeInfo
+      | typeInfo.kind == TypeClassDecl && Set.member typeInfo.id superclasses = RoleSuperclass
+      | typeInfo.kind == TypeClassDecl = RoleTypeClass
+      | Set.member typeInfo.id instanceProviders = RoleInstanceProvider
+      | Set.member typeInfo.id referenced = RoleReferenced
+      | not (Set.member typeInfo.id linkedNodes) = RoleIsolated
+      | otherwise = RoleReferenced
+  in
+  Map.fromFoldable $ map (\t -> t.id /\ computeRole t) types
+
+-- =============================================================================
 -- Clustering
 -- =============================================================================
 
--- | Get cluster target X based on package
--- | For now, simple left/right split by package
-getClusterTargetX :: ForceConfig -> TypeInfo -> Number
-getClusterTargetX config typeInfo =
-  case typeInfo.packageName of
-    "hylograph-selection" -> config.width * 0.35
-    "hylograph-layout" -> config.width * 0.65
-    "hylograph-graph" -> config.width * 0.5
-    "hylograph-simulation" -> config.width * 0.8
-    _ -> config.centerX
+-- | Get cluster target position based on connected component
+getClusterTarget :: ForceConfig -> Map.Map Int Int -> Int -> Int -> { x :: Number, y :: Number }
+getClusterTarget config componentMap totalComponents nodeId =
+  case Map.lookup nodeId componentMap of
+    Just compId -> getGridPosition config compId totalComponents
+    Nothing -> { x: config.centerX, y: config.centerY }
 
 -- =============================================================================
 -- Initialization
@@ -238,8 +359,8 @@ initForceGraph :: String -> Array TypeInfo -> Array TypeLink -> Effect ForceGrap
 initForceGraph selector types links = do
   let config = defaultConfig
 
-  -- Convert types to simulation nodes
-  nodes <- createTypeNodes config types
+  -- Convert types to simulation nodes (includes role and component computation)
+  nodes <- createTypeNodes config types links
 
   -- Convert links
   let simLinks = map (\l -> { source: l.source, target: l.target, linkType: l.linkType }) links
@@ -303,21 +424,41 @@ tick stateRef = do
   _ <- rerender "#type-labels" (labelsTree state.nodes)
   pure unit
 
--- | Create type nodes from TypeInfo
-createTypeNodes :: ForceConfig -> Array TypeInfo -> Effect (Array TypeNode)
-createTypeNodes config types = do
-  let jitterRange = 80.0
+-- | Create type nodes from TypeInfo with computed roles and component positions
+createTypeNodes :: ForceConfig -> Array TypeInfo -> Array TypeLink -> Effect (Array TypeNode)
+createTypeNodes config types links = do
+  let
+    jitterRange = 50.0
+
+    -- Compute roles for coloring
+    roleMap = computeNodeRoles types links
+
+    -- Compute connected components for grid layout
+    componentMap = findConnectedComponents types links
+
+    -- Count unique components
+    uniqueComponents = Set.size $ Set.fromFoldable $ Map.values componentMap
+    totalComponents = max 1 uniqueComponents
 
   traverse (\{ typeInfo, idx } -> do
     dx <- (\r -> (r - 0.5) * jitterRange) <$> random
     dy <- (\r -> (r - 0.5) * jitterRange) <$> random
 
-    let targetX = getClusterTargetX config typeInfo
+    let
+      role = case Map.lookup typeInfo.id roleMap of
+        Just r -> r
+        Nothing -> RoleIsolated
+
+      componentId = case Map.lookup typeInfo.id componentMap of
+        Just c -> c
+        Nothing -> 0
+
+      target = getClusterTarget config componentMap totalComponents typeInfo.id
 
     pure
       { id: typeInfo.id
-      , x: targetX + dx
-      , y: config.centerY + dy
+      , x: target.x + dx
+      , y: target.y + dy
       , vx: 0.0
       , vy: 0.0
       , fx: null
@@ -327,7 +468,9 @@ createTypeNodes config types = do
       , packageName: typeInfo.packageName
       , kind: typeInfo.kind
       , maturityLevel: typeInfo.maturityLevel
-      , gridX: targetX
-      , gridY: config.centerY
+      , role: role
+      , componentId: componentId
+      , gridX: target.x
+      , gridY: target.y
       }
   ) (Array.mapWithIndex (\idx typeInfo -> { idx, typeInfo }) types)

@@ -13,9 +13,13 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
-import TypeExplorer.Types (State, TypeInfo, TypeKind(..), TypeFilter(..), ViewMode(..), ClusterStrategy(..), colors, initialState)
+import TypeExplorer.Types (State, TypeInfo, TypeKind(..), TypeFilter(..), ViewMode(..), ClusterStrategy(..),
+                           colors, initialState, InterpreterMatrix, TypeClassGridData)
 import TypeExplorer.Data.Loader as Loader
 import TypeExplorer.Views.ForceGraph as ForceGraph
+import TypeExplorer.Views.Matrix as Matrix
+import TypeExplorer.Views.TypeClassGrid as TypeClassGrid
+import Hylograph.HATS.InterpreterTick (clearContainer)
 
 -- | Actions for the app
 data Action
@@ -26,6 +30,8 @@ data Action
   | SetClusterStrategy ClusterStrategy
   | SetViewMode ViewMode
   | DataLoaded (Either String Loader.TypeData)
+  | MatrixDataLoaded (Either String InterpreterMatrix)
+  | TypeClassDataLoaded (Either String TypeClassGridData)
 
 -- | The main app component
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -53,16 +59,39 @@ render state =
     , -- Main content
       HH.main
         [ HP.class_ $ HH.ClassName "app-main" ]
-        [ -- Left: Visualization area
+        [ -- Visualization area - both containers always present, visibility toggled
           HH.div
-            [ HP.class_ $ HH.ClassName "viz-container"
-            , HP.id "graph"
+            [ HP.class_ $ HH.ClassName $ "viz-container viz-graph" <> if state.viewMode == ForceGraphView then "" else " hidden"
+            , HP.id "viz-graph"
             ]
             [ if state.loading
                 then HH.div [ HP.class_ $ HH.ClassName "loading" ] [ HH.text "Loading type data..." ]
                 else case state.error of
                   Just err -> HH.div [ HP.class_ $ HH.ClassName "error" ] [ HH.text err ]
-                  Nothing -> HH.text ""  -- Graph renders via HATS
+                  Nothing -> HH.text ""  -- Force graph renders via HATS
+            ]
+        , HH.div
+            [ HP.class_ $ HH.ClassName $ "viz-container viz-split" <> if state.viewMode == TypeClassesView then "" else " hidden" ]
+            [ -- Left pane: Matrix
+              HH.div
+                [ HP.class_ $ HH.ClassName "split-pane split-left"
+                , HP.id "viz-matrix"
+                ]
+                [ if state.loading
+                    then HH.div [ HP.class_ $ HH.ClassName "loading" ] [ HH.text "Loading..." ]
+                    else HH.text ""
+                ]
+            , -- Divider
+              HH.div [ HP.class_ $ HH.ClassName "split-divider" ] []
+            , -- Right pane: TypeClass grid
+              HH.div
+                [ HP.class_ $ HH.ClassName "split-pane split-right"
+                , HP.id "viz-typeclass"
+                ]
+                [ if state.loading
+                    then HH.div [ HP.class_ $ HH.ClassName "loading" ] [ HH.text "Loading..." ]
+                    else HH.text ""
+                ]
             ]
         , -- Right: Sidebar
           HH.aside
@@ -83,12 +112,12 @@ renderViewToggle current =
         [ HP.class_ $ HH.ClassName $ if current == ForceGraphView then "active" else ""
         , HE.onClick \_ -> SetViewMode ForceGraphView
         ]
-        [ HH.text "Force Graph" ]
+        [ HH.text "Type Graph" ]
     , HH.button
-        [ HP.class_ $ HH.ClassName $ if current == MatrixView then "active" else ""
-        , HE.onClick \_ -> SetViewMode MatrixView
+        [ HP.class_ $ HH.ClassName $ if current == TypeClassesView then "active" else ""
+        , HE.onClick \_ -> SetViewMode TypeClassesView
         ]
-        [ HH.text "Matrix" ]
+        [ HH.text "Type Classes" ]
     ]
 
 renderSummary :: forall m. State -> H.ComponentHTML Action () m
@@ -123,11 +152,12 @@ renderLegend =
   HH.section
     [ HP.class_ $ HH.ClassName "legend" ]
     [ HH.h2_ [ HH.text "Legend" ]
-    , HH.h3_ [ HH.text "Maturity Level" ]
-    , renderLegendItem colors.highMaturity "High (many instances)"
-    , renderLegendItem colors.mediumMaturity "Medium (some instances)"
-    , renderLegendItem colors.lowMaturity "Low (few instances)"
+    , HH.h3_ [ HH.text "Node Role" ]
     , renderLegendItem colors.typeClass "Type class"
+    , renderLegendItem colors.superclass "Superclass"
+    , renderLegendItem colors.instanceProvider "Has instances"
+    , renderLegendItem colors.referenced "Referenced"
+    , renderLegendItem colors.isolated "Isolated"
     , HH.h3_ [ HH.text "Relationships" ]
     , renderLegendItem colors.linkInstance "Instance of"
     , renderLegendItem colors.linkSuperclass "Superclass"
@@ -262,8 +292,8 @@ handleAction = case _ of
     -- Create subscription for HATS -> Halogen communication
     { emitter, listener } <- liftEffect HS.create
 
-    -- Initialize force graph
-    handle <- liftEffect $ ForceGraph.initForceGraph "#graph" state.types state.links
+    -- Initialize force graph (default view)
+    handle <- liftEffect $ ForceGraph.initForceGraph "#viz-graph" state.types state.links
 
     -- Wire up node clicks
     liftEffect $ handle.onNodeClick \typeId ->
@@ -283,5 +313,68 @@ handleAction = case _ of
   SetClusterStrategy strategy ->
     H.modify_ _ { clusterStrategy = strategy }
 
-  SetViewMode mode ->
+  SetViewMode mode -> do
     H.modify_ _ { viewMode = mode }
+    state <- H.get
+
+    case mode of
+      ForceGraphView -> do
+        -- Force graph already initialized on data load, just show it
+        pure unit
+
+      TypeClassesView -> do
+        -- Load both datasets if needed, then initialize split panes
+        case state.matrixData, state.typeClassData of
+          Just matrix, Just tcData -> do
+            -- Both loaded, initialize both panes (clear first)
+            liftEffect $ clearContainer "#viz-matrix"
+            liftEffect $ clearContainer "#viz-typeclass"
+            _ <- liftEffect $ Matrix.initMatrixView "#viz-matrix" matrix
+            _ <- liftEffect $ TypeClassGrid.initTypeClassGrid "#viz-typeclass" tcData
+            pure unit
+          Nothing, _ -> do
+            -- Load matrix data first
+            result <- liftAff Loader.loadMatrixData
+            handleAction (MatrixDataLoaded result)
+          _, Nothing -> do
+            -- Load typeclass data
+            result <- liftAff Loader.loadTypeClassGridData
+            handleAction (TypeClassDataLoaded result)
+
+  MatrixDataLoaded (Left err) ->
+    H.modify_ _ { error = Just err }
+
+  MatrixDataLoaded (Right matrixData) -> do
+    H.modify_ _ { matrixData = Just matrixData }
+    state <- H.get
+    case state.viewMode of
+      TypeClassesView -> case state.typeClassData of
+        Just tcData -> do
+          liftEffect $ clearContainer "#viz-matrix"
+          liftEffect $ clearContainer "#viz-typeclass"
+          _ <- liftEffect $ Matrix.initMatrixView "#viz-matrix" matrixData
+          _ <- liftEffect $ TypeClassGrid.initTypeClassGrid "#viz-typeclass" tcData
+          pure unit
+        Nothing -> do
+          result <- liftAff Loader.loadTypeClassGridData
+          handleAction (TypeClassDataLoaded result)
+      _ -> pure unit
+
+  TypeClassDataLoaded (Left err) ->
+    H.modify_ _ { error = Just err }
+
+  TypeClassDataLoaded (Right tcData) -> do
+    H.modify_ _ { typeClassData = Just tcData }
+    state <- H.get
+    case state.viewMode of
+      TypeClassesView -> case state.matrixData of
+        Just matrixData -> do
+          liftEffect $ clearContainer "#viz-matrix"
+          liftEffect $ clearContainer "#viz-typeclass"
+          _ <- liftEffect $ Matrix.initMatrixView "#viz-matrix" matrixData
+          _ <- liftEffect $ TypeClassGrid.initTypeClassGrid "#viz-typeclass" tcData
+          pure unit
+        Nothing -> do
+          result <- liftAff Loader.loadMatrixData
+          handleAction (MatrixDataLoaded result)
+      _ -> pure unit

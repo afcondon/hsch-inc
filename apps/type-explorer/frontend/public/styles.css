@@ -65,6 +65,10 @@ body {
   background: #fff;
 }
 
+.viz-container.hidden {
+  display: none;
+}
+
 .viz-container .loading,
 .viz-container .error {
   position: absolute;
@@ -244,6 +248,40 @@ body {
   padding: 0.25rem 0;
   font-size: 0.85rem;
   border-bottom: 1px solid #f0f0f0;
+}
+
+/* Splitscreen Layout */
+.viz-split {
+  display: flex;
+  height: 100%;
+}
+
+.split-pane {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background: #fff;
+}
+
+.split-left {
+  border-right: none;
+}
+
+.split-right {
+  border-left: none;
+}
+
+.split-divider {
+  width: 4px;
+  background: linear-gradient(to bottom, #e0e0e0, #ccc, #e0e0e0);
+  cursor: col-resize;
+  flex-shrink: 0;
+}
+
+.split-pane svg {
+  display: block;
+  min-width: 100%;
+  min-height: 100%;
 }
 
 /* View Toggle */

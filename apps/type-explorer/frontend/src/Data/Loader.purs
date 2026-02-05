@@ -4,6 +4,8 @@
 -- | Currently uses sample data; will connect to real API in Phase 3.
 module TypeExplorer.Data.Loader
   ( loadTypeData
+  , loadMatrixData
+  , loadTypeClassGridData
   , TypeData
   ) where
 
@@ -11,7 +13,9 @@ import Prelude
 
 import Data.Either (Either(..))
 import Effect.Aff (Aff)
-import TypeExplorer.Types (TypeInfo, TypeLink, InstanceInfo, TypeKind(..), LinkType(..))
+import TypeExplorer.Types (TypeInfo, TypeLink, InstanceInfo, TypeKind(..), LinkType(..),
+                           InterpreterMatrix, InterpreterInfo, ExpressionClassInfo,
+                           TypeClassGridData, TypeClassGridInfo, TypeClassSummary)
 
 -- | Complete type data from API
 type TypeData =
@@ -148,4 +152,92 @@ sampleInstances =
   , { typeId: 50, className: "Functor", classModule: "Data.Functor", constraints: [] }
   , { typeId: 50, className: "Foldable", classModule: "Data.Foldable", constraints: [] }
   , { typeId: 50, className: "Traversable", classModule: "Data.Traversable", constraints: [] }
+  ]
+
+-- =============================================================================
+-- Matrix Data
+-- =============================================================================
+
+-- | Load matrix data (Interpreter × Expression)
+loadMatrixData :: Aff (Either String InterpreterMatrix)
+loadMatrixData = pure $ Right sampleMatrixData
+
+sampleMatrixData :: InterpreterMatrix
+sampleMatrixData =
+  { interpreters: sampleInterpreters
+  , expressionClasses: sampleExpressionClasses
+  , matrix: sampleMatrix
+  }
+
+sampleInterpreters :: Array InterpreterInfo
+sampleInterpreters =
+  [ { name: "Eval", moduleName: "Hylograph.Expr.Interpreter.Eval", implementedClasses: ["NumExpr", "StringExpr", "BoolExpr", "TrigExpr"] }
+  , { name: "EvalD", moduleName: "Hylograph.Expr.Interpreter.Eval", implementedClasses: ["NumExpr", "DatumExpr"] }
+  , { name: "SVG", moduleName: "Hylograph.Expr.Interpreter.SVG", implementedClasses: ["NumExpr", "StringExpr"] }
+  , { name: "CodeGen", moduleName: "Hylograph.Expr.Interpreter.CodeGen", implementedClasses: ["NumExpr"] }
+  , { name: "English", moduleName: "Hylograph.Interpreter.English", implementedClasses: ["NumExpr"] }
+  , { name: "PureSVG", moduleName: "Hylograph.Expr.Interpreter.PureSVG", implementedClasses: ["NumExpr", "StringExpr", "BoolExpr"] }
+  , { name: "Meta", moduleName: "Hylograph.Expr.Interpreter.Meta", implementedClasses: ["NumExpr", "StringExpr", "BoolExpr", "TrigExpr", "DatumExpr"] }
+  ]
+
+sampleExpressionClasses :: Array ExpressionClassInfo
+sampleExpressionClasses =
+  [ { name: "NumExpr", moduleName: "Hylograph.Expr.Expr", methods: ["add", "sub", "mul", "div", "negate", "abs"] }
+  , { name: "StringExpr", moduleName: "Hylograph.Expr.Expr", methods: ["str", "concat", "show"] }
+  , { name: "BoolExpr", moduleName: "Hylograph.Expr.Expr", methods: ["bool", "not", "and", "or"] }
+  , { name: "TrigExpr", moduleName: "Hylograph.Expr.Expr", methods: ["sin", "cos", "tan", "atan2"] }
+  , { name: "DatumExpr", moduleName: "Hylograph.Expr.Datum", methods: ["datum", "index"] }
+  ]
+
+-- Matrix: interpreters × expression classes
+-- Rows: Eval, EvalD, SVG, CodeGen, English, PureSVG, Meta
+-- Cols: NumExpr, StringExpr, BoolExpr, TrigExpr, DatumExpr
+sampleMatrix :: Array (Array Boolean)
+sampleMatrix =
+  [ [true,  true,  true,  true,  false]  -- Eval
+  , [true,  false, false, false, true ]  -- EvalD
+  , [true,  true,  false, false, false]  -- SVG
+  , [true,  false, false, false, false]  -- CodeGen
+  , [true,  false, false, false, false]  -- English
+  , [true,  true,  true,  false, false]  -- PureSVG
+  , [true,  true,  true,  true,  true ]  -- Meta (full coverage)
+  ]
+
+-- =============================================================================
+-- TypeClass Grid Data
+-- =============================================================================
+
+-- | Load type class grid data
+loadTypeClassGridData :: Aff (Either String TypeClassGridData)
+loadTypeClassGridData = pure $ Right sampleTypeClassGridData
+
+sampleTypeClassGridData :: TypeClassGridData
+sampleTypeClassGridData =
+  { typeClasses: sampleTypeClasses
+  , count: 15
+  , summary: { totalMethods: 68, totalInstances: 156 }
+  }
+
+sampleTypeClasses :: Array TypeClassGridInfo
+sampleTypeClasses =
+  -- Expression classes
+  [ { id: 1, name: "NumExpr", moduleName: "Hylograph.Expr.Expr", packageName: "hylograph-selection", methodCount: 6, instanceCount: 7 }
+  , { id: 2, name: "StringExpr", moduleName: "Hylograph.Expr.Expr", packageName: "hylograph-selection", methodCount: 3, instanceCount: 5 }
+  , { id: 3, name: "BoolExpr", moduleName: "Hylograph.Expr.Expr", packageName: "hylograph-selection", methodCount: 4, instanceCount: 4 }
+  , { id: 4, name: "TrigExpr", moduleName: "Hylograph.Expr.Expr", packageName: "hylograph-selection", methodCount: 4, instanceCount: 3 }
+  , { id: 5, name: "DatumExpr", moduleName: "Hylograph.Expr.Datum", packageName: "hylograph-selection", methodCount: 2, instanceCount: 2 }
+  -- Animation classes
+  , { id: 6, name: "Animation", moduleName: "Hylograph.Expr.Animation", packageName: "hylograph-selection", methodCount: 5, instanceCount: 4 }
+  , { id: 7, name: "Transition", moduleName: "Hylograph.Internal.Transition", packageName: "hylograph-selection", methodCount: 3, instanceCount: 3 }
+  -- Path classes
+  , { id: 8, name: "PathExpr", moduleName: "Hylograph.Expr.Path", packageName: "hylograph-selection", methodCount: 8, instanceCount: 2 }
+  -- Standard classes with many instances
+  , { id: 9, name: "Functor", moduleName: "Data.Functor", packageName: "prelude", methodCount: 1, instanceCount: 45 }
+  , { id: 10, name: "Apply", moduleName: "Control.Apply", packageName: "prelude", methodCount: 1, instanceCount: 38 }
+  , { id: 11, name: "Applicative", moduleName: "Control.Applicative", packageName: "prelude", methodCount: 1, instanceCount: 32 }
+  , { id: 12, name: "Bind", moduleName: "Control.Bind", packageName: "prelude", methodCount: 1, instanceCount: 28 }
+  , { id: 13, name: "Monad", moduleName: "Control.Monad", packageName: "prelude", methodCount: 0, instanceCount: 25 }
+  -- Less common classes
+  , { id: 14, name: "Semigroup", moduleName: "Data.Semigroup", packageName: "prelude", methodCount: 1, instanceCount: 18 }
+  , { id: 15, name: "Monoid", moduleName: "Data.Monoid", packageName: "prelude", methodCount: 1, instanceCount: 12 }
   ]
