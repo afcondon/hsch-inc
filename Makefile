@@ -73,7 +73,7 @@ APPS := apps
 .PHONY: lib-graph lib-layout lib-selection lib-music lib-simulation
 .PHONY: lib-showcase-shell lib-simulation-halogen
 .PHONY: app-wasm app-embedding-explorer app-sankey app-hylograph app-minard minard-site-explorer spider-analyze spider-compare spider-html app-tilted-radio
-.PHONY: app-timber-lieder app-edge app-emptier-coinage app-simpsons app-nn
+.PHONY: app-edge app-emptier-coinage app-simpsons app-nn
 .PHONY: wasm-kernel
 .PHONY: npm-install npm-install-embedding-explorer npm-install-minard
 .PHONY: ee-server ge-server ee-website ge-website landing
@@ -144,7 +144,7 @@ lib-astar-demo: lib-simulation lib-graph
 # SHOWCASE APPLICATIONS
 # ============================================================================
 
-apps: app-wasm app-embedding-explorer app-sankey app-hylograph app-minard minard-site-explorer app-tilted-radio app-timber-lieder app-edge app-emptier-coinage
+apps: app-wasm app-embedding-explorer app-sankey app-hylograph app-minard minard-site-explorer app-tilted-radio app-edge app-emptier-coinage
 	@echo "All applications built successfully"
 
 # ----------------------------------------------------------------------------
@@ -248,18 +248,6 @@ app-hylograph: lib-selection
 	cd "$(SHOWCASES)/hylograph-app" && spago build
 	@echo "Bundling hylograph..."
 	cd "$(SHOWCASES)/hylograph-app" && spago bundle -p hylograph-app --module Main --outfile public/bundle.js
-
-# ----------------------------------------------------------------------------
-# TreeBuilder Demo (psd3-timber-lieder)
-# ----------------------------------------------------------------------------
-
-app-timber-lieder: lib-selection
-	@echo "Installing npm dependencies for timber-lieder..."
-	cd "$(SHOWCASES)/psd3-timber-lieder" && npm install
-	@echo "Building timber-lieder..."
-	cd "$(SHOWCASES)/psd3-timber-lieder" && spago build
-	@echo "Bundling timber-lieder..."
-	cd "$(SHOWCASES)/psd3-timber-lieder" && spago bundle --module Main --outfile demo/bundle.js
 
 # ----------------------------------------------------------------------------
 # Minard (Code Cartography - promoted from Corrode Expel)
@@ -449,7 +437,7 @@ lib-site-music: lib-site-shell
 # ============================================================================
 
 .PHONY: serve-wasm serve-ee serve-ee-backend serve-ge serve-ge-backend
-.PHONY: serve-sankey serve-timber-lieder serve-minard serve-minard-backend
+.PHONY: serve-sankey serve-minard serve-minard-backend
 .PHONY: serve-tidal serve-tidal-backend serve-astar serve-landing
 .PHONY: serve-website serve-dashboard
 
@@ -500,11 +488,6 @@ serve-sankey: app-sankey
 serve-hylograph: app-hylograph
 	@echo "Serving Hylograph on port $(PORT)..."
 	cd "$(SHOWCASES)/hylograph-app/public" && python3 -m http.server $(PORT)
-
-# TreeBuilder Demo (Timber Lieder)
-serve-timber-lieder: app-timber-lieder
-	@echo "Serving TreeBuilder Demo on port $(PORT)..."
-	cd "$(SHOWCASES)/psd3-timber-lieder/demo" && python3 -m http.server $(PORT)
 
 # Minard (Code Cartography)
 serve-minard: minard-frontend
