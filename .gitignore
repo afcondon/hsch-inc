@@ -46,4 +46,13 @@ erl_crash.dump
 # - purescript-lua/
 # - purescript-lua-package-sets/
 # - purescript-python-new/
-apps/minard/
+
+# apps/minard: track docs, ignore build artifacts
+apps/minard/node_modules/
+apps/minard/**/node_modules/
+apps/minard/output/
+apps/minard/**/output/
+apps/minard/**/.spago/
+apps/minard/**/dist/
+apps/minard/**/*.duckdb
+apps/minard/**/*.duckdb.wal
