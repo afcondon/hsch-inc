@@ -1,25 +1,10 @@
 workspace:
-  packageSet:
-    registry: 72.0.1
+  # Solver mode - hylograph packages from registry
   extraPackages:
-    hylograph-graph:
-      path: "../../visualisation libraries/purescript-hylograph-graph"
-    hylograph-selection:
-      path: "../../visualisation libraries/purescript-hylograph-selection"
-    hylograph-layout:
-      path: "../../visualisation libraries/purescript-hylograph-layout"
-    hylograph-transitions:
-      path: "../../visualisation libraries/purescript-hylograph-transitions"
-    hylograph-simulation:
-      path: "../../visualisation libraries/purescript-hylograph-simulation"
-    hylograph-simulation-halogen:
-      path: "../../visualisation libraries/purescript-hylograph-simulation-halogen"
-    hylograph-simulation-core:
-      path: "../../visualisation libraries/purescript-hylograph-simulation-core"
-    hylograph-d3-kernel:
-      path: "../../visualisation libraries/purescript-hylograph-d3-kernel"
+    # Private showcase for L-System visualization
     hylograph-prim-zoo-mosh:
       path: "../../showcases/psd3-prim-zoo-mosh"
+    # Git dependency - not in registry
     html-parser-halogen:
       git: https://github.com/afcondon/purescript-html-parser-halogen.git
       ref: esmodules
@@ -35,37 +20,35 @@ package:
     outfile: public/bundle.js
     platform: browser
   dependencies:
-    - aff
-    - affjax
-    - affjax-web
-    - argonaut-codecs
-    - argonaut-core
-    - arrays
-    - console
-    - effect
-    - either
-    - foldable-traversable
-    - foreign
-    - halogen
-    - halogen-subscriptions
-    - halogen-svg-elems
-    - html-parser-halogen
-    - integers
-    - maybe
-    - ordered-collections
-    - prelude
-    - random
-    - routing
-    - strings
-    - web-dom
-    - web-events
-    - web-html
-    # Hylograph libraries for force layout and visualizations
-    - hylograph-graph
-    - hylograph-selection
-    - hylograph-simulation
-    - hylograph-simulation-halogen
-    - hylograph-simulation-core
-    - hylograph-d3-kernel
-    # L-System visualization from Zoo
-    - hylograph-prim-zoo-mosh
+    - aff: ">=8.0.0 <9.0.0"
+    - affjax: ">=13.0.0 <14.0.0"
+    - affjax-web: ">=1.0.0 <2.0.0"
+    - argonaut-codecs: ">=9.1.0 <10.0.0"
+    - argonaut-core: ">=7.0.0 <8.0.0"
+    - arrays: ">=7.3.0 <8.0.0"
+    - console: ">=6.1.0 <7.0.0"
+    - effect: ">=4.0.0 <5.0.0"
+    - either: ">=6.1.0 <7.0.0"
+    - foldable-traversable: ">=6.0.0 <7.0.0"
+    - foreign: ">=7.0.0 <8.0.0"
+    - halogen: ">=7.0.0 <8.0.0"
+    - halogen-subscriptions: ">=2.0.0 <3.0.0"
+    - halogen-svg-elems: ">=8.0.0 <9.0.0"
+    - html-parser-halogen: "*"
+    - hylograph-d3-kernel: ">=0.1.0 <0.2.0"
+    - hylograph-graph: ">=0.1.0 <0.2.0"
+    - hylograph-prim-zoo-mosh: "*"
+    - hylograph-selection: ">=0.1.1 <0.2.0"
+    - hylograph-simulation: ">=0.1.0 <0.2.0"
+    - hylograph-simulation-core: ">=0.1.0 <0.2.0"
+    - hylograph-simulation-halogen: ">=0.1.0 <0.2.0"
+    - integers: ">=6.0.0 <7.0.0"
+    - maybe: ">=6.0.0 <7.0.0"
+    - ordered-collections: ">=3.2.0 <4.0.0"
+    - prelude: ">=6.0.2 <7.0.0"
+    - random: ">=6.0.0 <7.0.0"
+    - routing: ">=11.0.0 <12.0.0"
+    - strings: ">=6.0.1 <7.0.0"
+    - web-dom: ">=6.0.0 <7.0.0"
+    - web-events: ">=4.0.0 <5.0.0"
+    - web-html: ">=4.1.1 <5.0.0"
