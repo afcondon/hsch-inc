@@ -10,10 +10,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ---
 
-## Architecture (10 documents)
+## Architecture (11 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Minard Vision | active | `docs/kb/architecture/minard-vision.md` | minard, code-cartography, visualization, LLM, fog-of-war, type-explorer |
 | HATS Existential Design | active | `docs/kb/architecture/hats-existential-design.md` | HATS, existential-types, CPS, heterogeneous-composition, psd3-selection |
 | CE2 Architecture Overview | active | `docs/kb/architecture/ce2-architecture.md` | ce2, code-explorer, halogen, psd3, visualization, state-machine |
 | PSD3 Interpreter Systems | active | `docs/kb/architecture/psd3-interpreter-systems.md` | finally-tagless, interpreters, AST, psd3-selection, psd3-simulation |
