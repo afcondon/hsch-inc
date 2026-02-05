@@ -200,6 +200,21 @@ services:
       retries: 3
 
   # ============================================================
+  # TYPE EXPLORER (Type relationship visualization)
+  # ============================================================
+  type-explorer:
+    profiles: ["minard", "full"]
+    build:
+      context: ./apps/type-explorer/frontend
+    networks:
+      - polyglot
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # ============================================================
   # WASM FORCE DEMO (Rust/WASM + JavaScript)
   # ============================================================
   wasm-demo:

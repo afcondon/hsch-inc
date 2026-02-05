@@ -25,6 +25,7 @@ docs/**/.DS_Store
 apps/*
 !apps/minard/
 !apps/hylographic/
+!apps/type-explorer/
 
 # Ignore common junk
 .DS_Store

@@ -25,7 +25,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
 
-## Plans (33 documents)
+## Plans (34 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
@@ -65,6 +65,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Hylograph Cloudflare Deployment | active | `docs/kb/plans/hylograph-cloudflare-deployment.md` | hylograph, cloudflare, deployment, infrastructure |
 | Beads Visualization Showcase | planned | `docs/kb/plans/beads-viz-showcase.md` | beads, visualization, force-graph, hats, showcase |
 | Code Explorer Evolution | active | `docs/kb/plans/code-explorer-evolution.md` | code-explorer, cli, visualization, halogen, developer-tools |
+| Type Explorer Plan | active | `docs/kb/plans/type-explorer-plan.md` | type-explorer, visualization, hylograph, minard, types |
 
 ## Research (16 documents)
 
@@ -86,7 +87,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | SSRS Integration for HATS | active | `docs/kb/research/ssrs-hats-integration.md` | recursion-schemes, ssrs, hats, hylograph, stack-safety |
 | Booklet Printing Automation | research | `docs/kb/research/booklet-printing-automation.md` | macos, printing, automation, pdf |
 
-## Reference (10 documents)
+## Reference (11 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
@@ -99,6 +100,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Lessons Learned (Simpsons) | active | `site/website/src/Viz/Simpsons/LESSONS-LEARNED.md` | lessons-learned, D3 |
 | psd3-selection Content Status | active | `visualisation libraries/purescript-psd3-selection/docs/CONTENT-STATUS.md` | documentation, status |
 | Presentation Planning | active | `visualisation libraries/purescript-psd3-selection/docs/PRESENTATION-PLANNING.md` | presentation, planning |
+| Hylograph Type System Analysis | active | `docs/kb/reference/hylograph-type-system-analysis.md` | hylograph, types, architecture, finally-tagless |
 | Documentation TOC | active | `apps/shaped-steer/docs/DOCUMENTATION-TOC.md` | documentation, diátaxis |
 
 ## How-To (10 documents)
@@ -134,8 +136,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 66 documents
-- **Active**: 57
+- **Total**: 68 documents
+- **Active**: 59
 - **Planned**: 3
 - **Implemented**: 5
 - **Superseded/Stale**: 1

@@ -73,7 +73,7 @@ APPS := apps
 .PHONY: lib-graph lib-layout lib-selection lib-music lib-simulation
 .PHONY: lib-showcase-shell lib-simulation-halogen
 .PHONY: app-wasm app-embedding-explorer app-sankey app-hylograph app-minard minard-site-explorer spider-analyze spider-compare spider-html app-tilted-radio
-.PHONY: app-edge app-emptier-coinage app-simpsons app-nn
+.PHONY: app-edge app-emptier-coinage app-simpsons app-nn app-type-explorer
 .PHONY: wasm-kernel
 .PHONY: npm-install npm-install-embedding-explorer npm-install-minard
 .PHONY: ee-server ge-server ee-website ge-website landing
@@ -312,6 +312,16 @@ spider-html: minard-site-explorer
 	@echo "Report: apps/minard/site-explorer/site-explorer.html"
 
 # ----------------------------------------------------------------------------
+# Type Explorer (Type relationship visualization)
+# ----------------------------------------------------------------------------
+
+app-type-explorer: lib-selection lib-simulation
+	@echo "Building type-explorer..."
+	cd "$(APPS)/type-explorer/frontend" && spago build
+	@echo "Bundling type-explorer..."
+	cd "$(APPS)/type-explorer/frontend" && spago bundle --platform browser --bundle-type app --outfile public/bundle.js
+
+# ----------------------------------------------------------------------------
 # Tilted Radio (Tidal Editor - Purerl + PureScript)
 # ----------------------------------------------------------------------------
 
@@ -437,7 +447,7 @@ lib-site-music: lib-site-shell
 # ============================================================================
 
 .PHONY: serve-wasm serve-ee serve-ee-backend serve-ge serve-ge-backend
-.PHONY: serve-sankey serve-minard serve-minard-backend
+.PHONY: serve-sankey serve-minard serve-minard-backend serve-type-explorer
 .PHONY: serve-tidal serve-tidal-backend serve-astar serve-landing
 .PHONY: serve-website serve-dashboard
 
@@ -488,6 +498,11 @@ serve-sankey: app-sankey
 serve-hylograph: app-hylograph
 	@echo "Serving Hylograph on port $(PORT)..."
 	cd "$(SHOWCASES)/hylograph-app/public" && python3 -m http.server $(PORT)
+
+# Type Explorer
+serve-type-explorer: app-type-explorer
+	@echo "Serving Type Explorer on port $(PORT)..."
+	cd "$(APPS)/type-explorer/frontend/public" && python3 -m http.server $(PORT)
 
 # Minard (Code Cartography)
 serve-minard: minard-frontend
