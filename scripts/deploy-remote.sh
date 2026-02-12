@@ -23,9 +23,9 @@ BUILD_ONLY="${3:-}"
 # PATH for remote commands (Docker Desktop on macOS needs /usr/local/bin)
 REMOTE_PATH="export PATH=/usr/local/bin:/opt/homebrew/bin:\$PATH"
 
-# Get the repo root (where this script lives is scripts/, go up one level)
+# Get the workspace root (script is in purescript-polyglot/scripts/, go up two levels)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 # Colors for output
 RED='\033[0;31m'
@@ -82,9 +82,11 @@ fi
 info "Creating remote directory..."
 ssh "$HOST" "mkdir -p $REMOTE_DIR"
 
-# Rsync the repo (excluding heavy/dev-only stuff)
+# Rsync only the directories referenced by docker-compose.yml
+# The workspace has many sibling repos; we only sync what's needed for Docker builds.
 info "Syncing files to remote (this may take a while on first run)..."
-rsync -avz --delete \
+
+RSYNC_OPTS=(-avz --delete \
     --exclude='.git' \
     --exclude='node_modules' \
     --exclude='.spago' \
@@ -93,14 +95,28 @@ rsync -avz --delete \
     --exclude='.mypy_cache' \
     --exclude='*.pyc' \
     --exclude='.DS_Store' \
-    --exclude='purescript-lua' \
-    --exclude='purescript-python-new' \
-    --exclude='_external' \
-    "$REPO_ROOT/" "$HOST:$REMOTE_DIR/"
+    --exclude='output' \
+)
+
+# docker-compose.yml itself
+rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/docker-compose.yml" "$HOST:$REMOTE_DIR/"
+
+# CodeExplorer (minard, type-explorer, site-explorer)
+rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/CodeExplorer/" "$HOST:$REMOTE_DIR/CodeExplorer/"
+
+# Showcases (edge router, tilted-radio, hypo-punter, sankey, wasm, optics, zoo, layouts, hylograph)
+rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/purescript-hylograph-showcases/" "$HOST:$REMOTE_DIR/purescript-hylograph-showcases/"
+
+# Ports (purerl-tidal backend)
+rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/purescript-ports/purerl-tidal/" "$HOST:$REMOTE_DIR/purescript-ports/purerl-tidal/"
+
+# Polyglot (website, blog, library doc sites)
+rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/purescript-polyglot/site/" "$HOST:$REMOTE_DIR/purescript-polyglot/site/"
+rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/purescript-polyglot/blog/" "$HOST:$REMOTE_DIR/purescript-polyglot/blog/"
 
 # Build Docker images on remote
 info "Building Docker images..."
-ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker-compose build"
+ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker compose build"
 
 if [ "$BUILD_ONLY" = "--build-only" ]; then
     info "Build complete (--build-only specified, not starting containers)"
@@ -109,11 +125,11 @@ fi
 
 # Start the stack
 info "Starting Docker stack..."
-ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker-compose up -d"
+ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker compose up -d"
 
 # Show status
 info "Deployment complete!"
 echo ""
-ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker-compose ps"
+ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker compose ps"
 echo ""
 info "Access the application at: http://$HOST/"
