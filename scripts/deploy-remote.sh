@@ -2,9 +2,9 @@
 # deploy-remote.sh - Deploy PSD3 Docker stack to remote host
 #
 # Usage:
-#   ./scripts/deploy-remote.sh user@macmini
-#   ./scripts/deploy-remote.sh user@macmini ~/psd3
-#   ./scripts/deploy-remote.sh user@macmini ~/psd3 --build-only
+#   ./scripts/deploy-remote.sh user@macmini minard
+#   ./scripts/deploy-remote.sh user@macmini full ~/psd3
+#   ./scripts/deploy-remote.sh user@macmini minard ~/psd3 --build-only
 #
 # Prerequisites:
 #   - SSH access to remote host (key-based auth recommended)
@@ -17,8 +17,9 @@
 set -e
 
 HOST="${1:-}"
-REMOTE_DIR="${2:-~/psd3}"
-BUILD_ONLY="${3:-}"
+PROFILE="${2:-full}"
+REMOTE_DIR="${3:-\~/psd3}"
+BUILD_ONLY="${4:-}"
 
 # PATH for remote commands (Docker Desktop on macOS needs /usr/local/bin)
 REMOTE_PATH="export PATH=/usr/local/bin:/opt/homebrew/bin:\$PATH"
@@ -41,17 +42,19 @@ if [ -z "$HOST" ]; then
     echo "PSD3 Remote Deployment Script"
     echo "=============================="
     echo ""
-    echo "Usage: $0 user@host [remote_dir] [--build-only]"
+    echo "Usage: $0 user@host [profile] [remote_dir] [--build-only]"
     echo ""
     echo "Arguments:"
     echo "  user@host     SSH destination (required)"
+    echo "  profile       Docker Compose profile (default: full)"
+    echo "                Options: core, minard, tidal, hypo, sankey, wasm, libs, showcases, full"
     echo "  remote_dir    Path on remote host (default: ~/psd3)"
     echo "  --build-only  Build images but don't start containers"
     echo ""
     echo "Examples:"
-    echo "  $0 admin@macmini.local"
-    echo "  $0 admin@192.168.1.100 /opt/psd3"
-    echo "  $0 admin@macmini.local ~/psd3 --build-only"
+    echo "  $0 admin@macmini.local minard"
+    echo "  $0 admin@192.168.1.100 full /opt/psd3"
+    echo "  $0 admin@macmini.local minard ~/psd3 --build-only"
     echo ""
     echo "Prerequisites:"
     echo "  1. SSH key-based authentication to remote host"
@@ -62,6 +65,7 @@ fi
 
 info "PSD3 Remote Deployment"
 echo "  Host: $HOST"
+echo "  Profile: $PROFILE"
 echo "  Remote dir: $REMOTE_DIR"
 echo "  Local repo: $REPO_ROOT"
 echo ""
@@ -95,7 +99,6 @@ RSYNC_OPTS=(-avz --delete \
     --exclude='.mypy_cache' \
     --exclude='*.pyc' \
     --exclude='.DS_Store' \
-    --exclude='output' \
 )
 
 # docker-compose.yml itself
@@ -116,7 +119,7 @@ rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/purescript-polyglot/blog/" "$HOST:$REMOTE_D
 
 # Build Docker images on remote
 info "Building Docker images..."
-ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker compose build"
+ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker compose --profile $PROFILE build"
 
 if [ "$BUILD_ONLY" = "--build-only" ]; then
     info "Build complete (--build-only specified, not starting containers)"
@@ -125,11 +128,11 @@ fi
 
 # Start the stack
 info "Starting Docker stack..."
-ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker compose up -d"
+ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker compose --profile $PROFILE up -d"
 
 # Show status
 info "Deployment complete!"
 echo ""
-ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker compose ps"
+ssh "$HOST" "$REMOTE_PATH && cd $REMOTE_DIR && docker compose --profile $PROFILE ps"
 echo ""
 info "Access the application at: http://$HOST/"
