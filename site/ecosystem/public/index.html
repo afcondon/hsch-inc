@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The PureScript Libraries Ecosystem</title>
+  <link rel="stylesheet" href="sigil.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page">
+    <h1>The PureScript Libraries Ecosystem</h1>
+    <p class="subtitle">The Lonely Planet Guide to PureScript-landia</p>
+
+    <p class="pitch">
+      Not Pursuit (which, since it includes everything, emphasizes nothing).
+      Not documentation. An opinionated, curated guide to the libraries that
+      make PureScript worth learning &mdash; with type signatures you can read,
+      compelling examples, and memorable framing.
+    </p>
+
+    <p>
+      Learning Haskell or PureScript is hard enough that people over-invest in the
+      language and under-invest in the libraries. The inverse of Python, where the
+      libraries <em>are</em> the reason to learn. This guide makes the case that
+      PureScript's libraries are worth the climb.
+    </p>
+
+    <!-- Hero sigil: a taste of what sigil rendering looks like -->
+    <div class="sigil-block">
+      <div class="sigil-label">A taste of the type signatures ahead</div>
+      <div id="sigil-hero-bind"></div>
+    </div>
+
+    <!-- Section directory -->
+
+    <div class="section-grid">
+      <div class="section-category">Foundational &mdash; you can't avoid these, and you shouldn't want to</div>
+
+      <a class="section-card" href="type-classes/">
+        <span class="num">01</span>
+        <span class="title">The Type Class Hierarchy</span>
+        <span class="tagline">The intellectual backbone. Functor to Monad, Eq to Ord, Semiring to Field.</span>
+      </a>
+      <a class="section-card" href="effects/">
+        <span class="num">02</span>
+        <span class="title">Effect &amp; Aff</span>
+        <span class="tagline">The thing that actually makes pure functional programming practical.</span>
+      </a>
+      <a class="section-card" href="optics/">
+        <span class="num">03</span>
+        <span class="title">Optics</span>
+        <span class="tagline">Lenses, prisms, traversals. Once you learn it you can't go back.</span>
+      </a>
+
+      <div class="section-category">Workhorse libraries &mdash; reach for these weekly</div>
+
+      <a class="section-card" href="containers/">
+        <span class="num">04</span>
+        <span class="title">Containers</span>
+        <span class="tagline">Map, Set, Array, List, NonEmpty. Write it once, it works on every container.</span>
+      </a>
+      <a class="section-card" href="parsing/">
+        <span class="num">05</span>
+        <span class="title">Parsing</span>
+        <span class="tagline">Composable, type-safe parsing that makes regex look primitive.</span>
+      </a>
+      <a class="section-card" href="codecs/">
+        <span class="num">06</span>
+        <span class="title">Argonaut &amp; Codecs</span>
+        <span class="tagline">Principled JSON serialization. Bidirectional, composable, type-safe.</span>
+      </a>
+      <a class="section-card" href="numbers/">
+        <span class="num">07</span>
+        <span class="title">Numbers</span>
+        <span class="tagline">The algebraic tower: Semiring to Field. Generic algorithms for free.</span>
+      </a>
+
+      <div class="section-category">Application frameworks</div>
+
+      <a class="section-card" href="halogen/">
+        <span class="num">08</span>
+        <span class="title">Halogen</span>
+        <span class="tagline">THE PureScript UI framework. Type-safe components worth the learning curve.</span>
+      </a>
+      <a class="section-card" href="httpurple/">
+        <span class="num">09</span>
+        <span class="title">HTTPurple</span>
+        <span class="tagline">Server-side PureScript. Same language, same type safety, client and server.</span>
+      </a>
+      <a class="section-card" href="routing/">
+        <span class="num">10</span>
+        <span class="title">routing-duplex</span>
+        <span class="tagline">Bidirectional routing. Parse URLs and print them with a single definition.</span>
+      </a>
+
+      <div class="section-category">Techniques &amp; patterns</div>
+
+      <a class="section-card" href="ffi/">
+        <span class="num">11</span>
+        <span class="title">FFI</span>
+        <span class="tagline">There's a Right Way and many Wrong Ways. Never depend on runtime representation.</span>
+      </a>
+      <a class="section-card" href="run/">
+        <span class="num">12</span>
+        <span class="title">Run / Free</span>
+        <span class="tagline">Write your program as a description, then choose how to interpret it.</span>
+      </a>
+      <a class="section-card" href="quickcheck/">
+        <span class="num">13</span>
+        <span class="title">QuickCheck</span>
+        <span class="tagline">Describe what should be true, let the machine find counterexamples.</span>
+      </a>
+
+      <div class="section-category">Showcase</div>
+
+      <a class="section-card" href="hylograph/">
+        <span class="num">14</span>
+        <span class="title">Hylograph</span>
+        <span class="tagline">Declarative visualization. This site is the demo.</span>
+      </a>
+      <a class="section-card" href="sigil/">
+        <span class="num">15</span>
+        <span class="title">Sigil</span>
+        <span class="tagline">Every beautifully typeset signature on this site comes from sigil.</span>
+      </a>
+      <a class="section-card" href="ports/">
+        <span class="num">16</span>
+        <span class="title">Haskell Ports</span>
+        <span class="tagline">Good ideas cross language boundaries.</span>
+      </a>
+    </div>
+
+    <div class="footer">
+      Built with <a href="https://github.com/afcondon/purescript-sigil">sigil</a>
+      and <a href="https://github.com/afcondon/purescript-hylograph-selection">hylograph</a>.
+    </div>
+  </div>
+
+  <script type="module" src="bundle.js"></script>
+</body>
+</html>
