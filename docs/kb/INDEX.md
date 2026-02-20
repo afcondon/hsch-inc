@@ -68,7 +68,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Code Explorer Evolution | active | `docs/kb/plans/code-explorer-evolution.md` | code-explorer, cli, visualization, halogen, developer-tools |
 | Type Explorer Plan | active | `docs/kb/plans/type-explorer-plan.md` | type-explorer, visualization, hylograph, minard, types |
 
-## Research (16 documents)
+## Research (17 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
@@ -87,6 +87,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Grid Snapping in Force Layouts | active | `docs/kb/research/grid-snapping-force-layouts.md` | force-layout, grid, d3, layout-enhancement, value-add |
 | SSRS Integration for HATS | active | `docs/kb/research/ssrs-hats-integration.md` | recursion-schemes, ssrs, hats, hylograph, stack-safety |
 | Booklet Printing Automation | research | `docs/kb/research/booklet-printing-automation.md` | macos, printing, automation, pdf |
+| PureScript .NET Backend Feasibility | active | `docs/kb/research/purescript-dotnet-backend-feasibility.md` | PureScript, .NET, CLR, compiler, backend, F# |
 
 ## Reference (11 documents)
 
@@ -137,7 +138,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 68 documents
+- **Total**: 69 documents
 - **Active**: 59
 - **Planned**: 3
 - **Implemented**: 5
@@ -149,7 +150,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 2. **Unified DAG Systems** - Spreadsheet/notebook/build unification, human+AI co-driving
 3. **Algorithmic Music** - Tidal patterns, Erlang backend, modular synth
 4. **Visualization** - D3-style declarative system (psd3-selection, graph, tree)
-5. **Multi-Backend** - JS, Python (PurePy), Erlang (purerl), Lua (pslua), WASM, Haskell (proposed)
+5. **Multi-Backend** - JS, Python (PurePy), Erlang (purerl), Lua (pslua), WASM, Haskell (proposed), .NET (researched)
 6. **DevOps & Workflow** - Docker profiles, focus management, deployment automation, Claude session tooling
 7. **Interactive Development** - Playgrounds, REPL alternatives, typed feedback loops, refinement types
 8. **Recursion Schemes** - Hylomorphism-based visualization, L-systems, type-directed diagrams
