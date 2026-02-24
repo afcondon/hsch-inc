@@ -68,7 +68,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Code Explorer Evolution | active | `docs/kb/plans/code-explorer-evolution.md` | code-explorer, cli, visualization, halogen, developer-tools |
 | Type Explorer Plan | active | `docs/kb/plans/type-explorer-plan.md` | type-explorer, visualization, hylograph, minard, types |
 
-## Research (17 documents)
+## Research (18 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
@@ -88,6 +88,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | SSRS Integration for HATS | active | `docs/kb/research/ssrs-hats-integration.md` | recursion-schemes, ssrs, hats, hylograph, stack-safety |
 | Booklet Printing Automation | research | `docs/kb/research/booklet-printing-automation.md` | macos, printing, automation, pdf |
 | PureScript .NET Backend Feasibility | active | `docs/kb/research/purescript-dotnet-backend-feasibility.md` | PureScript, .NET, CLR, compiler, backend, F# |
+| PureScript Alternative Backends Comparison | active | `docs/kb/research/purescript-alternative-backends-comparison.md` | PureScript, backends, purerl, purepy, purescm, .NET, FFI, cross-backend |
 
 ## Reference (11 documents)
 
@@ -138,8 +139,8 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ## Statistics
 
-- **Total**: 69 documents
-- **Active**: 59
+- **Total**: 70 documents
+- **Active**: 60
 - **Planned**: 3
 - **Implemented**: 5
 - **Superseded/Stale**: 1
