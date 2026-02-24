@@ -1,0 +1,105 @@
+= Type-Safe Attribute System
+:description: Understanding PSD3's type-safe attribute system with phantom types
+:toc: right
+:toclevels: 2
+:source-highlighter: highlight.js
+
+A key innovation of D3 is the natural way to go from static to data-driven attributes. PSD3 preserves this flexibility while adding compile-time type safety through typeclasses and phantom types.
+
+== Attribute Variants
+
+Attributes in PSD3 can take three forms, all with the same clean syntax:
+
+image::assets/diagrams/attribute-resolution.svg[Attribute type resolution diagram]
+
+[cols="1,2,2"]
+|===
+| Form | Example | Use Case
+
+| *Static*
+| `radius 10.0`
+| Same value for all elements
+
+| *Datum Function*
+| `cx (\d -> d.x)`
+| Value depends on bound data
+
+| *Datum + Index*
+| `x (\d i -> 50.0 + i * 100.0)`
+| Value depends on data and position
+|===
+
+TIP: The `IsAttribute` typeclass resolves all three forms at compile time.
+
+== The Contravariant Pattern
+
+Attributes form a _Contravariant Functor_. This means you can transform the input data type before the attribute sees it.
+
+Why contravariant? Regular functors transform _outputs_. Attributes transform _inputs_ (the datum they receive).
+
+[source,purescript]
+----
+-- Extract the name field before setting text content
+cmap _.name (textContent identity)
+
+-- Transform coordinates before positioning
+cmap (\d -> { x: d.lon * 10.0, y: d.lat * 10.0 }) (cx _.x)
+----
+
+== Type Safety Guarantees
+
+The attribute system provides several compile-time guarantees:
+
+* *Datum type matching* - Attributes must match the selection's datum type
+* *Attribute value types* - `radius` requires Number, `fill` requires String
+* *No missing attributes* - Arrays of attributes are explicit and type-checked
+
+=== Common Compile-Time Errors
+
+[source,purescript]
+----
+-- Type error: expected Number, got String
+radius "10"
+
+-- Type error: field 'x' not found in datum type
+cx (\d -> d.x)  -- when datum doesn't have 'x' field
+----
+
+NOTE: Runtime errors in D3 become compile-time errors in PSD3.
+
+== Common Attributes
+
+PSD3 provides typed wrappers for all common SVG and HTML attributes:
+
+=== Positioning
+`cx`, `cy`, `x`, `y`, `x1`, `y1`, `x2`, `y2` - coordinate positions
+
+=== Dimensions
+`width`, `height`, `radius`, `rx`, `ry` - size attributes
+
+=== Styling
+`fill`, `stroke`, `strokeWidth`, `fillOpacity`, `strokeOpacity` - colors and strokes
+
+=== Text
+`textContent`, `textAnchor`, `fontSize`, `fontWeight` - text styling
+
+=== Transforms
+`transform`, `translate`, `rotate`, `scale` - geometric transforms
+
+=== General
+`class_`, `id_`, `d` (for paths), `viewBox` - common utilities
+
+== Summary
+
+PSD3's attribute system:
+
+* Three forms: static, datum function, datum+index
+* Resolved at compile time via `IsAttribute` typeclass
+* Contravariant functor for data transformation
+* Type-safe: datum types, value types, completeness
+* Comprehensive coverage of SVG and HTML attributes
+
+== See Also
+
+* xref:understanding/selections.adoc[Type-Safe Selections] - The indexed monad pattern
+* xref:understanding/grammar.adoc[Grammar of D3] - How PSD3 models D3's concepts

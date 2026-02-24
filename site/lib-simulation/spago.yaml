@@ -1,0 +1,35 @@
+workspace:
+  # Solver mode - hylograph packages from registry
+  extraPackages:
+    # lib-shell is private, not published
+    hylograph-lib-shell:
+      path: "../lib-shell"
+
+package:
+  name: lib-simulation-site
+  description: Landing page for hylograph-simulation library
+  bundle:
+    module: Main
+    outfile: public/bundle.js
+    platform: browser
+  dependencies:
+    - aff
+    - affjax
+    - affjax-web
+    - argonaut-core
+    - argonaut-codecs
+    - arrays
+    - effect
+    - either
+    - foldable-traversable
+    - halogen
+    - halogen-svg-elems
+    - integers
+    - maybe
+    - ordered-collections
+    - prelude
+    - hylograph-lib-shell
+    - hylograph-selection
+    - hylograph-simulation
+    - strings
+    - tuples

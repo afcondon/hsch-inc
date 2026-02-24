@@ -1,0 +1,227 @@
+= Force Simulation
+:description: Using the useSimulation hook for force-directed layouts
+
+The `useSimulation` hook provides full force simulation lifecycle management with automatic state updates on each tick.
+
+== Basic Usage
+
+[source,purescript]
+----
+import PSD3.React.Hooks (useContainerId)
+import PSD3.React.Simulation (useSimulation)
+import PSD3.ForceEngine.Setup as Setup
+
+-- Define force configuration
+forceSetup :: Setup.Setup MyNode
+forceSetup = Setup.setup "my-graph"
+  [ Setup.manyBody "charge" # Setup.withStrength (Setup.static (-100.0))
+  , Setup.link "links" # Setup.withDistance (Setup.static 30.0)
+  , Setup.center "center"
+  ]
+
+mkForceGraph :: Component { nodes :: Array MyNode, links :: Array MyLink }
+mkForceGraph = do
+  containerId <- useContainerId
+
+  component "ForceGraph" \props -> React.do
+    -- Hook manages everything
+    { currentNodes, isRunning } <-
+      useSimulation forceSetup props.nodes props.links
+
+    -- Re-render when positions update
+    useEffect currentNodes do
+      renderNodes containerId currentNodes
+      pure mempty
+
+    pure $ R.div
+      { id: containerId
+      , style: R.css { width: "800px", height: "600px" }
+      }
+----
+
+== How It Works
+
+The `useSimulation` hook:
+
+1. *Creates simulation* on component mount
+2. *Applies setup* configuration (forces, parameters)
+3. *Sets initial data* (nodes and links)
+4. *Starts the simulation*
+5. *Updates `currentNodes`* on each tick (~60fps)
+6. *Handles prop changes* with GUP semantics
+7. *Stops simulation* on unmount
+
+== Return Value
+
+[source,purescript]
+----
+type UseSimulationResult row linkRow =
+  { simulation :: Maybe (Simulation row linkRow)
+  , currentNodes :: Array (SimulationNode row)
+  , isRunning :: Boolean
+  , alpha :: Number
+  }
+----
+
+[cols="1,3"]
+|===
+| Field | Description
+
+| `simulation` | The simulation handle (for direct access if needed)
+| `currentNodes` | Nodes with current positions, updated each tick
+| `isRunning` | `true` while simulation is active
+| `alpha` | Current alpha value (1.0 → 0.0 as simulation cools)
+|===
+
+== Node Type Requirements
+
+Your node type must extend `SimulationNode`:
+
+[source,purescript]
+----
+import PSD3.ForceEngine.Simulation (SimulationNode)
+import Data.Nullable (Nullable)
+import Data.Nullable as Nullable
+
+-- SimulationNode adds: id, x, y, vx, vy, fx, fy
+type MyNode = SimulationNode (name :: String, group :: Int)
+
+-- Creating nodes
+myNodes :: Array MyNode
+myNodes =
+  [ { id: 0, x: 0.0, y: 0.0, vx: 0.0, vy: 0.0
+    , fx: Nullable.null, fy: Nullable.null
+    , name: "Node A", group: 1 }
+  , { id: 1, x: 0.0, y: 0.0, vx: 0.0, vy: 0.0
+    , fx: Nullable.null, fy: Nullable.null
+    , name: "Node B", group: 1 }
+  ]
+----
+
+== Custom Callbacks
+
+Use `useSimulationWithCallbacks` for more control:
+
+[source,purescript]
+----
+import PSD3.React.Simulation (useSimulationWithCallbacks, defaultCallbackHandlers)
+
+mkForceGraph = do
+  containerId <- useContainerId
+
+  component "ForceGraph" \props -> React.do
+    status /\ setStatus <- useState "Starting..."
+
+    let handlers =
+          { onTick: pure unit
+          , onStart: setStatus \_ -> "Running..."
+          , onStop: setStatus \_ -> "Settled"
+          , onAlphaThreshold: \a ->
+              when (a < 0.1) $ setStatus \_ -> "Almost done..."
+          }
+
+    { currentNodes } <-
+      useSimulationWithCallbacks forceSetup props.nodes props.links handlers
+
+    useEffect currentNodes do
+      renderNodes containerId currentNodes
+      pure mempty
+
+    pure $ R.div_
+      [ R.div { id: containerId }
+      , R.p_ [ R.text status ]
+      ]
+----
+
+== Responding to Data Changes
+
+When `props.nodes` or `props.links` change, the hook automatically:
+
+1. Calls `applySetupWithData` (GUP semantics)
+2. Preserves simulation state for existing nodes (positions, velocities)
+3. Reheats the simulation
+
+[source,purescript]
+----
+-- Parent component changes data
+component "App" \_props -> React.do
+  nodes /\ setNodes <- useState initialNodes
+
+  pure $ R.div_
+    [ forceGraph { nodes, links }
+    , R.button
+        { onClick: handler_ $ setNodes \_ -> moreNodes }
+        [ R.text "Add nodes" ]
+    ]
+----
+
+== Adding Drag Behavior
+
+[source,purescript]
+----
+import PSD3.ForceEngine.Simulation as Sim
+
+mkDraggableGraph = do
+  containerId <- useContainerId
+
+  component "DraggableGraph" \props -> React.do
+    { simulation, currentNodes } <-
+      useSimulation forceSetup props.nodes props.links
+
+    -- Render nodes
+    useEffect currentNodes do
+      renderNodes containerId currentNodes
+      pure mempty
+
+    -- Attach drag after DOM is ready
+    useEffectOnce do
+      -- Small delay to ensure DOM is rendered
+      _ <- setTimeout 0 do
+        case simulation of
+          Nothing -> pure unit
+          Just sim -> do
+            circles <- Sim.querySelectorElements ("#" <> containerId <> " circle")
+            Sim.attachDrag circles sim
+      pure mempty
+
+    pure $ R.div { id: containerId }
+----
+
+== Switching Force Configurations
+
+Define multiple setups and switch between them:
+
+[source,purescript]
+----
+gridSetup = Setup.setup "grid"
+  [ Setup.positionX "x" # Setup.withX (Setup.dynamic _.gridX)
+  , Setup.positionY "y" # Setup.withY (Setup.dynamic _.gridY)
+  ]
+
+forceSetup = Setup.setup "force"
+  [ Setup.manyBody "charge" # Setup.withStrength (Setup.static (-100.0))
+  , Setup.link "links" # Setup.withDistance (Setup.static 30.0)
+  ]
+
+mkSwitchableGraph = do
+  containerId <- useContainerId
+
+  component "SwitchableGraph" \props -> React.do
+    useGrid /\ setUseGrid <- useState false
+
+    let currentSetup = if useGrid then gridSetup else forceSetup
+
+    { currentNodes } <- useSimulation currentSetup props.nodes props.links
+
+    pure $ R.div_
+      [ R.div { id: containerId }
+      , R.button
+          { onClick: handler_ $ setUseGrid not }
+          [ R.text $ if useGrid then "Force Layout" else "Grid Layout" ]
+      ]
+----
+
+== Next Steps
+
+* xref:getting-started/click-events.adoc[Click Events] - Surface D3 events to React
+* xref:reference/hooks-api.adoc[Hooks API] - Full API reference

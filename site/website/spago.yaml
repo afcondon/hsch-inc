@@ -1,0 +1,88 @@
+workspace:
+  # No packageSet - using solver mode to pull from live registry
+  extraPackages:
+    # These are NOT yet published to registry (in sibling repo)
+    hylograph-tidal:
+      path: "../../../purescript-hylograph-showcases/psd3-tilted-radio/purescript-psd\
+        3-tidal"
+    hylograph-showcase-shell:
+      path: "../showcase-shell"
+    html-parser-halogen:
+      git: https://github.com/afcondon/purescript-html-parser-halogen.git
+      ref: esmodules
+      dependencies:
+        - halogen
+        - string-parsers
+
+package:
+  name: demo-website
+  description: PSD3 documentation and examples website
+  bundle:
+    module: Hylograph.Main
+    outfile: public/bundle.js
+    platform: browser
+  dependencies:
+    - aff: ">=8.0.0 <9.0.0"
+    - affjax: ">=13.0.0 <14.0.0"
+    - affjax-web: ">=1.0.0 <2.0.0"
+    - argonaut-codecs: ">=9.1.0 <10.0.0"
+    - argonaut-core: ">=7.0.0 <8.0.0"
+    - arrays: ">=7.3.0 <8.0.0"
+    - bifunctors: ">=6.1.0 <7.0.0"
+    - console: ">=6.1.0 <7.0.0"
+    - const: ">=6.0.0 <7.0.0"
+    - datetime: ">=6.1.0 <7.0.0"
+    - debug: ">=6.0.2 <7.0.0"
+    - dom-indexed: ">=13.0.0 <14.0.0"
+    - effect: ">=4.0.0 <5.0.0"
+    - either: ">=6.1.0 <7.0.0"
+    - exceptions: ">=6.1.0 <7.0.0"
+    - foldable-traversable: ">=6.0.0 <7.0.0"
+    - foreign: ">=7.0.0 <8.0.0"
+    - foreign-object: ">=4.1.0 <5.0.0"
+    - functions: ">=6.0.0 <7.0.0"
+    - graphs: ">=8.1.0 <9.0.0"
+    - halogen: ">=7.0.0 <8.0.0"
+    - halogen-subscriptions: ">=2.0.0 <3.0.0"
+    - halogen-svg-elems: ">=8.0.0 <9.0.0"
+    - halogen-vdom: ">=8.0.0 <9.0.0"
+    - html-parser-halogen: "*"
+    - hylograph-canvas: ">=0.1.0 <0.2.0"
+    - hylograph-d3-kernel: ">=0.1.0 <0.2.0"
+    - hylograph-layout: ">=0.1.0 <0.2.0"
+    - hylograph-music: ">=0.1.0 <0.2.0"
+    - hylograph-selection: ">=0.1.1 <0.2.0"
+    - hylograph-simulation: ">=0.1.0 <0.2.0"
+    - hylograph-simulation-core: ">=0.1.0 <0.2.0"
+    - hylograph-simulation-halogen: ">=0.1.0 <0.2.0"
+    - hylograph-tidal: "*"
+    - hylograph-wasm-kernel: ">=0.1.0 <0.2.0"
+    - indexed-monad: ">=3.0.0 <4.0.0"
+    - integers: ">=6.0.0 <7.0.0"
+    - intersection-observer: ">=1.0.1 <2.0.0"
+    - lists: ">=7.0.0 <8.0.0"
+    - maybe: ">=6.0.0 <7.0.0"
+    - newtype: ">=5.0.0 <6.0.0"
+    - nullable: ">=6.0.0 <7.0.0"
+    - numbers: ">=9.0.1 <10.0.0"
+    - ordered-collections: ">=3.2.0 <4.0.0"
+    - parsing: ">=11.0.0 <12.0.0"
+    - partial: ">=4.0.0 <5.0.0"
+    - prelude: ">=6.0.2 <7.0.0"
+    - profunctor: ">=6.0.1 <7.0.0"
+    - profunctor-lenses: ">=8.0.0 <9.0.0"
+    - psci-support: ">=6.0.0 <7.0.0"
+    - random: ">=6.0.0 <7.0.0"
+    - read: ">=1.0.1 <2.0.0"
+    - refs: ">=6.0.0 <7.0.0"
+    - routing: ">=11.0.0 <12.0.0"
+    - strings: ">=6.0.1 <7.0.0"
+    - tailrec: ">=6.1.0 <7.0.0"
+    - transformers: ">=6.1.0 <7.0.0"
+    - tuples: ">=7.0.0 <8.0.0"
+    - typelevel-prelude: ">=7.0.0 <8.0.0"
+    - unsafe-coerce: ">=6.0.0 <7.0.0"
+    - web-dom: ">=6.0.0 <7.0.0"
+    - web-events: ">=4.0.0 <5.0.0"
+    - web-html: ">=4.1.1 <5.0.0"
+    - web-uievents: ">=5.0.0 <6.0.0"

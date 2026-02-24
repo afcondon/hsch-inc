@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hylograph - PureScript Data Visualization</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Logo Curtain -->
+  <div class="curtain" id="curtain">
+    <img src="images/logo.png" alt="Hylograph" class="curtain__logo">
+    <span class="curtain__logotype">Hylograph</span>
+  </div>
+
+  <main class="docs-landing">
+
+    <!-- Docs Quadrant -->
+    <section class="docs-grid">
+      <a href="getting-started/" class="doc-card">
+        <div class="doc-card__image">
+          <img src="images/getting-started.jpeg" alt="">
+        </div>
+        <div class="doc-card__content">
+          <h2>Getting Started</h2>
+          <p>Installation, setup, and your first visualization</p>
+        </div>
+      </a>
+
+      <a href="how-to/" class="doc-card">
+        <div class="doc-card__image">
+          <img src="images/howto.jpeg" alt="">
+        </div>
+        <div class="doc-card__content">
+          <h2>How-To Guides</h2>
+          <p>Step-by-step instructions for specific visualizations</p>
+        </div>
+      </a>
+
+      <a href="reference/" class="doc-card">
+        <div class="doc-card__image">
+          <img src="images/reference.jpeg" alt="">
+        </div>
+        <div class="doc-card__content">
+          <h2>API Reference</h2>
+          <p>Type signatures and module documentation</p>
+        </div>
+      </a>
+
+      <a href="understanding/" class="doc-card">
+        <div class="doc-card__image">
+          <img src="images/understanding.jpeg" alt="">
+        </div>
+        <div class="doc-card__content">
+          <h2>Understanding</h2>
+          <p>Conceptual overview and design philosophy</p>
+        </div>
+      </a>
+    </section>
+
+    <!-- Libraries -->
+    <nav class="libraries">
+      <h3>Libraries</h3>
+      <ul>
+        <li><a href="selection/">hylograph-selection</a></li>
+        <li><a href="simulation/">hylograph-simulation</a></li>
+        <li><a href="layout/">hylograph-layout</a></li>
+        <li><a href="graph/">hylograph-graph</a></li>
+        <li><a href="music/">hylograph-music</a></li>
+      </ul>
+    </nav>
+
+  </main>
+
+  <footer>
+    <p><a href="https://github.com/afcondon">GitHub</a></p>
+  </footer>
+
+  <script>
+    // Fade out the curtain after a moment
+    setTimeout(() => {
+      document.getElementById('curtain').classList.add('curtain--hidden');
+    }, 1200);
+  </script>
+</body>
+</html>

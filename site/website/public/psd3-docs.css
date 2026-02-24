@@ -1,0 +1,172 @@
+/* PSD3 Documentation Styles
+ * Applied to AsciiDoc-generated HTML within the demo website
+ * Inherits variables from psd3.css via the page
+ */
+
+/* Reset AsciiDoc's default body styling since we embed in existing page */
+body.article {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+/* Main content container */
+#content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  color: var(--psd3-text-primary, #1a1a2e);
+  line-height: 1.6;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--psd3-text-primary, #1a1a2e);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h1 { font-size: 2rem; border-bottom: 2px solid var(--psd3-gold, #d4a574); padding-bottom: 0.3em; }
+h2 { font-size: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 0.2em; }
+h3 { font-size: 1.25rem; }
+
+/* Paragraphs and text */
+p {
+  margin: 1em 0;
+}
+
+/* Code blocks */
+pre, .listingblock pre {
+  background: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+code {
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+  font-size: 0.9em;
+  background: #f0f0f0;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+th {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+/* Lists */
+ul, ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+li {
+  margin: 0.5em 0;
+}
+
+/* Admonition blocks (NOTE, TIP, IMPORTANT, etc.) */
+.admonitionblock {
+  margin: 1.5em 0;
+  padding: 1em 1em 1em 3em;
+  border-radius: 6px;
+  position: relative;
+}
+
+.admonitionblock td.icon {
+  position: absolute;
+  left: 1em;
+  top: 1em;
+}
+
+.admonitionblock.note {
+  background: #e8f4fd;
+  border-left: 4px solid #2196f3;
+}
+
+.admonitionblock.tip {
+  background: #e8f5e9;
+  border-left: 4px solid #4caf50;
+}
+
+.admonitionblock.important {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+}
+
+.admonitionblock.warning {
+  background: #ffebee;
+  border-left: 4px solid #f44336;
+}
+
+/* Images */
+.imageblock {
+  margin: 1.5em 0;
+  text-align: center;
+}
+
+.imageblock img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Table of contents (if enabled) */
+#toc {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1em;
+  margin-bottom: 2em;
+}
+
+#toc ul {
+  list-style: none;
+  padding-left: 1em;
+}
+
+#toctitle {
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+/* Links */
+a {
+  color: var(--psd3-gold, #d4a574);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Section nav cards styling (matching site pattern) */
+.section-nav-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1em;
+  margin: 1.5em 0;
+}

@@ -1,0 +1,9 @@
+package:
+  name: purepy-test
+  dependencies:
+    - prelude
+    - effect
+
+workspace:
+  packageSet:
+    registry: 72.0.1

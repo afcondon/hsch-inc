@@ -1,0 +1,24 @@
+workspace:
+  # Solver mode - hylograph packages from registry
+  extraPackages:
+    # showcase-shell is private, not published
+    hylograph-showcase-shell:
+      path: ..
+
+package:
+  name: showcase-shell-demo
+  bundle:
+    module: Main
+    outfile: bundle.js
+    platform: browser
+  dependencies:
+    - hylograph-showcase-shell
+    - hylograph-selection
+    - halogen
+    - halogen-svg-elems
+    - effect
+    - prelude
+    - maybe
+    - aff
+    - web-dom
+    - web-html

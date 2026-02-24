@@ -1,58 +1,42 @@
-# PSD3-Repos: Meta-level orchestration repo
-# This repo tracks only the orchestration layer, not the sub-repos
+# purescript-polyglot - Website & Blog
+# ====================================
 
-# Ignore everything by default
-/*
+# PureScript build artifacts
+output/
+.spago/
+spago.lock
 
-# Track meta-level orchestration files
-!.gitignore
-!CLAUDE.md
-!Makefile
-!docker-compose.yml
+# Node
+node_modules/
 
-# Track docs (worklog, context, etc.)
-!docs/
-docs/**/.DS_Store
-
-# Track scripts
-!scripts/
-
-# Track spikes (experimental explorations)
-!spikes/
-
-# Track apps
-!apps/
-apps/*
-!apps/minard/
-!apps/hylographic/
-!apps/type-explorer/
-
-# Ignore common junk
-.DS_Store
+# Editor/IDE
+.psc-ide-port
 *.swp
 *~
-.psc-ide-port
+.idea/
+*.iml
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Erlang (if any tests use purerl)
 erl_crash.dump
+_build/
+ebin/*.beam
+
+# Python (if any tests use purepy)
+output-py/
+__pycache__/
+*.pyc
+
+# Generated feeds
+docs/worklog/feed.xml
+
+# Claude Code
 .claude/
 
-# Sub-repos are managed separately (each has its own git)
-# These are explicitly listed for clarity:
-# - visualisation libraries/
-# - showcases/
-# - site/
-# - apps/
-# - _external/
-# - purescript-linear/
-# - purescript-lua/
-# - purescript-lua-package-sets/
-# - purescript-python-new/
-
-# apps/minard: track docs, ignore build artifacts
-apps/minard/node_modules/
-apps/minard/**/node_modules/
-apps/minard/output/
-apps/minard/**/output/
-apps/minard/**/.spago/
-apps/minard/**/dist/
-apps/minard/**/*.duckdb
-apps/minard/**/*.duckdb.wal
+# Bundles are built artifacts (optional - uncomment to ignore)
+# blog/public/bundle.js
+# site/website/public/bundle.js
+# site/lib-*/public/bundle.js

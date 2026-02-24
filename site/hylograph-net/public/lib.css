@@ -1,0 +1,94 @@
+/* Library page styles */
+
+.lib-header {
+  padding: 1rem 2rem;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.back-link {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.back-link:hover {
+  color: #333;
+}
+
+.back-link::before {
+  content: "\2190 ";
+}
+
+.lib-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.lib-page h1 {
+  font-family: monospace;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.readme {
+  line-height: 1.7;
+}
+
+.readme h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.readme p {
+  margin-bottom: 1rem;
+}
+
+.readme code {
+  background: #f0f0f0;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.readme pre {
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.lib-links {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 1rem;
+}
+
+.lib-links a {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.demo-link {
+  background: #333;
+  color: white;
+}
+
+.demo-link:hover {
+  background: #555;
+}
+
+.github-link {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.github-link:hover {
+  background: #e0e0e0;
+}

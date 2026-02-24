@@ -1,0 +1,102 @@
+= PSD3 React
+:description: React integration for PSD3 visualizations
+
+Integrate PSD3 visualizations with React applications, including first-class force simulation support.
+
+== Overview
+
+PSD3 React provides two levels of integration:
+
+*Static Visualizations*::
+Use `useContainerId` for visualizations that render once or on prop changes.
+
+*Force Simulations*::
+Use `useSimulation` for force-directed layouts with automatic tick updates.
+
+== Quick Example: Force Graph
+
+[source,purescript]
+----
+import PSD3.React.Hooks (useContainerId)
+import PSD3.React.Simulation (useSimulation)
+import PSD3.ForceEngine.Setup as Setup
+
+forceSetup = Setup.setup "graph"
+  [ Setup.manyBody "charge" # Setup.withStrength (Setup.static (-100.0))
+  , Setup.link "links" # Setup.withDistance (Setup.static 30.0)
+  ]
+
+mkForceGraph :: Component { nodes :: Array SimNode, links :: Array SimLink }
+mkForceGraph = do
+  containerId <- useContainerId
+
+  component "ForceGraph" \props -> React.do
+    { currentNodes, isRunning } <- useSimulation forceSetup props.nodes props.links
+
+    useEffect currentNodes do
+      renderGraph containerId currentNodes
+      pure mempty
+
+    pure $ R.div { id: containerId }
+----
+
+The `useSimulation` hook:
+- Creates and manages the simulation lifecycle
+- Updates `currentNodes` on each tick (~60fps)
+- Handles prop changes with GUP semantics (enter/update/exit)
+- Cleans up on unmount
+
+== Key Insight: Framework-Agnostic
+
+PSD3 is framework-agnostic. The same visualization code works whether you're using:
+
+* *React* (this package)
+* *Halogen* (psd3-selection examples)
+* *Vanilla JavaScript*
+
+The framework only provides:
+1. A DOM element to render into
+2. Lifecycle hooks to trigger rendering
+3. State management for simulation handles
+
+== Features
+
+*useContainerId*::
+Generate unique container IDs for visualizations.
+
+*useSimulation*::
+Full force simulation lifecycle management with:
+- Declarative force configuration via Setup DSL
+- Automatic tick-driven state updates
+- GUP semantics for data changes
+- Custom callback handlers
+
+*useSimulationWithCallbacks*::
+Extended version with handlers for start, stop, and alpha threshold events.
+
+== Getting Started
+
+* xref:getting-started/quickstart.adoc[Quickstart] - Static visualizations
+* xref:getting-started/force-simulation.adoc[Force Simulation] - useSimulation hook
+* xref:getting-started/click-events.adoc[Click Events] - D3 events to React state
+
+== Installation
+
+[source,yaml]
+----
+# spago.yaml
+dependencies:
+  - psd3-selection
+  - psd3-simulation
+  - react-basic-hooks
+  - react-basic-dom
+----
+
+== Part of the PSD3 Ecosystem
+
+* *psd3-tree* - Tree data structures
+* *psd3-selection* - Core D3 selection library
+* *psd3-simulation* - Force simulation engine
+* *psd3-layout* - Layout algorithms
+* *psd3-graph* - Graph algorithms
+* *psd3-react* - React integration (this package)

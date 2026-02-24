@@ -1,0 +1,28 @@
+# Unreachable routes (defined but not spidered)
+unreachable,Just
+unreachable,MermaidTreeDemo
+unreachable,ModuleGraph
+unreachable,NotFound
+unreachable,ReferenceModule
+unreachable,TourMotionScrolly
+unreachable,TourMotionScrollyHATS
+
+# Extra routes (spidered but not defined)
+extra,/challenge
+extra,/code-explorer
+extra,/core-primitives
+extra,/examples
+extra,/home
+extra,/indexed-monad
+extra,/scene-structures
+extra,/selection-states
+extra,/simple-force-graph
+extra,/state-machine
+extra,/static-vs-gup
+extra,/tour/scrolly2
+extra,/transitions
+extra,/tree-api
+extra,/type-safety
+
+# Archived routes
+archived,ModuleGraph

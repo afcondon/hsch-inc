@@ -1,0 +1,154 @@
+{
+  "dashboardPort": 9000,
+  "services": [
+    {
+      "id": "wasm-force-demo",
+      "name": "WASM Force Demo",
+      "port": 8079,
+      "type": "static",
+      "command": "python3 -m http.server {port}",
+      "cwd": "../../showcases/wasm-force-demo",
+      "buildTarget": "app-wasm",
+      "autoStart": false,
+      "notes": "Rust WASM + PureScript force simulation"
+    },
+    {
+      "id": "hypo-punter-landing",
+      "name": "Hypo-Punter Landing",
+      "port": 8091,
+      "type": "static",
+      "command": "python3 -m http.server {port}",
+      "cwd": "../../showcases/hypo-punter/landing/public",
+      "buildTarget": "landing",
+      "autoStart": false,
+      "notes": "Unified landing page for Python-backed demos"
+    },
+    {
+      "id": "embedding-explorer-frontend",
+      "name": "Embedding Explorer Frontend",
+      "port": 8087,
+      "type": "static",
+      "command": "python3 -m http.server {port}",
+      "cwd": "../../showcases/hypo-punter/ee-website/public",
+      "buildTarget": "ee-website",
+      "autoStart": false,
+      "notes": "Halogen + D3 SPLOM/UMAP visualization"
+    },
+    {
+      "id": "embedding-explorer-backend",
+      "name": "Embedding Explorer Backend (PurePy)",
+      "port": 5081,
+      "type": "python",
+      "command": "python3 -c \"import sys; sys.path.insert(0, 'output-py'); from main import main; main()()\"",
+      "cwd": "../../showcases/hypo-punter/ee-server",
+      "buildTarget": "ee-server",
+      "autoStart": false,
+      "notes": "PureScript-Python + Flask + UMAP. Serves API on this port."
+    },
+    {
+      "id": "grid-explorer-frontend",
+      "name": "Grid Explorer Frontend",
+      "port": 8088,
+      "type": "static",
+      "command": "python3 -m http.server {port}",
+      "cwd": "../../showcases/hypo-punter/ge-website/public",
+      "buildTarget": "ge-website",
+      "autoStart": false,
+      "notes": "Halogen + PSD3 power grid visualization"
+    },
+    {
+      "id": "grid-explorer-backend",
+      "name": "Grid Explorer Backend (PurePy)",
+      "port": 5082,
+      "type": "python",
+      "command": "python3 -c \"import sys; sys.path.insert(0, 'output-py'); from main import main; main()()\"",
+      "cwd": "../../showcases/hypo-punter/ge-server",
+      "buildTarget": "ge-server",
+      "autoStart": false,
+      "notes": "PureScript-Python + Flask + pandapower"
+    },
+    {
+      "id": "sankey-editor",
+      "name": "Sankey Editor (Arid Keystone)",
+      "port": 8089,
+      "type": "static",
+      "command": "python3 -m http.server {port}",
+      "cwd": "../../showcases/psd3-arid-keystone/demo",
+      "buildTarget": "app-sankey",
+      "autoStart": false,
+      "notes": "Annotated Sankey diagram editor"
+    },
+    {
+      "id": "code-explorer-frontend",
+      "name": "Code Explorer Frontend (Corrode Expel)",
+      "port": 8082,
+      "type": "static",
+      "command": "python3 -m http.server {port}",
+      "cwd": "../../showcases/corrode-expel/ce2-website/public",
+      "buildTarget": "ce2-website",
+      "autoStart": false,
+      "notes": "Code visualization with force-directed graphs"
+    },
+    {
+      "id": "code-explorer-backend",
+      "name": "Code Explorer Backend",
+      "port": 3000,
+      "type": "node",
+      "command": "node run.js",
+      "cwd": "../../showcases/corrode-expel/ce-server",
+      "buildTarget": "ce-server",
+      "env": {
+        "PORT": "{port}"
+      },
+      "autoStart": false,
+      "notes": "Node.js API server with DuckDB"
+    },
+    {
+      "id": "tidal-frontend",
+      "name": "Tidal Editor Frontend (Tilted Radio)",
+      "port": 8084,
+      "type": "static",
+      "command": "python3 -m http.server {port}",
+      "cwd": "../../showcases/psd3-tilted-radio/purescript-psd3-tidal",
+      "buildTarget": "ps-tidal",
+      "autoStart": false,
+      "notes": "Browser-based Tidal pattern editor"
+    },
+    {
+      "id": "tidal-backend",
+      "name": "Tidal Backend (Purerl/Erlang)",
+      "port": 8083,
+      "type": "erlang",
+      "command": "rebar3 shell",
+      "cwd": "../../showcases/psd3-tilted-radio/purerl-tidal",
+      "buildTarget": "purerl-tidal",
+      "env": {
+        "ERL_LIBS": "_build/default/lib"
+      },
+      "autoStart": false,
+      "notes": "Erlang/OTP backend for Tidal patterns. WebSocket + MIDI output."
+    },
+    {
+      "id": "astar-demo",
+      "name": "A* Pathfinding Demo",
+      "port": 8086,
+      "type": "static",
+      "command": "python3 -m http.server {port}",
+      "cwd": "../../visualisation libraries/psd3-astar-demo",
+      "buildTarget": "lib-astar-demo",
+      "autoStart": false,
+      "notes": "Interactive A*/BFS/DFS pathfinding visualization"
+    },
+    {
+      "id": "psd3-docs",
+      "name": "PSD3 Library Docs (Antora)",
+      "port": 9001,
+      "type": "static",
+      "command": "python3 -m http.server {port}",
+      "cwd": "../../visualisation libraries/purescript-psd3-selection/build/site",
+      "autoStart": false,
+      "disabled": true,
+      "notes": "Antora docs - run 'npx antora antora-playbook.yml' in psd3-selection first"
+    }
+  ]
+}

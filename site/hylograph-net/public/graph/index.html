@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hylograph-graph - Hylograph</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../lib.css">
+</head>
+<body>
+  <header class="lib-header">
+    <a href="../" class="back-link">Hylograph Project Documentation</a>
+  </header>
+
+  <main class="lib-page">
+    <h1>hylograph-graph</h1>
+
+    <article class="readme">
+<h1 id="purescript-hylograph-graph">purescript-hylograph-graph</h1>
+<p><a href="/honeycomb/"><img
+src="../../site/lib-graph/public/demo.jpeg"
+alt="Honeycomb Puzzle Demo" /></a></p>
+<p>Graph algorithms and data structures for PureScript, designed for
+visualization.</p>
+<h2 id="overview">Overview</h2>
+<p>This package provides graph algorithms with optional tracing for
+visualization, consolidating graph-related code from the Hylograph
+ecosystem.</p>
+<h2 id="features">Features</h2>
+<h3 id="graph-algorithms">Graph Algorithms</h3>
+<ul>
+<li><strong>Pathfinding</strong>: A*, Dijkstra, BFS/DFS</li>
+<li><strong>Analysis</strong>: Reachability, transitive reduction, layer
+computation</li>
+<li><strong>DAG operations</strong>: Topological sort, cycle
+detection</li>
+</ul>
+<h3 id="tree-utilities">Tree Utilities</h3>
+<ul>
+<li>Rose tree helpers (wrapping <code>tree-rose</code>)</li>
+<li>Tree manipulation functions</li>
+<li>DAGTree for “mostly hierarchical” graphs</li>
+</ul>
+<h3 id="visualization-support">Visualization Support</h3>
+<ul>
+<li>Optional algorithm tracing for step-by-step animation</li>
+<li>Position helpers for layout</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">spago</span> install hylograph-graph</span></code></pre></div>
+<h2 id="usage">Usage</h2>
+<h3 id="basic-pathfinding">Basic Pathfinding</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Graph.Pathfinding</span> (findPath)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>result <span class="ot">=</span> findPath startNode endNode myGraph</span></code></pre></div>
+<h3 id="with-tracing-for-visualization">With Tracing (for
+visualization)</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Graph.Pathfinding.Traced</span> (findPathTraced)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>{ result, steps, explored } <span class="ot">=</span> findPathTraced startNode endNode myGraph</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">-- Use `steps` to animate the algorithm</span></span></code></pre></div>
+<h2 id="modules">Modules</h2>
+<ul>
+<li><code>Data.Graph.Pathfinding</code> - Basic pathfinding
+algorithms</li>
+<li><code>Data.Graph.Pathfinding.Traced</code> - Pathfinding with
+step-by-step tracing</li>
+<li><code>Data.Graph.Algorithms</code> - Graph analysis (reachability,
+reduction)</li>
+<li><code>Data.Graph.Layout</code> - Position helpers for graph
+visualization</li>
+<li><code>Data.Graph.Types</code> - Core graph types</li>
+<li><code>Hylograph.Data.DAGTree</code> - Hybrid DAG/tree structure</li>
+</ul>
+<h2 id="part-of-hylograph">Part of Hylograph</h2>
+<p>This package is part of the Hylograph visualization ecosystem:</p>
+<ul>
+<li><strong>hylograph-graph</strong> - Graph algorithms (this
+package)</li>
+<li><strong>hylograph-selection</strong> - Type-safe D3 selection and
+rendering</li>
+<li><strong>hylograph-simulation</strong> - Force-directed graph
+simulation</li>
+<li><strong>hylograph-layout</strong> - Layout algorithms</li>
+</ul>
+<h2 id="license">License</h2>
+<p>MIT</p>
+    </article>
+
+    <aside class="lib-links">
+      <a href="https://pursuit.purescript.org/packages/purescript-hylograph-graph" class="pursuit-link">API Docs (Pursuit)</a>
+      <a href="https://github.com/afcondon/purescript-hylograph-graph" class="github-link">GitHub</a>
+    </aside>
+  </main>
+</body>
+</html>

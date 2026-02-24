@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hylograph-layout - Hylograph</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../lib.css">
+</head>
+<body>
+  <header class="lib-header">
+    <a href="../" class="back-link">Hylograph Project Documentation</a>
+  </header>
+
+  <main class="lib-page">
+    <h1>hylograph-layout</h1>
+
+    <article class="readme">
+<h1 id="purescript-hylograph-layout">purescript-hylograph-layout</h1>
+<p><a href="/layouts/"><img src="../../site/lib-layout/public/demo.jpeg"
+alt="Layout Gallery Demo" /></a></p>
+<p>Pure PureScript implementations of layout algorithms for hierarchies
+and flow diagrams.</p>
+<h2 id="overview">Overview</h2>
+<p>Layout algorithms for hierarchical and graph data, implemented in
+pure PureScript. Many of these layouts are familiar to users of D3 but
+here they are implemented without FFI dependencies using FP
+implementations in 100% PureScript. The hierarchical ones work with the
+rose-tree data structure from <code>purescript-tree-rose</code>.</p>
+<h2 id="installation">Installation</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">spago</span> install hylograph-layout</span></code></pre></div>
+<h2 id="available-layouts">Available Layouts</h2>
+<h3 id="hierarchical-layouts">Hierarchical Layouts</h3>
+<ul>
+<li><strong>Tree</strong> - Tidy tree layout (Reingold-Tilford
+algorithm)</li>
+<li><strong>Pack</strong> - Circle packing for hierarchical data</li>
+<li><strong>Partition</strong> - Sunburst/icicle partition layout</li>
+<li><strong>Treemap</strong> - Multiple tiling algorithms: squarify
+(default), slice, dice, sliceDice, binary</li>
+<li><strong>Cluster</strong> - Dendrogram layout</li>
+</ul>
+<h3 id="graph-layouts">Graph Layouts</h3>
+<ul>
+<li><strong>Sankey</strong> - Flow diagram layout for directed acyclic
+graphs (uses <code>hylograph-graph</code> for DAG operations)</li>
+<li><strong>EdgeBundle</strong> - Hierarchical edge bundling</li>
+<li><strong>Chord</strong> - Chord diagram layout</li>
+<li><strong>Adjacency</strong> - Adjacency matrix layout</li>
+</ul>
+<h2 id="example">Example</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">DataViz.Layout.Hierarchy.Tree</span> (tree, defaultTreeConfig)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Tree</span> (mkTree)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>myTree <span class="ot">=</span> mkTree <span class="st">&quot;root&quot;</span> [mkTree <span class="st">&quot;a&quot;</span> [], mkTree <span class="st">&quot;b&quot;</span> []]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>config <span class="ot">=</span> defaultTreeConfig { size <span class="ot">=</span> { width<span class="op">:</span> <span class="fl">400.0</span>, height<span class="op">:</span> <span class="fl">300.0</span> } }</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>positioned <span class="ot">=</span> tree config myTree</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">-- Each node now has x, y coordinates</span></span></code></pre></div>
+<h2 id="modules">Modules</h2>
+<ul>
+<li><code>DataViz.Layout.Hierarchy.Tree</code> - Tree layout</li>
+<li><code>DataViz.Layout.Hierarchy.Pack</code> - Circle packing</li>
+<li><code>DataViz.Layout.Hierarchy.Partition</code> -
+Partition/sunburst</li>
+<li><code>DataViz.Layout.Hierarchy.Treemap</code> - Treemap</li>
+<li><code>DataViz.Layout.Hierarchy.Cluster</code> - Dendrogram</li>
+<li><code>DataViz.Layout.Hierarchy.EdgeBundle</code> - Edge
+bundling</li>
+<li><code>DataViz.Layout.Sankey.Compute</code> - Sankey diagrams</li>
+<li><code>DataViz.Layout.Chord</code> - Chord diagrams</li>
+<li><code>DataViz.Layout.Adjacency</code> - Adjacency matrix</li>
+</ul>
+<h2 id="part-of-hylograph">Part of Hylograph</h2>
+<ul>
+<li><strong>hylograph-layout</strong> - Layout algorithms (this
+package)</li>
+<li><strong>hylograph-graph</strong> - Graph algorithms and DAG
+support</li>
+<li><strong>hylograph-selection</strong> - D3 selection library</li>
+<li><strong>hylograph-simulation</strong> - Force simulation</li>
+</ul>
+<p>Uses <code>tree-rose</code> for rose tree data structures.</p>
+<h2 id="license">License</h2>
+<p>MIT</p>
+    </article>
+
+    <aside class="lib-links">
+      <a href="https://pursuit.purescript.org/packages/purescript-hylograph-layout" class="pursuit-link">API Docs (Pursuit)</a>
+      <a href="https://github.com/afcondon/purescript-hylograph-layout" class="github-link">GitHub</a>
+    </aside>
+  </main>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Route Analysis - halogen-spider</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+           max-width: 1000px; margin: 0 auto; padding: 1rem; line-height: 1.6; }
+    h1 { margin-bottom: 0.5rem; }
+    .subtitle { color: #666; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 0; }
+    .tab { padding: 0.75rem 1.5rem; cursor: pointer; border: none; background: none; 
+           font-size: 1rem; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab:hover { color: #333; }
+    .tab.active { color: #0366d6; border-bottom-color: #0366d6; font-weight: 500; }
+    .tab-content { display: none; padding-top: 1rem; }
+    .tab-content.active { display: block; }
+    ul { list-style-type: none; padding: 0; margin: 0; }
+    li { padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+    a { color: #0366d6; text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+    small { color: #666; margin-left: 0.5rem; }
+    .count { color: #666; font-size: 0.9rem; margin-bottom: 1rem; }
+    .section { margin-bottom: 2rem; }
+    .section h3 { margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #eee; }
+    .unreachable { color: #d73a49; }
+    .extra { color: #6f42c1; }
+    .archived { color: #6a737d; }
+    .matched { color: #28a745; }
+    .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem; margin-left: 0.5rem; }
+    .badge-unreachable { background: #ffeef0; color: #d73a49; }
+    .badge-extra { background: #f5f0ff; color: #6f42c1; }
+    .badge-archived { background: #f6f8fa; color: #6a737d; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .summary-card { padding: 1rem; border-radius: 6px; text-align: center; }
+    .summary-card.total { background: #f6f8fa; }
+    .summary-card.good { background: #dcffe4; }
+    .summary-card.warning { background: #fff5b1; }
+    .summary-card.danger { background: #ffeef0; }
+    .summary-card .number { font-size: 2rem; font-weight: bold; }
+    .summary-card .label { font-size: 0.85rem; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Route Analysis Report</h1>
+  <p class="subtitle">Target: http://100.101.177.83</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('static')">Static Routes (33)</button>
+    <button class="tab" onclick="showTab('dynamic')">Spidered Routes (41)</button>
+    <button class="tab" onclick="showTab('comparison')">Comparison</button>
+  </div>
+
+  <div id="static" class="tab-content active">
+    <p class="count">Routes defined in source code</p>
+    <ul>
+<li><a href="http://100.101.177.83/#/acknowledgements" target="_blank">Acknowledgements → /acknowledgements</a> <small>(Hylograph.Acknowledgements)</small></li>
+<li><a href="http://100.101.177.83/#/force-playground" target="_blank">ForcePlayground → /force-playground</a> <small>(Component.ForcePlayground)</small></li>
+<li><a href="http://100.101.177.83/#/getting-started" target="_blank">GettingStarted → /getting-started</a> <small>(Hylograph.Tutorial.GettingStarted)</small></li>
+<li><a href="http://100.101.177.83/#/" target="_blank">Home → /</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/howto/debugging" target="_blank">HowtoDebugging → /howto/debugging</a> <small>(Component.HowTo.HowtoDebugging)</small></li>
+<li><a href="http://100.101.177.83/#/howto/events" target="_blank">HowtoEvents → /howto/events</a> <small>(Component.HowTo.HowtoEvents)</small></li>
+<li><a href="http://100.101.177.83/#/howto/force-graphs" target="_blank">HowtoForceGraphs → /howto/force-graphs</a> <small>(Component.HowTo.HowtoForceGraphs)</small></li>
+<li><a href="http://100.101.177.83/#/howto/hierarchical" target="_blank">HowtoHierarchical → /howto/hierarchical</a> <small>(Component.HowTo.HowtoHierarchical)</small></li>
+<li><a href="http://100.101.177.83/#/howto" target="_blank">HowtoIndex → /howto</a> <small>(Hylograph.HowTo.HowtoIndex)</small></li>
+<li><a href="http://100.101.177.83/#/howto/loading-data" target="_blank">HowtoLoadingData → /howto/loading-data</a> <small>(Component.HowTo.HowtoLoadingData)</small></li>
+<li><a href="http://100.101.177.83/#/howto/performance" target="_blank">HowtoPerformance → /howto/performance</a> <small>(Component.HowTo.HowtoPerformance)</small></li>
+<li><a href="http://100.101.177.83/#/howto/tooltips" target="_blank">HowtoTooltips → /howto/tooltips</a> <small>(Component.HowTo.HowtoTooltips)</small></li>
+<li><a href="http://100.101.177.83/#/howto/transitions" target="_blank">HowtoTransitions → /howto/transitions</a> <small>(Component.HowTo.HowtoTransitions)</small></li>
+<li><a href="http://100.101.177.83/#/just" target="_blank">Just → /just</a> <small>(unknown)</small></li>
+<li><a href="http://100.101.177.83/#/mermaid-tree-demo" target="_blank">MermaidTreeDemo → /mermaid-tree-demo</a> <small>(Component.MermaidTreeDemo)</small></li>
+<li><a href="http://100.101.177.83/#/module-graph" target="_blank">ModuleGraph → /module-graph</a> <small>(ARCHIVED)</small></li>
+<li><a href="http://100.101.177.83/#/not-found" target="_blank">NotFound → /not-found</a> <small>(unknown)</small></li>
+<li><a href="http://100.101.177.83/#/reference" target="_blank">Reference → /reference</a> <small>(Hylograph.Reference.Reference)</small></li>
+<li><a href="http://100.101.177.83/#/reference-module" target="_blank">ReferenceModule → /reference-module</a> <small>(Hylograph.Reference.Reference)</small></li>
+<li><a href="http://100.101.177.83/#/showcase" target="_blank">Showcase → /showcase</a> <small>(Component.Showcase.ShowcaseIndex)</small></li>
+<li><a href="http://100.101.177.83/#/showcase/lua-edge" target="_blank">ShowcaseLuaEdge → /showcase/lua-edge</a> <small>(Component.Showcase.ShowcaseLuaEdge)</small></li>
+<li><a href="http://100.101.177.83/#/simpsons-v2" target="_blank">SimpsonsV2 → /simpsons-v2</a> <small>(Page.Simpsons)</small></li>
+<li><a href="http://100.101.177.83/#/tour" target="_blank">TourIndex → /tour</a> <small>(Component.Tour.TourIndex)</small></li>
+<li><a href="http://100.101.177.83/#/tour/motion-scrolly" target="_blank">TourMotionScrolly → /tour/motion-scrolly</a> <small>(Component.Tour.TourMotionScrolly)</small></li>
+<li><a href="http://100.101.177.83/#/tour/motion-scrolly-h-a-t-s" target="_blank">TourMotionScrollyHATS → /tour/motion-scrolly-h-a-t-s</a> <small>(Component.Tour.TourMotionScrollyHATS)</small></li>
+<li><a href="http://100.101.177.83/#/tour/scrolly" target="_blank">TourScrolly → /tour/scrolly</a> <small>(Component.Tour.TourScrolly)</small></li>
+<li><a href="http://100.101.177.83/#/tour/simpsons" target="_blank">TourSimpsons → /tour/simpsons</a> <small>(Component.Tour.TourSimpsons)</small></li>
+<li><a href="http://100.101.177.83/#/tree-builder" target="_blank">TreeBuilder → /tree-builder</a> <small>(TreeBuilder.App)</small></li>
+<li><a href="http://100.101.177.83/#/understanding" target="_blank">Understanding → /understanding</a> <small>(Hylograph.Understanding)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/attributes" target="_blank">UnderstandingAttributes → /understanding/attributes</a> <small>(Component.Understanding.UnderstandingAttributes)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/grammar" target="_blank">UnderstandingGrammar → /understanding/grammar</a> <small>(Component.Understanding.UnderstandingGrammar)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/scenes" target="_blank">UnderstandingScenes → /understanding/scenes</a> <small>(Component.Understanding.UnderstandingScenes)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/selections" target="_blank">UnderstandingSelections → /understanding/selections</a> <small>(Component.Understanding.UnderstandingSelections)</small></li>
+    </ul>
+  </div>
+
+  <div id="dynamic" class="tab-content">
+    <p class="count">Routes discovered by crawling the live site</p>
+    <ul>
+<li><a href="http://100.101.177.83/#/" target="_blank">/</a> <small>(depth 0, from start)</small></li>
+<li><a href="http://100.101.177.83/#/acknowledgements" target="_blank">/acknowledgements</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/challenge" target="_blank">/challenge</a> <small>(depth 4, from /understanding/scenes)</small></li>
+<li><a href="http://100.101.177.83/#/code-explorer" target="_blank">/code-explorer</a> <small>(depth 4, from /understanding/scenes)</small></li>
+<li><a href="http://100.101.177.83/#/core-primitives" target="_blank">/core-primitives</a> <small>(depth 4, from /understanding/grammar)</small></li>
+<li><a href="http://100.101.177.83/#/examples" target="_blank">/examples</a> <small>(depth 3, from /getting-started)</small></li>
+<li><a href="http://100.101.177.83/#/force-playground" target="_blank">/force-playground</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/getting-started" target="_blank">/getting-started</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/home" target="_blank">/home</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/howto" target="_blank">/howto</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/howto/debugging" target="_blank">/howto/debugging</a> <small>(depth 3, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/events" target="_blank">/howto/events</a> <small>(depth 3, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/force-graphs" target="_blank">/howto/force-graphs</a> <small>(depth 3, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/hierarchical" target="_blank">/howto/hierarchical</a> <small>(depth 3, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/loading-data" target="_blank">/howto/loading-data</a> <small>(depth 3, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/performance" target="_blank">/howto/performance</a> <small>(depth 3, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/tooltips" target="_blank">/howto/tooltips</a> <small>(depth 3, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/transitions" target="_blank">/howto/transitions</a> <small>(depth 3, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/indexed-monad" target="_blank">/indexed-monad</a> <small>(depth 4, from /understanding/selections)</small></li>
+<li><a href="http://100.101.177.83/#/reference" target="_blank">/reference</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/scene-structures" target="_blank">/scene-structures</a> <small>(depth 4, from /understanding/scenes)</small></li>
+<li><a href="http://100.101.177.83/#/selection-states" target="_blank">/selection-states</a> <small>(depth 4, from /understanding/grammar)</small></li>
+<li><a href="http://100.101.177.83/#/showcase" target="_blank">/showcase</a> <small>(depth 3, from /getting-started)</small></li>
+<li><a href="http://100.101.177.83/#/showcase/lua-edge" target="_blank">/showcase/lua-edge</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/simple-force-graph" target="_blank">/simple-force-graph</a> <small>(depth 4, from /howto/force-graphs)</small></li>
+<li><a href="http://100.101.177.83/#/simpsons-v2" target="_blank">/simpsons-v2</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/state-machine" target="_blank">/state-machine</a> <small>(depth 4, from /understanding/selections)</small></li>
+<li><a href="http://100.101.177.83/#/static-vs-gup" target="_blank">/static-vs-gup</a> <small>(depth 4, from /understanding/grammar)</small></li>
+<li><a href="http://100.101.177.83/#/tour" target="_blank">/tour</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/tour/scrolly" target="_blank">/tour/scrolly</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/scrolly2" target="_blank">/tour/scrolly2</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/simpsons" target="_blank">/tour/simpsons</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/transitions" target="_blank">/transitions</a> <small>(depth 4, from /understanding/scenes)</small></li>
+<li><a href="http://100.101.177.83/#/tree-api" target="_blank">/tree-api</a> <small>(depth 4, from /understanding/grammar)</small></li>
+<li><a href="http://100.101.177.83/#/tree-builder" target="_blank">/tree-builder</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/type-safety" target="_blank">/type-safety</a> <small>(depth 4, from /understanding/selections)</small></li>
+<li><a href="http://100.101.177.83/#/understanding" target="_blank">/understanding</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/attributes" target="_blank">/understanding/attributes</a> <small>(depth 3, from /understanding)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/grammar" target="_blank">/understanding/grammar</a> <small>(depth 3, from /understanding)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/scenes" target="_blank">/understanding/scenes</a> <small>(depth 3, from /understanding)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/selections" target="_blank">/understanding/selections</a> <small>(depth 3, from /understanding)</small></li>
+    </ul>
+  </div>
+
+  <div id="comparison" class="tab-content">
+    <div class="summary-grid">
+      <div class="summary-card total">
+        <div class="number">22</div>
+        <div class="label">Issues Found</div>
+      </div>
+      <div class="summary-card danger">
+        <div class="number">7</div>
+        <div class="label">Unreachable</div>
+      </div>
+      <div class="summary-card warning">
+        <div class="number">15</div>
+        <div class="label">Extra Routes</div>
+      </div>
+      <div class="summary-card">
+        <div class="number">1</div>
+        <div class="label">Archived</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="unreachable">Unreachable Routes</h3>
+      <p class="count">Defined in code but not reachable from navigation</p>
+      <ul><li class="unreachable"><a href="http://100.101.177.83/#Just" target="_blank">Just</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#MermaidTreeDemo" target="_blank">MermaidTreeDemo</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#ModuleGraph" target="_blank">ModuleGraph</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#NotFound" target="_blank">NotFound</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#ReferenceModule" target="_blank">ReferenceModule</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#TourMotionScrolly" target="_blank">TourMotionScrolly</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#TourMotionScrollyHATS" target="_blank">TourMotionScrollyHATS</a><span class="badge badge-unreachable">unreachable</span></li></ul>
+    </div>
+
+    <div class="section">
+      <h3 class="extra">Extra Routes</h3>
+      <p class="count">Found by spidering but not in route definitions</p>
+      <ul><li class="extra"><a href="http://100.101.177.83/#/challenge" target="_blank">/challenge</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/code-explorer" target="_blank">/code-explorer</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/core-primitives" target="_blank">/core-primitives</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/examples" target="_blank">/examples</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/home" target="_blank">/home</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/indexed-monad" target="_blank">/indexed-monad</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/scene-structures" target="_blank">/scene-structures</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/selection-states" target="_blank">/selection-states</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/simple-force-graph" target="_blank">/simple-force-graph</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/state-machine" target="_blank">/state-machine</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/static-vs-gup" target="_blank">/static-vs-gup</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/tour/scrolly2" target="_blank">/tour/scrolly2</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/transitions" target="_blank">/transitions</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/tree-api" target="_blank">/tree-api</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/type-safety" target="_blank">/type-safety</a><span class="badge badge-extra">extra</span></li></ul>
+    </div>
+
+    <div class="section">
+      <h3 class="archived">Archived Routes</h3>
+      <p class="count">Routes marked as archived in code</p>
+      <ul><li class="archived">ModuleGraph<span class="badge badge-archived">archived</span></li></ul>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+  </script>
+</body>
+</html>

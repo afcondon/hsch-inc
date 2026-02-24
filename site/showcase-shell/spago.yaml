@@ -1,0 +1,34 @@
+workspace:
+  packageSet:
+    registry: 72.0.1
+  extraPackages:
+    hylograph-graph:
+      path: "../../visualisation libraries/purescript-hylograph-graph"
+    hylograph-layout:
+      path: "../../visualisation libraries/purescript-hylograph-layout"
+    hylograph-transitions:
+      path: "../../visualisation libraries/purescript-hylograph-transitions"
+    hylograph-selection:
+      path: "../../visualisation libraries/purescript-hylograph-selection"
+
+package:
+  name: hylograph-showcase-shell
+  description: Reusable Halogen shell for PSD3 showcase applications
+  publish:
+    version: 0.1.0
+    license: MIT
+    location:
+      githubOwner: afcondon
+      githubRepo: purescript-hylograph-showcase-shell
+  dependencies:
+    - arrays
+    - effect
+    - halogen
+    - halogen-subscriptions
+    - maybe
+    - prelude
+    - hylograph-selection
+    - refs
+    - strings
+    - web-dom
+    - web-html

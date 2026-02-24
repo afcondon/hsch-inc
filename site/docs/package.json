@@ -1,0 +1,15 @@
+{
+  "name": "psd3-docs-server",
+  "version": "1.0.0",
+  "description": "Development server for PSD3 documentation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@asciidoctor/core": "^3.0.4",
+    "express": "^4.18.2",
+    "glob": "^10.3.10"
+  }
+}

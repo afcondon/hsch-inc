@@ -1,0 +1,104 @@
+{
+  "nodes": [
+    {"id": 0, "label": "PureScript", "category": "core", "r": 12, "pinned": true},
+
+    {"id": 1, "label": "JavaScript", "category": "backend", "r": 8},
+    {"id": 2, "label": "Python", "category": "backend", "r": 8},
+    {"id": 3, "label": "Erlang", "category": "backend", "r": 8},
+    {"id": 4, "label": "Lua", "category": "backend", "r": 8},
+    {"id": 5, "label": "Rust", "category": "backend", "r": 8},
+
+    {"id": 6, "label": "WASM", "category": "runtime", "r": 7},
+    {"id": 7, "label": "BEAM", "category": "runtime", "r": 7},
+    {"id": 8, "label": "nginx", "category": "runtime", "r": 7},
+    {"id": 9, "label": "node", "category": "runtime", "r": 7},
+    {"id": 10, "label": "browser", "category": "runtime", "r": 7},
+
+    {"id": 11, "label": "Finally Tagless", "category": "concept", "r": 6},
+    {"id": 12, "label": "Type Safety", "category": "concept", "r": 6},
+    {"id": 13, "label": "FRP", "category": "concept", "r": 6},
+    {"id": 14, "label": "Declarative", "category": "concept", "r": 6},
+    {"id": 15, "label": "Data Join", "category": "concept", "r": 6},
+    {"id": 16, "label": "Performance", "category": "concept", "r": 6},
+    {"id": 17, "label": "Interpreters", "category": "concept", "r": 6},
+
+    {"id": 18, "label": "psd3-tree", "category": "library", "r": 6},
+    {"id": 19, "label": "psd3-selection", "category": "library", "r": 6},
+    {"id": 20, "label": "psd3-simulation", "category": "library", "r": 6},
+    {"id": 21, "label": "psd3-layouts", "category": "library", "r": 6},
+    {"id": 22, "label": "Meta-tree", "category": "library", "r": 6},
+
+    {"id": 23, "label": "D3.js", "category": "ext-library", "r": 7},
+    {"id": 24, "label": "TangleJS", "category": "ext-library", "r": 6},
+    {"id": 25, "label": "pandas", "category": "ext-library", "r": 6},
+    {"id": 26, "label": "numpy", "category": "ext-library", "r": 6},
+    {"id": 27, "label": "UMAP", "category": "ext-library", "r": 6},
+
+    {"id": 28, "label": "Algorave", "category": "showcase", "r": 7},
+    {"id": 29, "label": "Sankey", "category": "showcase", "r": 6},
+    {"id": 30, "label": "Code Explorer", "category": "showcase", "r": 6},
+
+    {"id": 31, "label": "Data Viz", "category": "domain", "r": 6},
+    {"id": 32, "label": "Live Coding", "category": "domain", "r": 6},
+    {"id": 33, "label": "Scientific", "category": "domain", "r": 6},
+    {"id": 34, "label": "Build Systems", "category": "domain", "r": 6},
+    {"id": 35, "label": "Data-driven UI", "category": "domain", "r": 6},
+    {"id": 36, "label": "Edge Compute", "category": "domain", "r": 6}
+  ],
+  "links": [
+    {"source": 0, "target": 1, "type": "builds-to"},
+    {"source": 0, "target": 2, "type": "builds-to"},
+    {"source": 0, "target": 3, "type": "builds-to"},
+    {"source": 0, "target": 4, "type": "builds-to"},
+    {"source": 0, "target": 5, "type": "builds-to"},
+
+    {"source": 1, "target": 9, "type": "runs-on"},
+    {"source": 1, "target": 10, "type": "runs-on"},
+    {"source": 3, "target": 7, "type": "runs-on"},
+    {"source": 4, "target": 8, "type": "runs-on"},
+    {"source": 5, "target": 6, "type": "runs-on"},
+
+    {"source": 0, "target": 11, "type": "enables"},
+    {"source": 0, "target": 12, "type": "enables"},
+    {"source": 0, "target": 13, "type": "enables"},
+    {"source": 0, "target": 14, "type": "enables"},
+
+    {"source": 5, "target": 16, "type": "enables"},
+    {"source": 6, "target": 16, "type": "enables"},
+
+    {"source": 17, "target": 23, "type": "enables"},
+    {"source": 17, "target": 22, "type": "enables"},
+
+    {"source": 0, "target": 18, "type": "uses-library"},
+    {"source": 0, "target": 19, "type": "uses-library"},
+    {"source": 0, "target": 20, "type": "uses-library"},
+    {"source": 0, "target": 21, "type": "uses-library"},
+
+    {"source": 1, "target": 23, "type": "uses-library"},
+    {"source": 1, "target": 24, "type": "uses-library"},
+    {"source": 2, "target": 25, "type": "uses-library"},
+    {"source": 2, "target": 26, "type": "uses-library"},
+    {"source": 2, "target": 27, "type": "uses-library"},
+
+    {"source": 23, "target": 15, "type": "enables"},
+
+    {"source": 28, "target": 3, "type": "runs-on"},
+    {"source": 29, "target": 1, "type": "runs-on"},
+    {"source": 30, "target": 1, "type": "runs-on"},
+
+    {"source": 28, "target": 32, "type": "enables"},
+    {"source": 29, "target": 31, "type": "enables"},
+    {"source": 23, "target": 31, "type": "enables"},
+
+    {"source": 13, "target": 29, "type": "enables"},
+    {"source": 29, "target": 34, "type": "enables"},
+
+    {"source": 27, "target": 33, "type": "enables"},
+
+    {"source": 19, "target": 35, "type": "enables"},
+    {"source": 23, "target": 35, "type": "enables"},
+
+    {"source": 36, "target": 8, "type": "runs-on"},
+    {"source": 4, "target": 36, "type": "enables"}
+  ]
+}

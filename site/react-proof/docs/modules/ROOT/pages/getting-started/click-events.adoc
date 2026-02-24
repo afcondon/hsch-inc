@@ -1,0 +1,164 @@
+= Click Events
+:description: Bridge D3 click events to React state
+
+This guide shows how to surface D3 events to React state, enabling interactive visualizations.
+
+== The Event Bridge Pattern
+
+[source]
+----
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   React      │     │    PSD3      │     │   D3/DOM     │
+│   State      │◄────│  withBehaviors│◄────│   Events     │
+│              │     │              │     │              │
+└──────────────┘     └──────────────┘     └──────────────┘
+----
+
+1. React component holds state (e.g., which bar is selected)
+2. PSD3 visualization attaches click handlers via `withBehaviors`
+3. Click handler calls a callback that updates React state
+4. React re-renders to reflect the selection
+
+== Interactive Bar Chart Example
+
+[source,purescript]
+----
+module InteractiveChart where
+
+import Prelude
+import Data.Array as Array
+import Data.Int (round, toNumber)
+import Data.Maybe (Maybe(..))
+import Effect (Effect)
+import PSD3.AST as A
+import PSD3.AST (ElementType(..))
+import PSD3.Expr.Friendly (num, text, computed, computedStr, fromWithIndex, fromStrWithIndex)
+import PSD3.Internal.Behavior.Types (onClickWithDatum)
+import PSD3.React.Hooks (useContainerId)
+import PSD3.Render (runD3, select, renderTree, clear)
+import React.Basic.DOM as R
+import React.Basic.Hooks (Component, component, useState, useEffectOnce, (/\))
+import React.Basic.Hooks as React
+
+mkInteractiveBarChart :: Component { chartData :: Array Number }
+mkInteractiveBarChart = do
+  containerId <- useContainerId
+
+  component "InteractiveBarChart" \props -> React.do
+    -- React state: which bar index is selected
+    selectedBar /\ setSelectedBar <- useState (Nothing :: Maybe Int)
+
+    -- Render visualization with click handlers
+    useEffectOnce do
+      void $ runD3 do
+        clear ("#" <> containerId)
+        container <- select ("#" <> containerId)
+        renderTree container (chartAST props.chartData setSelectedBar)
+      pure mempty
+
+    -- Render container and selection indicator
+    pure $ R.div_
+      [ R.div
+          { id: containerId
+          , style: R.css { width: "500px", height: "300px" }
+          }
+      , R.p_ [ R.text $ case selectedBar of
+          Nothing -> "Click a bar to select it"
+          Just idx -> "Selected bar " <> show (idx + 1)
+        ]
+      ]
+
+-- | Chart AST with click behaviors
+chartAST :: Array Number -> ((Maybe Int -> Maybe Int) -> Effect Unit) -> A.AST Number
+chartAST dataset setSelectedBar =
+  A.elem SVG
+    [ computed "width" (num 500.0)
+    , computed "height" (num 300.0)
+    ]
+    `A.withChild`
+      A.joinData "bars" "rect" dataset \_ ->
+        A.elem Rect
+          [ fromWithIndex "x" (\_ i -> toNumber i * 60.0 + 20.0)
+          , fromWithIndex "y" (\val _ -> 280.0 - val * 2.5)
+          , computed "width" (num 50.0)
+          , fromWithIndex "height" (\val _ -> val * 2.5)
+          , computedStr "fill" (text "steelblue")
+          , computedStr "cursor" (text "pointer")  -- Visual feedback
+          ]
+          `A.withBehaviors`
+            [ onClickWithDatum \clickedValue -> do
+                -- Find index of clicked value
+                let mIdx = Array.findIndex (_ == clickedValue) dataset
+                case mIdx of
+                  Just idx -> setSelectedBar (\_ -> Just idx)
+                  Nothing -> pure unit
+            ]
+----
+
+== Key Concepts
+
+=== withBehaviors
+
+Attaches event handlers to an element:
+
+[source,purescript]
+----
+A.elem Rect [ ... attributes ... ]
+  `A.withBehaviors`
+    [ onClickWithDatum \datum -> doSomething datum
+    , onMouseOverWithDatum \datum -> highlight datum
+    ]
+----
+
+=== onClickWithDatum
+
+Receives the bound datum when the element is clicked:
+
+[source,purescript]
+----
+onClickWithDatum :: forall d. (d -> Effect Unit) -> Behavior d
+----
+
+The `d` is whatever type you bound with `joinData`.
+
+=== Updating React State
+
+React state setters have type:
+
+[source,purescript]
+----
+setSelectedBar :: (Maybe Int -> Maybe Int) -> Effect Unit
+----
+
+Call it from your click handler:
+
+[source,purescript]
+----
+setSelectedBar (\_ -> Just idx)  -- Replace with new value
+setSelectedBar (\old -> ...)     -- Transform old value
+----
+
+== Highlight Selected Bar
+
+Add visual feedback for selection:
+
+[source,purescript]
+----
+-- Pass selectedBar state to the AST
+chartAST dataset selectedBar setSelectedBar =
+  ...
+  `A.withChild`
+    A.joinData "bars" "rect" (Array.mapWithIndex Tuple dataset) \_ ->
+      A.elem Rect
+        [ ...
+        , fromStrWithIndex "fill" (\(Tuple idx val) _ ->
+            if selectedBar == Just idx
+            then "orange"      -- Selected
+            else "steelblue")  -- Normal
+        ]
+----
+
+== Next Steps
+
+* xref:getting-started/force-simulation.adoc[Force Simulation] - Animated graphs
+* xref:how-to/props-updates.adoc[Props-Based Re-rendering] - Re-render on changes

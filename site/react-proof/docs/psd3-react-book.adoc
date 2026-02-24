@@ -1,0 +1,19 @@
+= PSD3 React
+:doctype: book
+:toc: left
+:toclevels: 3
+:sectnums:
+
+// Single-file book for PDF generation
+
+include::modules/ROOT/pages/index.adoc[leveloffset=+1]
+
+= Getting Started
+
+include::modules/ROOT/pages/getting-started/quickstart.adoc[leveloffset=+2]
+
+include::modules/ROOT/pages/getting-started/click-events.adoc[leveloffset=+2]
+
+= Reference
+
+include::modules/ROOT/pages/reference/hooks-api.adoc[leveloffset=+2]

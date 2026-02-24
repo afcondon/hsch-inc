@@ -1,0 +1,33 @@
+{
+  "name": "psd3-demo-website",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "spago build",
+    "build:docs": "asciidoctor -e -D public/docs -R docs 'docs/**/*.adoc'",
+    "bundle": "npm run build:docs && spago bundle --module Hylograph.Main --outfile public/index.js",
+    "serve": "npx http-server public -p 1234",
+    "dev": "npm run build:docs && npm run build && npm run bundle && npm run serve"
+  },
+  "dependencies": {
+    "d3-array": "^3.2.4",
+    "d3-brush": "^3.0.0",
+    "d3-chord": "^3.0.1",
+    "d3-color": "^3.1.0",
+    "d3-drag": "^3.0.0",
+    "d3-ease": "^3.0.1",
+    "d3-force": "^3.0.0",
+    "d3-hierarchy": "^3.1.2",
+    "d3-interpolate": "^3.0.1",
+    "d3-sankey": "^0.12.3",
+    "d3-scale": "^4.0.2",
+    "d3-scale-chromatic": "^3.1.0",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "d3-transition": "^3.0.1",
+    "d3-zoom": "^3.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

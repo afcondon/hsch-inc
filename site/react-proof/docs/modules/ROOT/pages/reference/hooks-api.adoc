@@ -1,0 +1,154 @@
+= Hooks API
+:description: Reference for PSD3 React hooks
+
+== PSD3.React.Hooks
+
+=== useContainerId
+
+Generate a unique container ID for a PSD3 visualization.
+
+[source,purescript]
+----
+useContainerId :: Effect String
+----
+
+*Usage:*
+
+[source,purescript]
+----
+mkMyViz :: Component Props
+mkMyViz = do
+  containerId <- useContainerId  -- Call OUTSIDE component body
+
+  component "MyViz" \props -> React.do
+    -- Use containerId in effects and JSX
+    useEffectOnce do
+      void $ runD3 do
+        container <- select ("#" <> containerId)
+        ...
+
+    pure $ R.div { id: containerId }
+----
+
+*Important:* Call `useContainerId` outside the `React.do` block. It runs once when the component is created, ensuring each component instance gets a unique ID.
+
+*Generated IDs* look like: `psd3-container-1`, `psd3-container-2`, etc.
+
+== Integration with React Hooks
+
+=== useEffectOnce
+
+Render visualization when component mounts:
+
+[source,purescript]
+----
+useEffectOnce do
+  void $ runD3 do
+    clear ("#" <> containerId)
+    container <- select ("#" <> containerId)
+    renderTree container myAST
+  pure mempty  -- No cleanup
+----
+
+=== useEffect with Dependencies
+
+Re-render when data changes:
+
+[source,purescript]
+----
+useEffect props.chartData do
+  void $ runD3 do
+    clear ("#" <> containerId)
+    container <- select ("#" <> containerId)
+    renderTree container (chartAST props.chartData)
+  pure mempty
+----
+
+=== useLayoutEffect
+
+For synchronous rendering (before paint):
+
+[source,purescript]
+----
+useLayoutEffect props.chartData do
+  void $ runD3 do
+    ...
+  pure mempty
+----
+
+== Cleanup Pattern
+
+For visualizations that need cleanup (e.g., simulations):
+
+[source,purescript]
+----
+useEffectOnce do
+  sim <- Sim.create Sim.defaultConfig
+  Sim.start sim
+
+  -- Return cleanup function
+  pure do
+    Sim.stop sim
+----
+
+== Common Patterns
+
+=== Static Visualization
+
+[source,purescript]
+----
+mkStaticViz :: Component { data :: Array Number }
+mkStaticViz = do
+  containerId <- useContainerId
+  component "StaticViz" \props -> React.do
+    useEffectOnce do
+      void $ runD3 do
+        clear ("#" <> containerId)
+        container <- select ("#" <> containerId)
+        renderTree container (vizAST props.data)
+      pure mempty
+    pure $ R.div { id: containerId }
+----
+
+=== Interactive with State
+
+[source,purescript]
+----
+mkInteractiveViz :: Component { data :: Array Number }
+mkInteractiveViz = do
+  containerId <- useContainerId
+  component "InteractiveViz" \props -> React.do
+    selected /\ setSelected <- useState Nothing
+
+    useEffectOnce do
+      void $ runD3 do
+        clear ("#" <> containerId)
+        container <- select ("#" <> containerId)
+        renderTree container (vizAST props.data setSelected)
+      pure mempty
+
+    pure $ R.div_
+      [ R.div { id: containerId }
+      , R.p_ [ R.text $ show selected ]
+      ]
+----
+
+=== Animated (Simulation)
+
+[source,purescript]
+----
+mkAnimatedViz :: Component {}
+mkAnimatedViz = do
+  containerId <- useContainerId
+  component "AnimatedViz" \_props -> React.do
+    useEffectOnce do
+      sim <- Sim.create Sim.defaultConfig
+      Sim.setNodes myNodes sim
+      Sim.onTick (updateDOM containerId) sim
+      Sim.start sim
+
+      -- Cleanup: stop simulation on unmount
+      pure (Sim.stop sim)
+
+    pure $ R.div { id: containerId }
+----

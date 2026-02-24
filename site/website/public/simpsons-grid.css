@@ -1,0 +1,32 @@
+
+.page-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-areas:
+    "A B"
+    "C D"
+    "E E"
+    "F G"
+    "H I"
+    "J J";
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.section-A { grid-area: A; }
+.section-B { grid-area: B; }
+.section-C { grid-area: C; }
+.section-D { grid-area: D; }
+.section-E { grid-area: E; }
+.section-F { grid-area: F; }
+.section-G { grid-area: G; }
+.section-H { grid-area: H; }
+.section-I { grid-area: I; }
+.section-J { grid-area: J; }
+
+@media (max-width: 768px) {
+  .page-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: "A" "B" "C" "D" "E" "F" "G" "H" "I" "J";
+  }
+}

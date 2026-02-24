@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hylograph-music - Hylograph</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../lib.css">
+</head>
+<body>
+  <header class="lib-header">
+    <a href="../" class="back-link">Hylograph Project Documentation</a>
+  </header>
+
+  <main class="lib-page">
+    <h1>hylograph-music</h1>
+
+    <article class="readme">
+<h1 id="purescript-hylograph-music">purescript-hylograph-music</h1>
+<p><a href="/anscombe/"><img src="../../site/lib-music/public/demo.jpeg"
+alt="Anscombe’s Quartet Demo" /></a></p>
+<p><strong>Audio interpreter for Hylograph - Data Sonification and
+Accessibility</strong></p>
+<h2 id="vision">Vision</h2>
+<p>This package explores data sonification by implementing an audio
+interpreter for the Hylograph tagless DSL. The same Hylograph code that
+creates visual charts can be interpreted as sound, making data
+accessible through hearing rather than sight.</p>
+<h2 id="installation">Installation</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">spago</span> install hylograph-music</span></code></pre></div>
+<h2 id="motivation">Motivation</h2>
+<h3 id="accessibility">1. Accessibility</h3>
+<p>Data visualization is inherently visual, excluding: - Unsighted or
+visually impaired users - Users with visual attention occupied (pilots,
+drivers, surgeons) - Situations where visual displays are
+impractical</p>
+<p>Audio provides an alternative modality for data comprehension. Just
+as a scatter plot reveals patterns spatially, a sonification can reveal
+patterns temporally and spectrally.</p>
+<h3 id="demonstrating-finally-tagless">2. Demonstrating Finally
+Tagless</h3>
+<p>This package proves that Hylograph’s tagless architecture truly
+separates description from interpretation: - Same Hylograph program -
+Multiple interpreters: D3 (visual), English (text), WebAudio (sound) -
+No changes to user code</p>
+<h3 id="foundation-for-music-dsl">3. Foundation for Music DSL</h3>
+<p>While focused on sonification, this work explores patterns that could
+inform a future music composition DSL inspired by: - Tidal Cycles’
+mini-notation - Modular synthesis patching philosophy - The data join
+pattern for separating temporal structure from musical content</p>
+<h2 id="conceptual-mapping">Conceptual Mapping</h2>
+<table>
+<thead>
+<tr>
+<th>D3/Visual Domain</th>
+<th>Audio/Music Domain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>select "svg"</code></td>
+<td>Create audio context</td>
+</tr>
+<tr>
+<td><code>selectAll "circle"</code></td>
+<td>Create array of sound events</td>
+</tr>
+<tr>
+<td>Data join</td>
+<td>Bind data to sonic parameters</td>
+</tr>
+<tr>
+<td><code>attr "cx"</code> (x position)</td>
+<td>Time offset (when to play)</td>
+</tr>
+<tr>
+<td><code>attr "cy"</code> (y position)</td>
+<td>Pitch (frequency in Hz)</td>
+</tr>
+<tr>
+<td><code>attr "r"</code> (radius)</td>
+<td>Duration or volume</td>
+</tr>
+<tr>
+<td><code>attr "fill"</code> (color)</td>
+<td>Timbre (waveform shape)</td>
+</tr>
+<tr>
+<td>Parent/child hierarchy</td>
+<td>Sequential/parallel composition</td>
+</tr>
+<tr>
+<td>Enter/Update/Exit</td>
+<td>Sound onset/sustain/release</td>
+</tr>
+</tbody>
+</table>
+<h2 id="example-usage-future">Example Usage (Future)</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- This code works with both D3 and Music interpreters!</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ot">sonifyData ::</span> <span class="kw">forall</span> m sel<span class="op">.</span> <span class="dt">SelectionM</span> sel m <span class="ot">=&gt;</span> <span class="dt">Array</span> <span class="dt">Number</span> <span class="ot">-&gt;</span> m <span class="dt">Unit</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>sonifyData dataset <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  context <span class="ot">&lt;-</span> select <span class="st">&quot;audio&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  tones <span class="ot">&lt;-</span> context</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">#</span> renderData <span class="dt">Tone</span> dataset <span class="st">&quot;tone&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        (<span class="dt">Just</span> \d <span class="ot">-&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>          [ time (\i _ <span class="ot">-&gt;</span> i <span class="op">*</span> <span class="fl">0.5</span>)        <span class="co">-- Evenly spaced in time</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>          , pitch (\_ d <span class="ot">-&gt;</span> <span class="fl">200.0</span> <span class="op">+</span> d <span class="op">*</span> <span class="fl">10.0</span>)  <span class="co">-- Map data to frequency</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>          , duration (\_ _ <span class="ot">-&gt;</span> <span class="fl">0.3</span>)        <span class="co">-- 300ms notes</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>          , volume (\_ d <span class="ot">-&gt;</span> d <span class="op">/</span> <span class="fl">100.0</span>)    <span class="co">-- Map data to volume</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>          , timbre (\_ _ <span class="ot">-&gt;</span> <span class="st">&quot;sine&quot;</span>)       <span class="co">-- Pure sine wave</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>          ])</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Nothing</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Nothing</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pure</span> unit</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">-- Interpret as visualization</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  runD3M <span class="op">$</span> sonifyData anscombeQuartet1</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">-- Interpret as sonification</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  runMusicM <span class="op">$</span> sonifyData anscombeQuartet1</span></code></pre></div>
+<h2 id="anscombes-quartet">Anscombe’s Quartet</h2>
+<p>Anscombe’s Quartet demonstrates why this matters. Four datasets with
+identical statistics: - Same mean - Same variance - Same correlation</p>
+<p>But when visualized, they look completely different. And when
+sonified, they would <strong>sound</strong> completely different: -
+Dataset 1: Linear progression (smooth ascending/descending melody) -
+Dataset 2: Quadratic (curved melodic contour) - Dataset 3: Linear with
+outlier (melody interrupted by jarring note) - Dataset 4: Vertical line
+with outlier (repeated note with one exception)</p>
+<p>The patterns that vision reveals spatially, hearing reveals
+temporally and spectrally.</p>
+<h2 id="use-cases">Use Cases</h2>
+<ol type="1">
+<li><strong>Data Exploration</strong> - Listen to data distributions,
+outliers, trends</li>
+<li><strong>Accessibility</strong> - Make charts and visualizations
+available to blind users</li>
+<li><strong>Monitoring</strong> - Audio dashboards for system metrics
+(like Geiger counters for data)</li>
+<li><strong>Multimodal Analysis</strong> - Use both vision and hearing
+simultaneously for richer understanding</li>
+<li><strong>Education</strong> - Teach data literacy through multiple
+sensory modes</li>
+</ol>
+<h2 id="architecture">Architecture</h2>
+<pre><code>hylograph-selection/              # Core tagless DSL (unchanged)
+  └── Hylograph/Internal/
+      └── Capabilities/Selection.purs  # SelectionM typeclass
+
+hylograph-music/                  # Audio interpreter (this package)
+  └── Hylograph/Music/
+      ├── Interpreter/WebAudio.purs    # Implements SelectionM for sound
+      ├── Attributes.purs              # Audio attribute mappings
+      └── Internal/FFI.purs            # Web Audio API bindings</code></pre>
+<p>The <code>MusicSelection_</code> type represents scheduled audio
+events rather than DOM elements, but the operations are the same:
+select, join data, set attributes, handle enter/update/exit.</p>
+<h2 id="modules">Modules</h2>
+<ul>
+<li><code>Hylograph.Music.Interpreter.WebAudio</code> - WebAudio
+interpreter</li>
+<li><code>Hylograph.Music.Attributes</code> - Sonic attribute
+mappings</li>
+<li><code>Hylograph.Music.Internal.FFI</code> - Web Audio API
+bindings</li>
+</ul>
+<h2 id="relationship-to-music-composition-dsl-future">Relationship to
+Music Composition DSL (Future)</h2>
+<p>This sonification work is distinct from but related to a potential
+music composition DSL. Key differences:</p>
+<p><strong>hylograph-music (this package):</strong> - Data → Sound
+(sonification) - Input: Arbitrary data arrays - Output: Audio
+representation of data patterns - Goal: Accessibility and data
+comprehension</p>
+<p><strong>Future Music DSL:</strong> - Musical ideas → Sound
+(composition) - Input: Musical structures (mini-notation, chord
+progressions, melodies) - Output: Music - Goal: Creative music making
+and generative composition</p>
+<p><strong>Shared patterns:</strong> - Typed data joins (structure +
+content) - Multiple interpreters (audio, notation, visualization,
+English) - Finally tagless architecture - Separation of “what/when”
+(temporal structure) from “how” (sonic content)</p>
+<p>Both benefit from exploring how the join pattern works in the
+temporal/auditory domain.</p>
+<h2 id="status">Status</h2>
+<p>Early exploration. The basic package structure and type signatures
+exist, but the implementation is stub-only. Next steps:</p>
+<ol type="1">
+<li>Implement basic Web Audio FFI bindings</li>
+<li>Implement <code>appendData</code> to schedule simple tones from
+data</li>
+<li>Create proof-of-concept demo sonifying a simple dataset</li>
+<li>Explore attribute mappings (which data dimensions map best to which
+sonic parameters?)</li>
+<li>Compare with D3 interpreter to identify shared abstractions</li>
+</ol>
+<h2 id="part-of-hylograph">Part of Hylograph</h2>
+<ul>
+<li><strong>hylograph-music</strong> - Audio interpreter (this
+package)</li>
+<li><strong>hylograph-selection</strong> - Core tagless DSL</li>
+<li><strong>hylograph-simulation</strong> - Force simulation</li>
+<li><strong>hylograph-graph</strong> - Graph algorithms</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://sonification.de/handbook/">Sonification
+Handbook</a> - Academic resource on data sonification</li>
+<li><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web
+Audio API</a> - Browser audio capabilities</li>
+<li><a href="https://tidalcycles.org/">Tidal Cycles</a> - Live coding
+music with mini-notation</li>
+<li><a href="https://strudel.tidalcycles.org/">Strudel</a> - Tidal in
+the browser (potential compilation target)</li>
+</ul>
+<h2 id="license">License</h2>
+<p>MIT</p>
+    </article>
+
+    <aside class="lib-links">
+      <a href="https://pursuit.purescript.org/packages/purescript-hylograph-music" class="pursuit-link">API Docs (Pursuit)</a>
+      <a href="https://github.com/afcondon/purescript-hylograph-music" class="github-link">GitHub</a>
+    </aside>
+  </main>
+</body>
+</html>

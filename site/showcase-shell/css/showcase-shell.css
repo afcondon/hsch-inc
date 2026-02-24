@@ -1,0 +1,329 @@
+/*
+ * PSD3 Showcase Shell - CSS Framework
+ *
+ * Provides layout structure for showcase applications:
+ * - Full-viewport SVG layer (zoomable/pannable)
+ * - Fixed header overlay
+ * - Configurable floating panels
+ *
+ * Depends on psd3.css for design tokens (--psd3-*, --space-*, etc.)
+ */
+
+/* ==========================================================================
+   CSS Custom Properties (can be overridden per-app)
+   ========================================================================== */
+
+:root {
+  --showcase-header-height: 60px;
+  --showcase-panel-width: 320px;
+  --showcase-panel-z: 50;
+  --showcase-header-z: 60;
+  --showcase-svg-z: 0;
+}
+
+/* ==========================================================================
+   Base Layout - Fixed viewport, no scrolling
+   ========================================================================== */
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.showcase-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Header - Fixed at top, overlays SVG
+   ========================================================================== */
+
+.showcase-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--showcase-header-z);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--showcase-header-height);
+  padding: 0 var(--space-6);
+  background: var(--psd3-bg-card);
+  border-bottom: 1px solid var(--psd3-border);
+}
+
+/* Transparent variant - for overlaying SVG */
+.showcase-header--transparent {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+/* ==========================================================================
+   Main Content Area
+   ========================================================================== */
+
+.showcase-main {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  margin-top: var(--showcase-header-height);
+}
+
+/* ==========================================================================
+   SVG Layer - Full viewport, behind panels
+   ========================================================================== */
+
+.showcase-svg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--showcase-svg-z);
+  background: var(--psd3-bg-page);
+  overflow: hidden;
+}
+
+.showcase-svg-layer svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Zoom group - receives transform from D3 zoom */
+.showcase-zoom-group {
+  /* D3 applies transform here */
+}
+
+/* ==========================================================================
+   Panels Container
+   ========================================================================== */
+
+.showcase-panels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;  /* Allow clicks through to SVG */
+  z-index: var(--showcase-panel-z);
+}
+
+/* ==========================================================================
+   Panel Base Styles
+   ========================================================================== */
+
+.showcase-panel {
+  position: absolute;
+  background: var(--psd3-bg-card);
+  border: 1px solid var(--psd3-border);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  pointer-events: auto;  /* Re-enable clicks on panels */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.showcase-panel-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+/* ==========================================================================
+   Panel Positions
+   ========================================================================== */
+
+/* Left panel - slides in from left edge */
+.showcase-panel--left {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--showcase-panel-width);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.showcase-panel--left.showcase-panel--closed {
+  transform: translateX(-100%);
+}
+
+.showcase-panel--left.showcase-panel--open {
+  transform: translateX(0);
+}
+
+/* Right panel - slides in from right edge */
+.showcase-panel--right {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--showcase-panel-width);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.showcase-panel--right.showcase-panel--closed {
+  transform: translateX(100%);
+}
+
+.showcase-panel--right.showcase-panel--open {
+  transform: translateX(0);
+}
+
+/* Bottom panel - slides up from bottom */
+.showcase-panel--bottom {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: auto;
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.showcase-panel--bottom.showcase-panel--closed {
+  transform: translateY(100%);
+}
+
+.showcase-panel--bottom.showcase-panel--open {
+  transform: translateY(0);
+}
+
+.showcase-panel--bottom .showcase-panel-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-3) var(--space-6);
+  overflow: visible;
+}
+
+/* Top-left corner panel */
+.showcase-panel--top-left {
+  left: var(--space-4);
+  top: var(--space-4);
+  width: var(--showcase-panel-width);
+  max-height: calc(100% - var(--space-8));
+  border-radius: var(--radius-md);
+}
+
+.showcase-panel--top-left.showcase-panel--closed {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-20px);
+}
+
+/* Top-right corner panel */
+.showcase-panel--top-right {
+  right: var(--space-4);
+  top: var(--space-4);
+  width: var(--showcase-panel-width);
+  max-height: calc(100% - var(--space-8));
+  border-radius: var(--radius-md);
+}
+
+.showcase-panel--top-right.showcase-panel--closed {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(20px);
+}
+
+/* Bottom-left corner panel */
+.showcase-panel--bottom-left {
+  left: var(--space-4);
+  bottom: var(--space-4);
+  width: var(--showcase-panel-width);
+  max-height: calc(100% - var(--space-8));
+  border-radius: var(--radius-md);
+}
+
+.showcase-panel--bottom-left.showcase-panel--closed {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+}
+
+/* Bottom-right corner panel */
+.showcase-panel--bottom-right {
+  right: var(--space-4);
+  bottom: var(--space-4);
+  width: var(--showcase-panel-width);
+  max-height: calc(100% - var(--space-8));
+  border-radius: var(--radius-md);
+}
+
+.showcase-panel--bottom-right.showcase-panel--closed {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+}
+
+/* ==========================================================================
+   Panel Toggle Button
+   ========================================================================== */
+
+.showcase-panel-toggle {
+  position: absolute;
+  z-index: 1;
+  background: var(--psd3-bg-card);
+  border: 1px solid var(--psd3-border);
+  color: var(--psd3-text-muted);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.showcase-panel-toggle:hover {
+  background: var(--psd3-gold);
+  color: white;
+  border-color: var(--psd3-gold);
+}
+
+/* Toggle position for left panel */
+.showcase-panel--left .showcase-panel-toggle {
+  right: calc(-1 * var(--space-8));
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* Toggle position for right panel */
+.showcase-panel--right .showcase-panel-toggle {
+  left: calc(-1 * var(--space-8));
+  top: 50%;
+  transform: translateY(-50%);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+/* Toggle position for bottom panel */
+.showcase-panel--bottom .showcase-panel-toggle {
+  top: calc(-1 * var(--space-8));
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+/* Toggle position for corner panels */
+.showcase-panel--top-left .showcase-panel-toggle,
+.showcase-panel--top-right .showcase-panel-toggle,
+.showcase-panel--bottom-left .showcase-panel-toggle,
+.showcase-panel--bottom-right .showcase-panel-toggle {
+  top: var(--space-2);
+  right: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+/* For panels that should leave room for bottom panel */
+.showcase-panel--above-bottom {
+  bottom: 60px;  /* Adjust based on bottom panel height */
+}
+
+/* For panels with no padding */
+.showcase-panel--no-padding .showcase-panel-content {
+  padding: 0;
+}

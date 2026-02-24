@@ -1,0 +1,17 @@
+# Dependencies
+.spago/
+node_modules/
+
+# Build output
+output/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Lock files (optional - can be committed for reproducibility)
+# spago.lock

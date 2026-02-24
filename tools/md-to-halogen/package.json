@@ -1,0 +1,17 @@
+{
+  "name": "md-to-halogen",
+  "version": "1.0.0",
+  "description": "Build-time preprocessor: Markdown → PureScript Halogen HTML",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "md-to-halogen": "./index.js"
+  },
+  "scripts": {
+    "test": "node index.js --help"
+  },
+  "dependencies": {
+    "markdown-it": "^14.0.0",
+    "glob": "^10.3.0"
+  }
+}

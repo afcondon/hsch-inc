@@ -13,9 +13,12 @@ PureScript compiles to CoreFn, an untyped functional intermediate representation
 |---------|--------|--------|---------------|
 | **purs** (reference) | JavaScript | Production | PureScript core team |
 | **purerl** | Erlang/BEAM | Production | id3as (Rob Sheridan et al.) |
+| **purs-backend-erl** | Erlang/BEAM | Production | id3as (rewrite of purerl) |
 | **purescm** | Chez Scheme / Racket | Experimental | Nathan Faubion (aristanetworks) |
 | **purepy** | Python | Working (90+ tests) | Claude-authored, afc maintained |
 | **.NET** (hypothetical) | CLR / C# | Researched, not built | — |
+
+**Note on purerl vs purs-backend-erl**: There are two Erlang backends. The original **purerl** (`purerl/purerl`) is Haskell-based and reads CoreFn directly. The newer **purs-backend-erl** (`id3as/purescript-backend-erl`) is a PureScript-based rewrite that uses `purescript-backend-optimizer`, achieving ~30-40% performance improvements. Both are maintained by id3as and are FFI-compatible. The local codebase at `purescript-backends/purerl/` is the original Haskell version.
 
 Additionally, **purescript-lua** (pslua) exists as an experimental Lua backend and **purekt** shares architecture with purescm via `purescript-backend-optimizer`.
 
@@ -38,14 +41,16 @@ PureScript Source
     → Target language source / bytecode
 ```
 
-| Dimension | JS (reference) | Purerl | Purescm/Purekt | Purepy | .NET (proposed) |
-|-----------|----------------|--------|----------------|--------|-----------------|
-| **Implementation language** | Haskell (in purs) | Haskell | PureScript | Haskell + PureScript | Haskell (proposed) |
-| **Uses backend-optimizer** | No (own passes) | Yes (PureScript impl) | Yes (originated here) | Yes | Would use it |
-| **IR consumed** | CoreFn | Optimized CoreFn | Optimized CoreFn | Optimized CoreFn | CoreFn |
-| **Output format** | ES modules / CJS | .erl source | .rkt / .ss source | .py source | C# source or CIL |
-| **Bundling** | esbuild/webpack | rebar3/mix | raco | pip/setuptools | dotnet build |
-| **FFI language** | JavaScript | Erlang | Scheme/Racket | Python | C# |
+| Dimension | JS (reference) | Purerl (original) | Purs-backend-erl | Purescm/Purekt | Purepy | .NET (proposed) |
+|-----------|----------------|-------------------|------------------|----------------|--------|-----------------|
+| **Implementation language** | Haskell (in purs) | Haskell | PureScript | PureScript | Haskell + PureScript | Haskell (proposed) |
+| **Uses backend-optimizer** | No (own passes) | No (own Haskell passes) | Yes | Yes (originated here) | Yes | Would use it |
+| **IR consumed** | CoreFn | CoreFn | Optimized CoreFn | Optimized CoreFn | Optimized CoreFn | CoreFn |
+| **Output format** | ES modules / CJS | .erl source in `output/` | .erl source in `output-erl/` | .rkt / .ss source | .py source | C# source or CIL |
+| **Invocation** | Built into `purs` | `backend.cmd` in spago.yaml | Two-step: `spago build` then `purs-backend-erl` | CLI post-pass | CLI post-pass | — |
+| **Bundling** | esbuild/webpack | rebar3/mix | rebar3/mix | raco | pip/setuptools | dotnet build |
+| **FFI language** | JavaScript | Erlang | Erlang (compatible) | Scheme/Racket | Python | C# |
+| **Performance** | Baseline | Baseline (Erlang) | ~30-40% faster (uncurrying, inlining) | — | — | — |
 
 ### The Role of `purescript-backend-optimizer`
 

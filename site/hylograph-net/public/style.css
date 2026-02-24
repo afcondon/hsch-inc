@@ -1,0 +1,188 @@
+/* Hylograph.net */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-page: #f5f5f5;
+  --bg-card: #ffffff;
+  --border: #e0e0e0;
+  --text-primary: #333;
+  --text-muted: #666;
+  --shadow-card: 0 4px 12px rgba(0,0,0,0.1);
+  --radius: 8px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Logo Curtain */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  transition: opacity 0.6s ease-out, visibility 0.6s;
+}
+
+.curtain--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.curtain__logo {
+  /* Same size as one quadrant box: (800px - 1.5rem gap) / 2 */
+  width: calc((min(800px, 100vw - 3rem) - 1.5rem) / 2);
+  height: calc((min(800px, 100vw - 3rem) - 1.5rem) / 2);
+  object-fit: contain;
+}
+
+.curtain__logotype {
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  text-transform: lowercase;
+  color: var(--text-primary);
+}
+
+/* Main layout */
+.docs-landing {
+  padding: 3rem 1.5rem;
+}
+
+/* Docs Quadrant - 2x2 grid of square boxes */
+.docs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+}
+
+@media (max-width: 600px) {
+  .docs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Doc card - square with horizontal layout */
+.doc-card {
+  display: flex;
+  flex-direction: row;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  aspect-ratio: 1;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.doc-card:hover {
+  box-shadow: var(--shadow-card);
+  border-color: #999;
+}
+
+.doc-card__image {
+  width: 100px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--bg-page);
+}
+
+.doc-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.doc-card__content {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.doc-card__content h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.doc-card__content p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .doc-card__image {
+    width: 80px;
+  }
+}
+
+/* Libraries nav */
+.libraries {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.libraries h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #999;
+  margin-bottom: 1rem;
+}
+
+.libraries ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.libraries a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-family: monospace;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.libraries a:hover {
+  background: #e8e8e8;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+footer a {
+  color: #666;
+}

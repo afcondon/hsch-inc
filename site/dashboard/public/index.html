@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSD3 Dev Dashboard</title>
+  <link rel="stylesheet" href="psd3.css">
+  <style>
+    /* Dashboard-specific overrides */
+    :root {
+      --status-running: #22c55e;
+      --status-stopped: #9ca3af;
+      --status-error: #ef4444;
+    }
+
+    body {
+      padding-top: 0;
+    }
+
+    .dashboard {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-4) var(--space-6);
+      background: var(--psd3-bg-card);
+      border-bottom: 1px solid var(--psd3-border);
+    }
+
+    .dashboard-title {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .dashboard-title h1 {
+      font-size: var(--text-xl);
+      font-weight: 600;
+      color: var(--psd3-text-primary);
+    }
+
+    .dashboard-title .accent {
+      color: var(--psd3-gold);
+    }
+
+    .ws-indicator {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      color: var(--psd3-text-muted);
+    }
+
+    .ws-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--status-stopped);
+      transition: background var(--transition-fast);
+    }
+
+    .ws-dot.connected {
+      background: var(--status-running);
+    }
+
+    /* Main content */
+    .dashboard-main {
+      flex: 1;
+      padding: var(--space-6);
+      background: var(--psd3-bg-page);
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--space-4);
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Service cards */
+    .service-card {
+      background: var(--psd3-bg-card);
+      border: 1px solid var(--psd3-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      transition: all var(--transition-normal);
+    }
+
+    .service-card:hover {
+      box-shadow: var(--shadow-card);
+    }
+
+    .service-card.running {
+      border-left: 3px solid var(--psd3-gold);
+    }
+
+    .service-card.disabled {
+      opacity: 0.5;
+    }
+
+    .service-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-3);
+    }
+
+    .service-name {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--psd3-text-primary);
+    }
+
+    .service-type {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      background: var(--psd3-bg-subtle);
+      color: var(--psd3-text-muted);
+    }
+
+    .service-type.python { background: rgba(233, 30, 140, 0.1); color: var(--psd3-python); }
+    .service-type.node { background: rgba(0, 168, 204, 0.1); color: var(--psd3-pure); }
+    .service-type.erlang { background: rgba(123, 47, 247, 0.1); color: var(--psd3-purple); }
+
+    .service-info {
+      display: flex;
+      gap: var(--space-4);
+      margin-bottom: var(--space-3);
+      font-size: var(--text-sm);
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .info-label {
+      color: var(--psd3-text-muted);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--status-stopped);
+    }
+
+    .status-dot.running { background: var(--status-running); }
+    .status-dot.error { background: var(--status-error); }
+
+    .port-display {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      background: var(--psd3-bg-subtle);
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-sm);
+    }
+
+    .port-link {
+      color: var(--psd3-link);
+      text-decoration: none;
+    }
+
+    .port-link:hover {
+      text-decoration: underline;
+    }
+
+    .port-editable {
+      cursor: pointer;
+      color: var(--psd3-text-body);
+    }
+
+    .port-editable:hover {
+      color: var(--psd3-gold);
+    }
+
+    /* Action buttons */
+    .service-actions {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .btn {
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-start {
+      background: var(--psd3-gold);
+      color: white;
+    }
+
+    .btn-start:hover {
+      background: var(--psd3-gold-light);
+    }
+
+    .btn-stop {
+      background: var(--status-error);
+      color: white;
+    }
+
+    .btn-restart {
+      background: var(--psd3-bg-subtle);
+      color: var(--psd3-text-body);
+      border-color: var(--psd3-border);
+    }
+
+    .btn-restart:hover {
+      background: var(--psd3-bg-card);
+      border-color: var(--psd3-gold);
+    }
+
+    .btn-logs {
+      background: transparent;
+      color: var(--psd3-text-muted);
+      border-color: var(--psd3-border);
+    }
+
+    .btn-logs:hover {
+      color: var(--psd3-text-body);
+      border-color: var(--psd3-text-muted);
+    }
+
+    /* Notes */
+    .service-notes {
+      font-size: var(--text-xs);
+      color: var(--psd3-text-muted);
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--psd3-border-light);
+    }
+
+    /* Modals */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal {
+      background: var(--psd3-bg-card);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 800px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-4) var(--space-6);
+      border-bottom: 1px solid var(--psd3-border);
+    }
+
+    .modal-title {
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--psd3-text-primary);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--psd3-text-muted);
+      font-size: var(--text-2xl);
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: var(--psd3-text-body);
+    }
+
+    /* Log viewer */
+    .log-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-4);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: 1.6;
+      background: var(--psd3-bg-subtle);
+    }
+
+    .log-line {
+      white-space: pre-wrap;
+      word-break: break-all;
+      padding: 2px 0;
+    }
+
+    .log-line.stderr {
+      color: var(--status-error);
+    }
+
+    .log-line.system {
+      color: var(--psd3-link);
+    }
+
+    .log-time {
+      color: var(--psd3-text-light);
+      margin-right: var(--space-2);
+    }
+
+    /* Port modal */
+    .port-modal-body {
+      padding: var(--space-6);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .port-modal-body input {
+      width: 120px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <header class="dashboard-header">
+      <div class="dashboard-title">
+        <h1><span class="accent">PSD3</span> Dev Dashboard</h1>
+      </div>
+      <div class="ws-indicator">
+        <span class="ws-dot" id="wsStatus"></span>
+        <span id="wsLabel">Connecting...</span>
+      </div>
+    </header>
+
+    <main class="dashboard-main">
+      <div class="services-grid" id="servicesGrid"></div>
+    </main>
+  </div>
+
+  <!-- Log Modal -->
+  <div class="modal-overlay" id="logModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="logModalTitle">Logs</span>
+        <button class="modal-close" onclick="closeLogModal()">&times;</button>
+      </div>
+      <div class="log-container" id="logContainer"></div>
+    </div>
+  </div>
+
+  <!-- Port Modal -->
+  <div class="modal-overlay" id="portModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Change Port</span>
+        <button class="modal-close" onclick="closePortModal()">&times;</button>
+      </div>
+      <div class="port-modal-body">
+        <input type="number" id="portInput" min="1024" max="65535" placeholder="Port">
+        <button class="btn btn-start" onclick="savePort()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let services = [];
+    let ws;
+    let currentLogService = null;
+    let currentPortService = null;
+
+    function connectWebSocket() {
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${location.host}`);
+
+      ws.onopen = () => {
+        document.getElementById('wsStatus').classList.add('connected');
+        document.getElementById('wsLabel').textContent = 'Connected';
+      };
+
+      ws.onclose = () => {
+        document.getElementById('wsStatus').classList.remove('connected');
+        document.getElementById('wsLabel').textContent = 'Disconnected';
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'init') {
+          services = msg.services;
+          render();
+        } else if (msg.type === 'status') {
+          const idx = services.findIndex(s => s.id === msg.service.id);
+          if (idx >= 0) {
+            services[idx] = msg.service;
+            render();
+          }
+        } else if (msg.type === 'log' && msg.serviceId === currentLogService) {
+          appendLogEntry(msg.entry);
+        }
+      };
+    }
+
+    function getTypeClass(type) {
+      if (type === 'python') return 'python';
+      if (type === 'node') return 'node';
+      if (type === 'erlang') return 'erlang';
+      return '';
+    }
+
+    function render() {
+      const grid = document.getElementById('servicesGrid');
+      grid.innerHTML = services.map(s => `
+        <div class="service-card ${s.status} ${s.disabled ? 'disabled' : ''}">
+          <div class="service-header">
+            <span class="service-name">${s.name}</span>
+            <span class="service-type ${getTypeClass(s.type)}">${s.type}</span>
+          </div>
+          <div class="service-info">
+            <div class="info-item">
+              <span class="info-label">Status:</span>
+              <span class="status-badge">
+                <span class="status-dot ${s.status}"></span>
+                ${s.status}${s.pid ? ` (${s.pid})` : ''}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Port:</span>
+              <span class="port-display">
+                ${s.status === 'running'
+                  ? `<a href="http://localhost:${s.port}" target="_blank" class="port-link">${s.port}</a>`
+                  : `<span class="port-editable" onclick="openPortModal('${s.id}', ${s.port})">${s.port}</span>`
+                }
+              </span>
+            </div>
+          </div>
+          <div class="service-actions">
+            ${s.status === 'running'
+              ? `<button class="btn btn-stop" onclick="stopService('${s.id}')">Stop</button>`
+              : `<button class="btn btn-start" onclick="startService('${s.id}')" ${s.disabled ? 'disabled' : ''}>Start</button>`
+            }
+            <button class="btn btn-restart" onclick="restartService('${s.id}')" ${s.disabled ? 'disabled' : ''}>Restart</button>
+            <button class="btn btn-logs" onclick="showLogs('${s.id}')">Logs</button>
+          </div>
+          ${s.notes ? `<div class="service-notes">${s.notes}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function startService(id) {
+      await fetch(`/api/services/${id}/start`, { method: 'POST' });
+    }
+
+    async function stopService(id) {
+      await fetch(`/api/services/${id}/stop`, { method: 'POST' });
+    }
+
+    async function restartService(id) {
+      await fetch(`/api/services/${id}/restart`, { method: 'POST' });
+    }
+
+    async function showLogs(id) {
+      currentLogService = id;
+      const service = services.find(s => s.id === id);
+      document.getElementById('logModalTitle').textContent = `Logs: ${service.name}`;
+
+      const res = await fetch(`/api/services/${id}/logs`);
+      const logs = await res.json();
+
+      const container = document.getElementById('logContainer');
+      container.innerHTML = '';
+      logs.forEach(appendLogEntry);
+
+      document.getElementById('logModal').classList.add('show');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendLogEntry(entry) {
+      const container = document.getElementById('logContainer');
+      const div = document.createElement('div');
+      div.className = `log-line ${entry.stream}`;
+      const time = new Date(entry.time).toLocaleTimeString();
+      div.innerHTML = `<span class="log-time">${time}</span>${escapeHtml(entry.line)}`;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function closeLogModal() {
+      document.getElementById('logModal').classList.remove('show');
+      currentLogService = null;
+    }
+
+    function openPortModal(id, port) {
+      currentPortService = id;
+      document.getElementById('portInput').value = port;
+      document.getElementById('portModal').classList.add('show');
+    }
+
+    function closePortModal() {
+      document.getElementById('portModal').classList.remove('show');
+      currentPortService = null;
+    }
+
+    async function savePort() {
+      const port = parseInt(document.getElementById('portInput').value);
+      if (!port || port < 1024 || port > 65535) {
+        alert('Invalid port number');
+        return;
+      }
+      const res = await fetch(`/api/services/${currentPortService}/port`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ port })
+      });
+      const result = await res.json();
+      if (result.error) {
+        alert(result.error);
+      } else {
+        closePortModal();
+      }
+    }
+
+    // Close modals on escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLogModal();
+        closePortModal();
+      }
+    });
+
+    // Initial load
+    fetch('/api/services')
+      .then(r => r.json())
+      .then(data => {
+        services = data;
+        render();
+      });
+
+    connectWebSocket();
+  </script>
+</body>
+</html>

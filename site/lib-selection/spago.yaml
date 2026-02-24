@@ -1,0 +1,20 @@
+workspace:
+  packageSet:
+    registry: 72.0.1
+  extraPackages:
+    hylograph-lib-shell:
+      path: "../lib-shell"
+
+package:
+  name: lib-selection-site
+  description: Landing page for hylograph-selection library
+  bundle:
+    module: Main
+    outfile: public/bundle.js
+    platform: browser
+  dependencies:
+    - aff
+    - effect
+    - halogen
+    - prelude
+    - hylograph-lib-shell

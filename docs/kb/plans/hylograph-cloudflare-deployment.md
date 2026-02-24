@@ -1,281 +1,158 @@
 ---
-title: "Hylograph Cloudflare Deployment Plan"
+title: "Hylograph Deployment Plan"
 category: plan
 status: active
-tags: [hylograph, cloudflare, deployment, infrastructure]
+tags: [hylograph, cloudflare, tailscale, deployment, infrastructure]
 created: 2026-01-27
-summary: Plan for publishing Hylograph to hylograph.net using Cloudflare Pages (static) and Cloudflare Tunnel (MacMini backends).
+updated: 2026-02-05
+summary: Deployment architecture for Hylograph ecosystem - Cloudflare Pages for static sites, TailScale Funnel on MacMini for backends.
 ---
 
-# Hylograph Cloudflare Deployment Plan
+# Hylograph Deployment Plan
 
 ## Overview
 
-Deploy the Hylograph project to hylograph.net using Cloudflare's free tier:
-- **Static content** → Cloudflare Pages
-- **Backend demos** → Cloudflare Tunnel to MacMini
+Deploy the Hylograph ecosystem using:
+- **Static content** → Cloudflare Pages (free tier)
+- **Backend demos** → TailScale Funnel → MacMini Docker
 
 Initial audience: friends and PureScript Discord community. All repos will be public.
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         hylograph.net                                │
-│                     (Cloudflare DNS + CDN)                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  ┌──────────────────────┐      ┌──────────────────────────────────┐ │
-│  │   Cloudflare Pages   │      │      Cloudflare Tunnel           │ │
-│  │   (Static Content)   │      │      (MacMini Backends)          │ │
-│  │                      │      │                                  │ │
-│  │  hylograph.net       │      │  live.hylograph.net              │ │
-│  │  docs.hylograph.net  │      │   ├─ /code-explorer              │ │
-│  │                      │      │   ├─ /grid-explorer              │ │
-│  │  - Main website      │      │   ├─ /embedding-explorer         │ │
-│  │  - Documentation     │      │   └─ /sankey                     │ │
-│  │  - Static demos      │      │                                  │ │
-│  │  - Library pages     │      │  Optional: Cloudflare Access     │ │
-│  │                      │      │  (email allowlist)               │ │
-│  └──────────────────────┘      └──────────────────────────────────┘ │
-│            │                                │                        │
-│            │                                │                        │
-│            ▼                                ▼                        │
-│    GitHub Actions                    MacMini (Docker)                │
-│    (build on push)                   (existing setup)                │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         hylograph.net                                    │
+│                     (Cloudflare DNS + CDN)                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌────────────────────────────────────────────┐                          │
+│  │          Cloudflare Pages (Static)         │                          │
+│  │                                            │                          │
+│  │  hylograph.net         4-quadrant docs     │                          │
+│  │  blog.hylograph.net    Hylographic blog    │                          │
+│  │  polyglot.hylograph.net  Demo gallery      │                          │
+│  │                                            │                          │
+│  └────────────────────────────────────────────┘                          │
+│                                                                          │
+│  ┌────────────────────────────────────────────┐                          │
+│  │       TailScale Funnel (MacMini)           │                          │
+│  │                                            │                          │
+│  │  *.tail[...].ts.net                        │                          │
+│  │   ├─ /code    Minard (Node.js + DuckDB)    │                          │
+│  │   ├─ /ee      Embedding Explorer (Python)  │                          │
+│  │   ├─ /ge      Grid Explorer (Python)       │                          │
+│  │   └─ /tidal   Tidal Editor (Erlang)        │                          │
+│  │                                            │                          │
+│  └────────────────────────────────────────────┘                          │
+│                                                                          │
+│  ┌────────────────────────────────────────────┐                          │
+│  │       Vanity Redirects (purescri.pt)       │                          │
+│  │                                            │                          │
+│  │  polyglot.purescri.pt → polyglot.hylograph.net                        │
+│  │  hylograph.purescri.pt → hylograph.net                                │
+│  │                                            │                          │
+│  └────────────────────────────────────────────┘                          │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Domain Structure
 
-| URL | Content | Hosting | Notes |
-|-----|---------|---------|-------|
-| `hylograph.net` | Main site + static demos | Cloudflare Pages | Rebrand from PSD3 |
-| `docs.hylograph.net` | Antora documentation | Cloudflare Pages | Separate Pages project |
-| `live.hylograph.net` | Backend demos | Tunnel → MacMini | Access-controlled |
+### Cloudflare Pages (Static Sites)
 
-Alternative (simpler, single Pages project):
+| URL | Content | Source | Cloudflare Project |
+|-----|---------|--------|-------------------|
+| `hylograph.net` | Library docs (4-quadrant) | `site/hylograph-net` | hylograph-docs |
+| `blog.hylograph.net` | Hylographic blog | `blog/` | hylograph-blog |
+| `polyglot.hylograph.net` | Demo gallery website | `site/website` | hylograph-polyglot |
 
-| URL | Content |
-|-----|---------|
-| `hylograph.net/` | Main site |
-| `hylograph.net/docs/` | Documentation |
-| `hylograph.net/demos/` | Static demos |
-| `live.hylograph.net/` | Backend demos |
+### TailScale Funnel (Backend Demos)
 
-**Recommendation**: Start with the simpler single-project approach. Split later if needed.
+| Path | Backend | Service |
+|------|---------|---------|
+| /code | Node.js + DuckDB | Minard code cartography |
+| /ee | Python (PurePy) | Embedding Explorer |
+| /ge | Python (PurePy) | Grid Explorer |
+| /tidal | Erlang (Purerl) | Tidal music editor |
+
+### Vanity Redirects
+
+Configured via Nick Saunders' purescri.pt forwarder:
+
+| Vanity URL | Target |
+|------------|--------|
+| `polyglot.purescri.pt` | `polyglot.hylograph.net` |
+| `hylograph.purescri.pt` | `hylograph.net` |
 
 ## Content Inventory
 
-### Tier 1: Static (Cloudflare Pages)
+### Static Sites (Cloudflare Pages)
 
-| Current Name | New Path | Source | Build |
-|--------------|----------|--------|-------|
-| Main website | `/` | site/website | `make website` |
-| Documentation | `/docs/` | site/docs | `npx antora` |
-| WASM Demo | `/demos/wasm/` | wasm-force-demo | `make app-wasm` |
-| AST Builder | `/demos/ast-builder/` | TBD after HATS | `make app-ast-builder` |
-| Sankey (static) | `/demos/sankey/` | psd3-arid-keystone | `make app-sankey` (static mode) |
-| Library: Selection | `/libs/selection/` | site/lib-selection | `make lib-site-selection` |
-| Library: Simulation | `/libs/simulation/` | site/lib-simulation | `make lib-site-simulation` |
-| Library: Layout | `/libs/layout/` | site/lib-layout | `make lib-site-layout` |
-| Library: Graph | `/libs/graph/` | site/lib-graph | `make lib-site-graph` |
-| Library: Music | `/libs/music/` | site/lib-music | `make lib-site-music` |
+| Site | Build Command | Output Directory |
+|------|---------------|------------------|
+| Docs (hylograph.net) | `./build.sh` | `site/hylograph-net/public` |
+| Blog (blog.hylograph.net) | `make blog` | `blog/public` |
+| Polyglot (polyglot.hylograph.net) | `make website` | `site/website/public` |
 
-### Tier 2: Backend Required (Cloudflare Tunnel)
+### Backend Demos (MacMini Docker)
 
-| Demo | Backend | Static Fallback |
-|------|---------|-----------------|
-| Code Explorer | Node.js (ce-server) | Link to repo + build instructions |
-| Grid Explorer | Python (PurePy) | Link to repo + build instructions |
-| Embedding Explorer | Python (PurePy) | Link to repo + build instructions |
-| Sankey Editor | Optional backend | Static file mode with sample data |
-| Tidal Editor | Erlang (Purerl) | Complex - may skip initially |
+| Demo | Backend Tech | Notes |
+|------|--------------|-------|
+| Minard | Node.js + DuckDB | Code cartography, requires database |
+| Embedding Explorer | Python (PurePy) | Vector embeddings |
+| Grid Explorer | Python (PurePy) | Grid visualization |
+| Tidal Editor | Erlang (Purerl) | Music patterns, complex setup |
 
 ## Implementation Steps
 
-### Phase 1: Cloudflare Setup
+### Phase 1: Cloudflare Pages Setup
 
-#### 1.1 DNS Configuration (Cloudflare Dashboard)
+#### 1.1 Create Three Cloudflare Pages Projects
 
-Since domain is registered with Cloudflare, DNS is already managed there.
+In Cloudflare Dashboard → Pages → Create project:
 
-Add records:
-```
-Type  Name   Content              Proxy
-A     @      192.0.2.1            Yes    (placeholder for Pages)
-CNAME docs   <pages-project>.pages.dev  Yes
-CNAME live   <tunnel-id>.cfargotunnel.com  Yes
-```
+**Project 1: hylograph-docs**
+- Connect to GitHub: `purescript-polyglot` repo
+- Build command: `cd site/hylograph-net && ./build.sh`
+- Output directory: `site/hylograph-net/public`
+- Custom domain: `hylograph.net`
 
-Note: Cloudflare Pages automatically configures DNS when you add a custom domain.
+**Project 2: hylograph-blog**
+- Connect to GitHub: `purescript-polyglot` repo
+- Build command: `make blog`
+- Output directory: `blog/public`
+- Custom domain: `blog.hylograph.net`
 
-#### 1.2 Create Cloudflare Pages Project
+**Project 3: hylograph-polyglot**
+- Connect to GitHub: `purescript-polyglot` repo
+- Build command: `make website`
+- Output directory: `site/website/public`
+- Custom domain: `polyglot.hylograph.net`
 
-1. Go to Cloudflare Dashboard → Pages → Create a project
-2. Connect to GitHub repository (will need to be public or grant access)
-3. Configure build settings:
-   ```
-   Build command: make cloudflare-build
-   Build output directory: dist/cloudflare
-   Root directory: /
-   ```
-4. Add custom domain: `hylograph.net`
+#### 1.2 DNS Configuration
 
-#### 1.3 Add Makefile Target
+Since hylograph.net is registered with Cloudflare, DNS is already managed there.
+Cloudflare Pages automatically configures DNS when you add custom domains.
 
-```makefile
-# New target for Cloudflare Pages build
-cloudflare-build:
-	@echo "Building for Cloudflare Pages..."
-	mkdir -p dist/cloudflare
+#### 1.3 Fix build.sh Path
 
-	# Main website
-	$(MAKE) website
-	cp -r site/website/public/* dist/cloudflare/
-
-	# Documentation (if Antora is available)
-	cd site/docs && npx antora antora-playbook.yml || true
-	mkdir -p dist/cloudflare/docs
-	cp -r site/docs/build/site/* dist/cloudflare/docs/ || true
-
-	# Static demos
-	$(MAKE) app-wasm
-	mkdir -p dist/cloudflare/demos/wasm
-	cp -r showcases/wasm-force-demo/public/* dist/cloudflare/demos/wasm/
-
-	# Library sites
-	$(MAKE) lib-sites
-	mkdir -p dist/cloudflare/libs
-	for lib in selection simulation layout graph music; do \
-		mkdir -p dist/cloudflare/libs/$$lib; \
-		cp -r site/lib-$$lib/public/* dist/cloudflare/libs/$$lib/; \
-	done
-
-	@echo "Build complete: dist/cloudflare/"
-```
-
-#### 1.4 Create _redirects File
-
-Create `dist/cloudflare/_redirects` for SPA routing and backend proxying:
-```
-# SPA fallback for main site
-/*    /index.html    200
-
-# Redirect old PSD3 URLs (if any)
-/psd3/*    /:splat    301
-```
-
-Or use `_headers` for caching:
-```
-/*
-  Cache-Control: public, max-age=3600
-
-/assets/*
-  Cache-Control: public, max-age=31536000, immutable
-```
-
-### Phase 2: Cloudflare Tunnel Setup (MacMini)
-
-#### 2.1 Install cloudflared on MacMini
+The `site/hylograph-net/build.sh` references an old path. Update:
 
 ```bash
-# On MacMini
-brew install cloudflared
+# Old
+LIBS_DIR="$SITE_DIR/../../visualisation libraries"
+
+# New
+LIBS_DIR="$SITE_DIR/../../../purescript-hylograph-libs"
 ```
 
-#### 2.2 Authenticate and Create Tunnel
+### Phase 2: GitHub Actions (Optional)
 
-```bash
-# Login (opens browser)
-cloudflared tunnel login
+Cloudflare Pages can build directly from GitHub pushes, but for PureScript builds
+you may need GitHub Actions to install spago/purs first.
 
-# Create tunnel
-cloudflared tunnel create hylograph-macmini
-
-# Note the tunnel ID and credentials file path
-```
-
-#### 2.3 Configure Tunnel
-
-Create `~/.cloudflared/config.yml` on MacMini:
-
-```yaml
-tunnel: <TUNNEL_ID>
-credentials-file: /Users/andrew/.cloudflared/<TUNNEL_ID>.json
-
-ingress:
-  # Code Explorer
-  - hostname: live.hylograph.net
-    path: /code-explorer/*
-    service: http://localhost:8085
-
-  # Code Explorer API
-  - hostname: live.hylograph.net
-    path: /code/*
-    service: http://localhost:3000
-
-  # Grid Explorer
-  - hostname: live.hylograph.net
-    path: /grid-explorer/*
-    service: http://localhost:8088
-
-  # Embedding Explorer
-  - hostname: live.hylograph.net
-    path: /embedding-explorer/*
-    service: http://localhost:8087
-
-  # Sankey Editor (with backend)
-  - hostname: live.hylograph.net
-    path: /sankey/*
-    service: http://localhost:8089
-
-  # Catch-all (404)
-  - service: http_status:404
-```
-
-#### 2.4 Add DNS Route
-
-```bash
-cloudflared tunnel route dns hylograph-macmini live.hylograph.net
-```
-
-#### 2.5 Run Tunnel as Service
-
-```bash
-# Install as launchd service (macOS)
-sudo cloudflared service install
-
-# Or run manually for testing
-cloudflared tunnel run hylograph-macmini
-```
-
-### Phase 3: Access Control (Optional)
-
-If you want to limit access to live.hylograph.net:
-
-#### 3.1 Cloudflare Access Setup
-
-1. Cloudflare Dashboard → Zero Trust → Access → Applications
-2. Add application:
-   - Name: Hylograph Live Demos
-   - Domain: live.hylograph.net
-   - Session duration: 24 hours
-3. Add policy:
-   - Name: Discord Community
-   - Action: Allow
-   - Include: Emails ending in specific domains OR specific email addresses
-
-Free tier includes 50 users, which is plenty for initial community testing.
-
-#### 3.2 Alternative: No Access Control
-
-For fully public access, skip this step. Cloudflare's default DDoS protection and rate limiting will provide basic protection.
-
-### Phase 4: CI/CD (GitHub Actions)
-
-Create `.github/workflows/deploy-pages.yml`:
+Create `.github/workflows/deploy-cloudflare.yml`:
 
 ```yaml
 name: Deploy to Cloudflare Pages
@@ -286,15 +163,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install pandoc
+        run: sudo apt-get install -y pandoc
+
+      - name: Build docs site
+        run: cd site/hylograph-net && ./build.sh
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          node-version: '20'
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: hylograph-docs
+          directory: site/hylograph-net/public
+
+  deploy-blog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Setup PureScript
         uses: purescript-contrib/setup-purescript@main
@@ -302,117 +193,140 @@ jobs:
           purescript: '0.15.15'
           spago: '0.21.0'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build for Cloudflare
-        run: make cloudflare-build
+      - name: Build blog
+        run: make blog
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: hylograph
-          directory: dist/cloudflare
+          projectName: hylograph-blog
+          directory: blog/public
+
+  deploy-polyglot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PureScript
+        uses: purescript-contrib/setup-purescript@main
+        with:
+          purescript: '0.15.15'
+          spago: '0.21.0'
+
+      - name: Build website
+        run: make website
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: hylograph-polyglot
+          directory: site/website/public
 ```
 
 Required secrets:
 - `CLOUDFLARE_API_TOKEN`: Create in Cloudflare Dashboard → API Tokens
-- `CLOUDFLARE_ACCOUNT_ID`: Found in Cloudflare Dashboard URL or overview page
+- `CLOUDFLARE_ACCOUNT_ID`: Found in Cloudflare Dashboard URL
 
-### Phase 5: Rebranding
+### Phase 3: TailScale Funnel (MacMini)
 
-#### 5.1 Update Main Website
+TailScale Funnel is already configured on the MacMini. Ensure:
 
-- Change branding from PSD3 to Hylograph
-- Update navigation to use new URL structure
-- Add "Live Demos" link to live.hylograph.net (if access-controlled, note this)
-- Add prominent "View Source" / GitHub links
+1. Docker services are running (use updated `docker-compose.yml`)
+2. Funnel is exposing the correct ports
+3. Static sites link to the Funnel URLs for backend demos
 
-#### 5.2 Update Documentation
+#### Funnel Configuration
 
-- Rebrand Antora site
-- Update installation instructions with new package names (if changing)
-- Add "Try it live" links where applicable
+```bash
+# Check current funnel status
+tailscale funnel status
 
-#### 5.3 Static Demo Fallbacks
-
-For demos that need backends, create static fallback pages:
-
-```html
-<!-- demos/code-explorer/index.html (static fallback) -->
-<h1>Code Explorer</h1>
-<p>This demo requires a backend server.</p>
-<h2>Try it live</h2>
-<p><a href="https://live.hylograph.net/code-explorer/">live.hylograph.net/code-explorer</a></p>
-<h2>Run locally</h2>
-<pre>
-git clone https://github.com/youruser/corrode-expel
-cd corrode-expel
-make build
-make run
-# Open http://localhost:8085
-</pre>
+# Typical setup (adjust ports as needed)
+tailscale funnel 80
 ```
+
+The Funnel URL will be something like `https://macmini.tail12345.ts.net/`
+
+### Phase 4: Vanity Redirects
+
+Contact Nick Saunders to configure:
+- `polyglot.purescri.pt` → `polyglot.hylograph.net`
+- `hylograph.purescri.pt` → `hylograph.net`
+
+These are simple HTTP redirects, no hosting required.
+
+### Phase 5: Cross-Linking
+
+Update each site to link to the others:
+
+**On hylograph.net (docs):**
+- Link to blog for deeper discussions
+- Link to polyglot for live demos
+- Note that some demos require backend (link to Funnel URLs)
+
+**On blog.hylograph.net:**
+- Link to docs for API reference
+- Link to polyglot for interactive examples
+- Embed or link to backend demos
+
+**On polyglot.hylograph.net:**
+- Link to docs for library details
+- Link to blog for context/narrative
+- Backend demo links with note about availability
 
 ## Cost Analysis
 
-**Cloudflare Free Tier includes:**
-- Pages: Unlimited sites, 500 builds/month, 100GB bandwidth
-- Tunnel: Unlimited, free
-- Access: 50 users
+**Cloudflare Free Tier:**
+- Pages: Unlimited sites, 500 builds/month, unlimited bandwidth
+- DNS: Free
 - DDoS protection: Included
-- Rate limiting: 10,000 requests/day (free rule)
 
-**Estimated monthly cost: $0**
+**TailScale Free Tier:**
+- Funnel: Included
+- Up to 100 devices
 
-For higher traffic or more Access users, paid plans start at $5/month (Pro).
+**Total monthly cost: $0**
+
+(MacMini electricity not counted)
+
+## Reliability Notes
+
+**Cloudflare Pages:**
+- High availability, global CDN
+- Automatic HTTPS
+- Will always be up
+
+**MacMini (TailScale Funnel):**
+- No UPS, subject to power cuts
+- Acceptable for demo purposes
+- Static sites should gracefully indicate when backends are unavailable
+
+Consider adding a simple status indicator or message on static sites:
+> "Live demos require backend services. If unavailable, try again later or run locally."
 
 ## Migration Checklist
 
-- [ ] Verify hylograph.net DNS is active in Cloudflare
-- [ ] Create Cloudflare Pages project
-- [ ] Add `cloudflare-build` Makefile target
-- [ ] Test build locally: `make cloudflare-build`
-- [ ] Connect Pages to GitHub repo
-- [ ] Add custom domain to Pages project
-- [ ] Verify static site deploys correctly
-- [ ] Install cloudflared on MacMini
-- [ ] Create and configure tunnel
-- [ ] Verify existing Docker services still work
-- [ ] Configure tunnel ingress rules
-- [ ] Test tunnel connectivity
-- [ ] (Optional) Set up Cloudflare Access
-- [ ] Update website branding
-- [ ] Announce to community
-
-## Rollback Plan
-
-If issues arise:
-1. Static content: Revert GitHub commit, Pages auto-redeploys
-2. Tunnel: Stop cloudflared service, backends become unreachable (fail closed)
-3. DNS: Point hylograph.net back to MacMini directly (remove Pages)
-
-The MacMini deployment remains unchanged and can serve as fallback.
+- [ ] Fix `site/hylograph-net/build.sh` path
+- [ ] Create Cloudflare Pages project: hylograph-docs
+- [ ] Create Cloudflare Pages project: hylograph-blog
+- [ ] Create Cloudflare Pages project: hylograph-polyglot
+- [ ] Add custom domain: hylograph.net
+- [ ] Add custom domain: blog.hylograph.net
+- [ ] Add custom domain: polyglot.hylograph.net
+- [ ] Set up GitHub Actions (if needed for PureScript builds)
+- [ ] Verify TailScale Funnel is running on MacMini
+- [ ] Request vanity redirects from Nick Saunders
+- [ ] Update cross-links between sites
+- [ ] Test all routes end-to-end
+- [ ] Announce to PureScript Discord
 
 ## Future Considerations
 
-- **Custom domain for docs**: docs.hylograph.net as separate Pages project if docs grow large
-- **Preview deployments**: Cloudflare Pages creates preview URLs for PRs automatically
+- **Preview deployments**: Cloudflare Pages creates preview URLs for PRs
 - **Analytics**: Cloudflare Web Analytics (free, privacy-respecting)
-- **Caching**: Fine-tune cache headers for assets vs HTML
-- **Monitoring**: Cloudflare Dashboard shows traffic, errors, performance
-
----
-
-## Status / Next Steps
-
-1. [ ] Confirm DNS is active for hylograph.net
-2. [ ] Create `cloudflare-build` Makefile target
-3. [ ] Test local build
-4. [ ] Create Cloudflare Pages project
-5. [ ] Set up GitHub Actions workflow
-6. [ ] Configure Cloudflare Tunnel on MacMini
-7. [ ] Test end-to-end
-8. [ ] Announce to PureScript Discord
+- **UPS for MacMini**: Would improve backend availability
+- **Consolidation**: Could merge all three static sites into one Pages project with path-based routing if management becomes cumbersome

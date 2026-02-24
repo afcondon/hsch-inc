@@ -1,0 +1,11 @@
+workspace:
+  packageSet:
+    registry: 72.0.1
+
+package:
+  name: hylograph-lib-shell
+  description: Shared shell component for PSD3 library documentation sites
+  dependencies:
+    - prelude
+    - halogen
+    - halogen-svg-elems

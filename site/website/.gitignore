@@ -1,0 +1,29 @@
+# Dependencies
+.spago/
+node_modules/
+bower_components/
+
+# Build output
+output/
+.psci_modules/
+generated-docs/
+
+# Bundle output (intermediate files, not final bundle)
+index.js
+public/index.js
+# public/bundle.js  # Tracked for Cloudflare deployment
+
+# Generated docs
+public/docs/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Spago lock (generated)
+spago.lock

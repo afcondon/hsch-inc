@@ -1,0 +1,160 @@
+= Quickstart
+:description: Create your first PSD3 + React visualization
+
+This guide creates a simple bar chart component that renders PSD3 visualizations within a React application.
+
+== Prerequisites
+
+* PureScript + Spago environment
+* Familiarity with React hooks
+
+== Step 1: Project Setup
+
+[source,bash]
+----
+spago init
+spago install react-basic-hooks react-basic-dom psd3-selection
+----
+
+== Step 2: Create a Visualization Component
+
+[source,purescript]
+----
+module MyViz where
+
+import Prelude
+import Data.Int (toNumber)
+import Effect (Effect)
+import PSD3.AST as A
+import PSD3.AST (ElementType(..))
+import PSD3.Expr.Friendly (num, text, computed, computedStr, fromWithIndex)
+import PSD3.React.Hooks (useContainerId)
+import PSD3.Render (runD3, select, renderTree, clear)
+import React.Basic.DOM as R
+import React.Basic.Hooks (Component, component, useEffectOnce)
+import React.Basic.Hooks as React
+
+-- | Bar chart component
+mkBarChart :: Component { chartData :: Array Number }
+mkBarChart = do
+  -- Step 1: Generate unique container ID (runs once per component instance)
+  containerId <- useContainerId
+
+  component "BarChart" \props -> React.do
+
+    -- Step 2: Render visualization on mount
+    useEffectOnce do
+      void $ runD3 do
+        let selector = "#" <> containerId
+        clear selector           -- Remove any existing content
+        container <- select selector
+        renderTree container (barChartAST props.chartData)
+      pure mempty                -- No cleanup needed
+
+    -- Step 3: Return container element
+    pure $ R.div
+      { id: containerId
+      , style: R.css { width: "500px", height: "300px" }
+      }
+
+-- | Bar chart AST - the same code works with Halogen or vanilla JS
+barChartAST :: Array Number -> A.AST Number
+barChartAST dataset =
+  A.elem SVG
+    [ computed "width" (num 500.0)
+    , computed "height" (num 300.0)
+    , computedStr "style" (text "background: #f5f5f5")
+    ]
+    `A.withChild`
+      A.joinData "bars" "rect" dataset \_ ->
+        A.elem Rect
+          [ fromWithIndex "x" (\_ i -> toNumber i * 60.0 + 20.0)
+          , fromWithIndex "y" (\val _ -> 280.0 - val * 2.5)
+          , computed "width" (num 50.0)
+          , fromWithIndex "height" (\val _ -> val * 2.5)
+          , computedStr "fill" (text "steelblue")
+          ]
+----
+
+== Step 3: Use in Your App
+
+[source,purescript]
+----
+module Main where
+
+import Prelude
+import Effect (Effect)
+import Effect.Exception (throw)
+import Data.Maybe (Maybe(..))
+import React.Basic.DOM.Client (createRoot, renderRoot)
+import Web.DOM.NonElementParentNode (getElementById)
+import Web.HTML (window)
+import Web.HTML.HTMLDocument (toNonElementParentNode)
+import Web.HTML.Window (document)
+
+import MyViz (mkBarChart)
+
+main :: Effect Unit
+main = do
+  doc <- document =<< window
+  maybeRoot <- getElementById "root" (toNonElementParentNode doc)
+  case maybeRoot of
+    Nothing -> throw "Could not find #root element"
+    Just rootEl -> do
+      barChart <- mkBarChart
+      root <- createRoot rootEl
+      renderRoot root $ barChart { chartData: [65.0, 90.0, 45.0, 80.0, 30.0] }
+----
+
+== Step 4: HTML Template
+
+[source,html]
+----
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PSD3 + React Demo</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="bundle.js"></script>
+</body>
+</html>
+----
+
+== The Pattern Explained
+
+[source]
+----
+┌─────────────────────────────────────────────────────────┐
+│ Component Creation (runs once)                           │
+│                                                          │
+│   containerId <- useContainerId                          │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────┐
+│ Component Body (React.do)                                │
+│                                                          │
+│   useEffectOnce do                                       │
+│     runD3 do                                             │
+│       clear selector                                     │
+│       container <- select selector                       │
+│       renderTree container myAST                         │
+│                                                          │
+│   pure $ R.div { id: containerId }                       │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+----
+
+1. *`useContainerId`* generates a unique ID outside the component body
+2. *`useEffectOnce`* runs the D3 code when the component mounts
+3. *`clear`* removes existing content (important for re-renders)
+4. *`renderTree`* renders the PSD3 AST to the container
+
+== Next Steps
+
+* xref:getting-started/click-events.adoc[Click Events] - Make bars clickable
+* xref:getting-started/force-simulation.adoc[Force Simulation] - Animated graphs
+* xref:how-to/props-updates.adoc[Props-Based Re-rendering] - Update on prop changes

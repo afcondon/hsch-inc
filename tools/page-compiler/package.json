@@ -1,0 +1,14 @@
+{
+  "name": "page-compiler",
+  "version": "1.0.0",
+  "description": "Compile markdown with layout to Halogen components",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "page-compiler": "./index.js"
+  },
+  "dependencies": {
+    "markdown-it": "^14.0.0",
+    "yaml": "^2.3.4"
+  }
+}

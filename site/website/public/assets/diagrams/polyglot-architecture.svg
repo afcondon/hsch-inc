@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <!-- Backend colors matching psd3.css -->
+    <linearGradient id="psGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14161a"/>
+      <stop offset="100%" style="stop-color:#2a2d35"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="transparent"/>
+
+  <!-- PureScript source (top) -->
+  <g transform="translate(400, 50)">
+    <rect x="-80" y="-25" width="160" height="50" rx="8" fill="url(#psGrad)" stroke="#14161a" stroke-width="2"/>
+    <text x="0" y="7" text-anchor="middle" fill="white" font-size="18" font-weight="600">PureScript</text>
+  </g>
+
+  <!-- Compiler layer labels -->
+  <text x="400" y="115" text-anchor="middle" fill="#666" font-size="12" font-style="italic">compilers</text>
+
+  <!-- Vertical lines from PureScript to compilers -->
+  <path d="M400 75 L400 130" stroke="#444" stroke-width="2" stroke-dasharray="4,2"/>
+  <path d="M400 130 L140 130" stroke="#444" stroke-width="2" stroke-dasharray="4,2"/>
+  <path d="M400 130 L660 130" stroke="#444" stroke-width="2" stroke-dasharray="4,2"/>
+
+  <!-- Compiler boxes -->
+  <!-- purs (JS) -->
+  <g transform="translate(140, 160)">
+    <rect x="-50" y="-20" width="100" height="40" rx="6" fill="#f7df1e" stroke="#d4c019" stroke-width="1.5"/>
+    <text x="0" y="6" text-anchor="middle" fill="#000" font-size="14" font-weight="500">purs</text>
+    <line x1="0" y1="20" x2="0" y2="50" stroke="#f7df1e" stroke-width="2"/>
+  </g>
+
+  <!-- purepy (Python) -->
+  <g transform="translate(270, 160)">
+    <rect x="-50" y="-20" width="100" height="40" rx="6" fill="#3776ab" stroke="#2d5f8a" stroke-width="1.5"/>
+    <text x="0" y="6" text-anchor="middle" fill="white" font-size="14" font-weight="500">purepy</text>
+    <line x1="0" y1="20" x2="0" y2="50" stroke="#3776ab" stroke-width="2"/>
+  </g>
+
+  <!-- purerl (Erlang) -->
+  <g transform="translate(400, 160)">
+    <rect x="-50" y="-20" width="100" height="40" rx="6" fill="#a90533" stroke="#8a042a" stroke-width="1.5"/>
+    <text x="0" y="6" text-anchor="middle" fill="white" font-size="14" font-weight="500">purerl</text>
+    <line x1="0" y1="20" x2="0" y2="50" stroke="#a90533" stroke-width="2"/>
+  </g>
+
+  <!-- pslua (Lua) -->
+  <g transform="translate(530, 160)">
+    <rect x="-50" y="-20" width="100" height="40" rx="6" fill="#000080" stroke="#000066" stroke-width="1.5"/>
+    <text x="0" y="6" text-anchor="middle" fill="white" font-size="14" font-weight="500">pslua</text>
+    <line x1="0" y1="20" x2="0" y2="50" stroke="#000080" stroke-width="2"/>
+  </g>
+
+  <!-- purs + wasm-bindgen (WASM) -->
+  <g transform="translate(660, 160)">
+    <rect x="-50" y="-20" width="100" height="40" rx="6" fill="#654ff0" stroke="#5040c0" stroke-width="1.5"/>
+    <text x="0" y="6" text-anchor="middle" fill="white" font-size="14" font-weight="500">purs+rust</text>
+    <line x1="0" y1="20" x2="0" y2="50" stroke="#654ff0" stroke-width="2"/>
+  </g>
+
+  <!-- Target runtime layer -->
+  <text x="400" y="235" text-anchor="middle" fill="#666" font-size="12" font-style="italic">runtimes</text>
+
+  <!-- Runtime boxes -->
+  <!-- JavaScript -->
+  <g transform="translate(140, 270)">
+    <rect x="-55" y="-22" width="110" height="44" rx="6" fill="#1a1a1a" stroke="#f7df1e" stroke-width="2"/>
+    <text x="0" y="-2" text-anchor="middle" fill="#f7df1e" font-size="13" font-weight="600">JavaScript</text>
+    <text x="0" y="14" text-anchor="middle" fill="#888" font-size="10">Browser / Node</text>
+  </g>
+
+  <!-- Python -->
+  <g transform="translate(270, 270)">
+    <rect x="-55" y="-22" width="110" height="44" rx="6" fill="#1a1a1a" stroke="#3776ab" stroke-width="2"/>
+    <text x="0" y="-2" text-anchor="middle" fill="#3776ab" font-size="13" font-weight="600">Python</text>
+    <text x="0" y="14" text-anchor="middle" fill="#888" font-size="10">NumPy / UMAP</text>
+  </g>
+
+  <!-- Erlang -->
+  <g transform="translate(400, 270)">
+    <rect x="-55" y="-22" width="110" height="44" rx="6" fill="#1a1a1a" stroke="#a90533" stroke-width="2"/>
+    <text x="0" y="-2" text-anchor="middle" fill="#a90533" font-size="13" font-weight="600">Erlang</text>
+    <text x="0" y="14" text-anchor="middle" fill="#888" font-size="10">OTP / GenServer</text>
+  </g>
+
+  <!-- Lua -->
+  <g transform="translate(530, 270)">
+    <rect x="-55" y="-22" width="110" height="44" rx="6" fill="#1a1a1a" stroke="#000080" stroke-width="2"/>
+    <text x="0" y="-2" text-anchor="middle" fill="#6666ff" font-size="13" font-weight="600">Lua</text>
+    <text x="0" y="14" text-anchor="middle" fill="#888" font-size="10">OpenResty / nginx</text>
+  </g>
+
+  <!-- WASM -->
+  <g transform="translate(660, 270)">
+    <rect x="-55" y="-22" width="110" height="44" rx="6" fill="#1a1a1a" stroke="#654ff0" stroke-width="2"/>
+    <text x="0" y="-2" text-anchor="middle" fill="#654ff0" font-size="13" font-weight="600">WebAssembly</text>
+    <text x="0" y="14" text-anchor="middle" fill="#888" font-size="10">Browser (fast)</text>
+  </g>
+
+  <!-- Showcases label -->
+  <text x="400" y="340" text-anchor="middle" fill="#666" font-size="12" font-style="italic">showcases on this site</text>
+
+  <!-- Showcase indicators -->
+  <g transform="translate(140, 365)">
+    <text x="0" y="0" text-anchor="middle" fill="#aaa" font-size="11">D3 Viz, Sankey</text>
+  </g>
+  <g transform="translate(270, 365)">
+    <text x="0" y="0" text-anchor="middle" fill="#aaa" font-size="11">EE, GE</text>
+  </g>
+  <g transform="translate(400, 365)">
+    <text x="0" y="0" text-anchor="middle" fill="#aaa" font-size="11">Tidal</text>
+  </g>
+  <g transform="translate(530, 365)">
+    <text x="0" y="0" text-anchor="middle" fill="#aaa" font-size="11">Edge Router</text>
+  </g>
+  <g transform="translate(660, 365)">
+    <text x="0" y="0" text-anchor="middle" fill="#aaa" font-size="11">Force Kernel</text>
+  </g>
+</svg>

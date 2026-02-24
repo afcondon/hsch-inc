@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Route Analysis - halogen-spider</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+           max-width: 1000px; margin: 0 auto; padding: 1rem; line-height: 1.6; }
+    h1 { margin-bottom: 0.5rem; }
+    .subtitle { color: #666; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 0; }
+    .tab { padding: 0.75rem 1.5rem; cursor: pointer; border: none; background: none; 
+           font-size: 1rem; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab:hover { color: #333; }
+    .tab.active { color: #0366d6; border-bottom-color: #0366d6; font-weight: 500; }
+    .tab-content { display: none; padding-top: 1rem; }
+    .tab-content.active { display: block; }
+    ul { list-style-type: none; padding: 0; margin: 0; }
+    li { padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+    a { color: #0366d6; text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+    small { color: #666; margin-left: 0.5rem; }
+    .count { color: #666; font-size: 0.9rem; margin-bottom: 1rem; }
+    .section { margin-bottom: 2rem; }
+    .section h3 { margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #eee; }
+    .unreachable { color: #d73a49; }
+    .extra { color: #6f42c1; }
+    .archived { color: #6a737d; }
+    .matched { color: #28a745; }
+    .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem; margin-left: 0.5rem; }
+    .badge-unreachable { background: #ffeef0; color: #d73a49; }
+    .badge-extra { background: #f5f0ff; color: #6f42c1; }
+    .badge-archived { background: #f6f8fa; color: #6a737d; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .summary-card { padding: 1rem; border-radius: 6px; text-align: center; }
+    .summary-card.total { background: #f6f8fa; }
+    .summary-card.good { background: #dcffe4; }
+    .summary-card.warning { background: #fff5b1; }
+    .summary-card.danger { background: #ffeef0; }
+    .summary-card .number { font-size: 2rem; font-weight: bold; }
+    .summary-card .label { font-size: 0.85rem; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Route Analysis Report</h1>
+  <p class="subtitle">Target: http://100.101.177.83</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('static')">Static Routes (81)</button>
+    <button class="tab" onclick="showTab('dynamic')">Spidered Routes (91)</button>
+    <button class="tab" onclick="showTab('comparison')">Comparison</button>
+  </div>
+
+  <div id="static" class="tab-content active">
+    <p class="count">Routes defined in source code</p>
+    <ul>
+<li><a href="http://100.101.177.83/#/acknowledgements" target="_blank">Acknowledgements → /acknowledgements</a> <small>(Hylograph.Acknowledgements)</small></li>
+<li><a href="http://100.101.177.83/#/animated-attr-test" target="_blank">AnimatedAttrTest → /animated-attr-test</a> <small>(ARCHIVED)</small></li>
+<li><a href="http://100.101.177.83/#/animated-tree-cluster" target="_blank">AnimatedTreeCluster → /animated-tree-cluster</a> <small>(Component.AnimatedTreeCluster)</small></li>
+<li><a href="http://100.101.177.83/#/chart-builder" target="_blank">ChartBuilder → /chart-builder</a> <small>(Component.ChartBuilder)</small></li>
+<li><a href="http://100.101.177.83/#/example" target="_blank">Example → /example</a> <small>(Component.Example)</small></li>
+<li><a href="http://100.101.177.83/#/examples" target="_blank">Examples → /examples</a> <small>(Component.ExamplesGallery)</small></li>
+<li><a href="http://100.101.177.83/#/force-config/p-o-c" target="_blank">ForceConfigPOC → /force-config/p-o-c</a> <small>(Component.SimpleForceGraph)</small></li>
+<li><a href="http://100.101.177.83/#/force-config/v2-test" target="_blank">ForceConfigV2Test → /force-config/v2-test</a> <small>(Component.SimpleForceGraph)</small></li>
+<li><a href="http://100.101.177.83/#/force-playground" target="_blank">ForcePlayground → /force-playground</a> <small>(Component.ForcePlayground)</small></li>
+<li><a href="http://100.101.177.83/#/force-playground-w-a-s-m" target="_blank">ForcePlaygroundWASM → /force-playground-w-a-s-m</a> <small>(Component.ForcePlaygroundWASM)</small></li>
+<li><a href="http://100.101.177.83/#/g-u-p-animated-test" target="_blank">GUPAnimatedTest → /g-u-p-animated-test</a> <small>(ARCHIVED)</small></li>
+<li><a href="http://100.101.177.83/#/g-u-p-debug" target="_blank">GUPDebug → /g-u-p-debug</a> <small>(Component.GUPDebug)</small></li>
+<li><a href="http://100.101.177.83/#/general-update-pattern" target="_blank">GeneralUpdatePattern → /general-update-pattern</a> <small>(Component.GeneralUpdatePattern)</small></li>
+<li><a href="http://100.101.177.83/#/getting-started" target="_blank">GettingStarted → /getting-started</a> <small>(Hylograph.Tutorial.GettingStarted)</small></li>
+<li><a href="http://100.101.177.83/#/h-a-t-s-transition-test" target="_blank">HATSTransitionTest → /h-a-t-s-transition-test</a> <small>(Component.HATSTransitionTest)</small></li>
+<li><a href="http://100.101.177.83/#/" target="_blank">Home → /</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/howto/axes-scales" target="_blank">HowtoAxesScales → /howto/axes-scales</a> <small>(Component.HowTo.HowtoAxesScales)</small></li>
+<li><a href="http://100.101.177.83/#/howto/debugging" target="_blank">HowtoDebugging → /howto/debugging</a> <small>(Component.HowTo.HowtoDebugging)</small></li>
+<li><a href="http://100.101.177.83/#/howto/events" target="_blank">HowtoEvents → /howto/events</a> <small>(Component.HowTo.HowtoEvents)</small></li>
+<li><a href="http://100.101.177.83/#/howto/force-graphs" target="_blank">HowtoForceGraphs → /howto/force-graphs</a> <small>(Component.HowTo.HowtoForceGraphs)</small></li>
+<li><a href="http://100.101.177.83/#/howto/hierarchical" target="_blank">HowtoHierarchical → /howto/hierarchical</a> <small>(Component.HowTo.HowtoHierarchical)</small></li>
+<li><a href="http://100.101.177.83/#/howto" target="_blank">HowtoIndex → /howto</a> <small>(Hylograph.HowTo.HowtoIndex)</small></li>
+<li><a href="http://100.101.177.83/#/howto/loading-data" target="_blank">HowtoLoadingData → /howto/loading-data</a> <small>(Component.HowTo.HowtoLoadingData)</small></li>
+<li><a href="http://100.101.177.83/#/howto/performance" target="_blank">HowtoPerformance → /howto/performance</a> <small>(Component.HowTo.HowtoPerformance)</small></li>
+<li><a href="http://100.101.177.83/#/howto/tooltips" target="_blank">HowtoTooltips → /howto/tooltips</a> <small>(Component.HowTo.HowtoTooltips)</small></li>
+<li><a href="http://100.101.177.83/#/howto/transitions" target="_blank">HowtoTransitions → /howto/transitions</a> <small>(Component.HowTo.HowtoTransitions)</small></li>
+<li><a href="http://100.101.177.83/#/howto/tree-a-p-i" target="_blank">HowtoTreeAPI → /howto/tree-a-p-i</a> <small>(Component.HowTo.HowtoTreeAPI)</small></li>
+<li><a href="http://100.101.177.83/#/howto/tree-explorer" target="_blank">HowtoTreeExplorer → /howto/tree-explorer</a> <small>(Component.HowTo.HowtoTreeExplorer)</small></li>
+<li><a href="http://100.101.177.83/#/just" target="_blank">Just → /just</a> <small>(unknown)</small></li>
+<li><a href="http://100.101.177.83/#/les-mis-g-u-p" target="_blank">LesMisGUP → /les-mis-g-u-p</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/les-mis-g-u-p-clean" target="_blank">LesMisGUPClean → /les-mis-g-u-p-clean</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/les-mis-g-u-p-simple" target="_blank">LesMisGUPSimple → /les-mis-g-u-p-simple</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/les-mis-g-u-p-tree" target="_blank">LesMisGUPTree → /les-mis-g-u-p-tree</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/les-mis-g-u-p-tree-a-p-i" target="_blank">LesMisGUPTreeAPI → /les-mis-g-u-p-tree-a-p-i</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/les-mis-query-demo" target="_blank">LesMisQueryDemo → /les-mis-query-demo</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/mermaid-tree-demo" target="_blank">MermaidTreeDemo → /mermaid-tree-demo</a> <small>(Component.MermaidTreeDemo)</small></li>
+<li><a href="http://100.101.177.83/#/module-graph" target="_blank">ModuleGraph → /module-graph</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/not-found" target="_blank">NotFound → /not-found</a> <small>(unknown)</small></li>
+<li><a href="http://100.101.177.83/#/pie-donut-demo" target="_blank">PieDonutDemo → /pie-donut-demo</a> <small>(Component.PieDonutDemo)</small></li>
+<li><a href="http://100.101.177.83/#/reference" target="_blank">Reference → /reference</a> <small>(Hylograph.Reference.Reference)</small></li>
+<li><a href="http://100.101.177.83/#/reference-module" target="_blank">ReferenceModule → /reference-module</a> <small>(Hylograph.Reference.Reference)</small></li>
+<li><a href="http://100.101.177.83/#/s-p-l-o-m" target="_blank">SPLOM → /s-p-l-o-m</a> <small>(Component.SPLOM)</small></li>
+<li><a href="http://100.101.177.83/#/s-p-l-o-m-h-a-t-s" target="_blank">SPLOMHATS → /s-p-l-o-m-h-a-t-s</a> <small>(Component.SPLOMHATS)</small></li>
+<li><a href="http://100.101.177.83/#/sankey-debug" target="_blank">SankeyDebug → /sankey-debug</a> <small>(Component.SankeyDebug)</small></li>
+<li><a href="http://100.101.177.83/#/showcase" target="_blank">Showcase → /showcase</a> <small>(Component.Showcase.ShowcaseIndex)</small></li>
+<li><a href="http://100.101.177.83/#/showcase/lua-edge" target="_blank">ShowcaseLuaEdge → /showcase/lua-edge</a> <small>(Component.Showcase.ShowcaseLuaEdge)</small></li>
+<li><a href="http://100.101.177.83/#/simple-chimera" target="_blank">SimpleChimera → /simple-chimera</a> <small>(Component.SimpleChimera)</small></li>
+<li><a href="http://100.101.177.83/#/simple-force-graph" target="_blank">SimpleForceGraph → /simple-force-graph</a> <small>(Component.SimpleForceGraph)</small></li>
+<li><a href="http://100.101.177.83/#/simple-tree-builder" target="_blank">SimpleTreeBuilder → /simple-tree-builder</a> <small>(Hylograph.SimpleTreeBuilder)</small></li>
+<li><a href="http://100.101.177.83/#/simpsons" target="_blank">Simpsons → /simpsons</a> <small>(D3.Viz.Simpsons.Standalone)</small></li>
+<li><a href="http://100.101.177.83/#/simpsons-v2" target="_blank">SimpsonsV2 → /simpsons-v2</a> <small>(Page.Simpsons)</small></li>
+<li><a href="http://100.101.177.83/#/tour/f-p-f-t-w" target="_blank">TourFPFTW → /tour/f-p-f-t-w</a> <small>(Component.Tour.TourFPFTW)</small></li>
+<li><a href="http://100.101.177.83/#/tour/flow" target="_blank">TourFlow → /tour/flow</a> <small>(Component.Tour.TourFlow)</small></li>
+<li><a href="http://100.101.177.83/#/tour/foundations" target="_blank">TourFoundations → /tour/foundations</a> <small>(Component.Tour.TourFoundations)</small></li>
+<li><a href="http://100.101.177.83/#/tour/graph-algorithms" target="_blank">TourGraphAlgorithms → /tour/graph-algorithms</a> <small>(Component.Tour.TourGraphAlgorithms)</small></li>
+<li><a href="http://100.101.177.83/#/tour/hierarchies" target="_blank">TourHierarchies → /tour/hierarchies</a> <small>(Component.Tour.TourHierarchies)</small></li>
+<li><a href="http://100.101.177.83/#/tour" target="_blank">TourIndex → /tour</a> <small>(Component.Tour.TourIndex)</small></li>
+<li><a href="http://100.101.177.83/#/tour/interpreters" target="_blank">TourInterpreters → /tour/interpreters</a> <small>(Component.Tour.TourInterpreters)</small></li>
+<li><a href="http://100.101.177.83/#/tour/les-mis-g-u-p" target="_blank">TourLesMisGUP → /tour/les-mis-g-u-p</a> <small>(Hylograph.Home)</small></li>
+<li><a href="http://100.101.177.83/#/tour/motion" target="_blank">TourMotion → /tour/motion</a> <small>(Component.Tour.TourMotion)</small></li>
+<li><a href="http://100.101.177.83/#/tour/motion-scrolly" target="_blank">TourMotionScrolly → /tour/motion-scrolly</a> <small>(Component.Tour.TourMotionScrolly)</small></li>
+<li><a href="http://100.101.177.83/#/tour/motion-scrolly-h-a-t-s" target="_blank">TourMotionScrollyHATS → /tour/motion-scrolly-h-a-t-s</a> <small>(Component.Tour.TourMotionScrollyHATS)</small></li>
+<li><a href="http://100.101.177.83/#/tour/professional" target="_blank">TourProfessional → /tour/professional</a> <small>(Component.Tour.TourProfessional)</small></li>
+<li><a href="http://100.101.177.83/#/tour/scrolly" target="_blank">TourScrolly → /tour/scrolly</a> <small>(Component.Tour.TourScrolly)</small></li>
+<li><a href="http://100.101.177.83/#/tour/simpsons" target="_blank">TourSimpsons → /tour/simpsons</a> <small>(Component.Tour.TourSimpsons)</small></li>
+<li><a href="http://100.101.177.83/#/tour/sonification" target="_blank">TourSonification → /tour/sonification</a> <small>(Component.Tour.TourSonification)</small></li>
+<li><a href="http://100.101.177.83/#/tour/wealth-health" target="_blank">TourWealthHealth → /tour/wealth-health</a> <small>(Component.Tour.TourWealthHealth)</small></li>
+<li><a href="http://100.101.177.83/#/tree-a-p-i" target="_blank">TreeAPI → /tree-a-p-i</a> <small>(Component.TreeAPI)</small></li>
+<li><a href="http://100.101.177.83/#/tree-builder" target="_blank">TreeBuilder → /tree-builder</a> <small>(TreeBuilder.App)</small></li>
+<li><a href="http://100.101.177.83/#/tree-builder/2" target="_blank">TreeBuilder2 → /tree-builder/2</a> <small>(TreeBuilder2.App)</small></li>
+<li><a href="http://100.101.177.83/#/tree-builder/3" target="_blank">TreeBuilder3 → /tree-builder/3</a> <small>(TreeBuilder3.App)</small></li>
+<li><a href="http://100.101.177.83/#/understanding" target="_blank">Understanding → /understanding</a> <small>(Hylograph.Understanding)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/attributes" target="_blank">UnderstandingAttributes → /understanding/attributes</a> <small>(Component.Understanding.UnderstandingAttributes)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/emmet" target="_blank">UnderstandingEmmet → /understanding/emmet</a> <small>(Component.Understanding.UnderstandingEmmet)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/grammar" target="_blank">UnderstandingGrammar → /understanding/grammar</a> <small>(Component.Understanding.UnderstandingGrammar)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/scenes" target="_blank">UnderstandingScenes → /understanding/scenes</a> <small>(Component.Understanding.UnderstandingScenes)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/selections" target="_blank">UnderstandingSelections → /understanding/selections</a> <small>(Component.Understanding.UnderstandingSelections)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/tree-a-p-i" target="_blank">UnderstandingTreeAPI → /understanding/tree-a-p-i</a> <small>(Component.Understanding.UnderstandingTreeAPI)</small></li>
+<li><a href="http://100.101.177.83/#/update-join-demo" target="_blank">UpdateJoinDemo → /update-join-demo</a> <small>(Component.UpdateJoinDemo)</small></li>
+<li><a href="http://100.101.177.83/#/viz-matrix" target="_blank">VizMatrix → /viz-matrix</a> <small>(VizMatrix.App)</small></li>
+<li><a href="http://100.101.177.83/#/wizard" target="_blank">Wizard → /wizard</a> <small>(Hylograph.Wizard.Wizard)</small></li>
+    </ul>
+  </div>
+
+  <div id="dynamic" class="tab-content">
+    <p class="count">Routes discovered by crawling the live site</p>
+    <ul>
+<li><a href="http://100.101.177.83/#/" target="_blank">/</a> <small>(depth 0, from start)</small></li>
+<li><a href="http://100.101.177.83/#/acknowledgements" target="_blank">/acknowledgements</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/animated-tree-cluster" target="_blank">/animated-tree-cluster</a> <small>(depth 3, from /tour/hierarchies)</small></li>
+<li><a href="http://100.101.177.83/#/architecture" target="_blank">/architecture</a> <small>(depth 3, from /understanding/tree-api)</small></li>
+<li><a href="http://100.101.177.83/#/challenge" target="_blank">/challenge</a> <small>(depth 3, from /understanding/scenes)</small></li>
+<li><a href="http://100.101.177.83/#/code-explorer" target="_blank">/code-explorer</a> <small>(depth 3, from /understanding/scenes)</small></li>
+<li><a href="http://100.101.177.83/#/core-primitives" target="_blank">/core-primitives</a> <small>(depth 3, from /understanding/grammar)</small></li>
+<li><a href="http://100.101.177.83/#/example/anscombes-quartet" target="_blank">/example/anscombes-quartet</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/bar-chart" target="_blank">/example/bar-chart</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/chord" target="_blank">/example/chord</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/cluster" target="_blank">/example/cluster</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/edge-bundle" target="_blank">/example/edge-bundle</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/grouped-bar-chart" target="_blank">/example/grouped-bar-chart</a> <small>(depth 3, from /tour/professional)</small></li>
+<li><a href="http://100.101.177.83/#/example/horizontal-tree" target="_blank">/example/horizontal-tree</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/les-mis" target="_blank">/example/les-mis</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/line-chart" target="_blank">/example/line-chart</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/multi-line-chart" target="_blank">/example/multi-line-chart</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/nested-elements" target="_blank">/example/nested-elements</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/pack" target="_blank">/example/pack</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/partition" target="_blank">/example/partition</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/radial-stacked-bar" target="_blank">/example/radial-stacked-bar</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/radial-tree" target="_blank">/example/radial-tree</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/sankey" target="_blank">/example/sankey</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/scatter-plot" target="_blank">/example/scatter-plot</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/simple-force" target="_blank">/example/simple-force</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/simple-hierarchy" target="_blank">/example/simple-hierarchy</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/simple-tree" target="_blank">/example/simple-tree</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/sunburst" target="_blank">/example/sunburst</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/three-circles-transition" target="_blank">/example/three-circles-transition</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/three-little-circles" target="_blank">/example/three-little-circles</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/three-little-dimensions" target="_blank">/example/three-little-dimensions</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/treemap" target="_blank">/example/treemap</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/v3-gup" target="_blank">/example/v3-gup</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/v3-parabola" target="_blank">/example/v3-parabola</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/v3-transition" target="_blank">/example/v3-transition</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/example/wealth-health" target="_blank">/example/wealth-health</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/examples" target="_blank">/examples</a> <small>(depth 2, from /getting-started)</small></li>
+<li><a href="http://100.101.177.83/#/force-playground" target="_blank">/force-playground</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/getting-started" target="_blank">/getting-started</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/home" target="_blank">/home</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/howto" target="_blank">/howto</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/howto/axes-scales" target="_blank">/howto/axes-scales</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/debugging" target="_blank">/howto/debugging</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/events" target="_blank">/howto/events</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/force-graphs" target="_blank">/howto/force-graphs</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/hierarchical" target="_blank">/howto/hierarchical</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/loading-data" target="_blank">/howto/loading-data</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/performance" target="_blank">/howto/performance</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/tooltips" target="_blank">/howto/tooltips</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/transitions" target="_blank">/howto/transitions</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/howto/tree-api" target="_blank">/howto/tree-api</a> <small>(depth 2, from /howto)</small></li>
+<li><a href="http://100.101.177.83/#/indexed-monad" target="_blank">/indexed-monad</a> <small>(depth 3, from /understanding/selections)</small></li>
+<li><a href="http://100.101.177.83/#/lesmis-gup-tree" target="_blank">/lesmis-gup-tree</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/limitations" target="_blank">/limitations</a> <small>(depth 3, from /understanding/tree-api)</small></li>
+<li><a href="http://100.101.177.83/#/mermaid-tree-demo" target="_blank">/mermaid-tree-demo</a> <small>(depth 3, from /tour/interpreters)</small></li>
+<li><a href="http://100.101.177.83/#/module-graph" target="_blank">/module-graph</a> <small>(depth 3, from /examples)</small></li>
+<li><a href="http://100.101.177.83/#/reference" target="_blank">/reference</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/scene-structures" target="_blank">/scene-structures</a> <small>(depth 3, from /understanding/scenes)</small></li>
+<li><a href="http://100.101.177.83/#/selection-states" target="_blank">/selection-states</a> <small>(depth 3, from /understanding/grammar)</small></li>
+<li><a href="http://100.101.177.83/#/showcase" target="_blank">/showcase</a> <small>(depth 2, from /getting-started)</small></li>
+<li><a href="http://100.101.177.83/#/showcase/lua-edge" target="_blank">/showcase/lua-edge</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/simple-force-graph" target="_blank">/simple-force-graph</a> <small>(depth 3, from /howto/force-graphs)</small></li>
+<li><a href="http://100.101.177.83/#/simpsons-v2" target="_blank">/simpsons-v2</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/splom" target="_blank">/splom</a> <small>(depth 3, from /showcase)</small></li>
+<li><a href="http://100.101.177.83/#/state-machine" target="_blank">/state-machine</a> <small>(depth 3, from /understanding/selections)</small></li>
+<li><a href="http://100.101.177.83/#/static-vs-gup" target="_blank">/static-vs-gup</a> <small>(depth 3, from /understanding/grammar)</small></li>
+<li><a href="http://100.101.177.83/#/tour" target="_blank">/tour</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/tour/flow" target="_blank">/tour/flow</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/foundations" target="_blank">/tour/foundations</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/fpftw" target="_blank">/tour/fpftw</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/graph-algorithms" target="_blank">/tour/graph-algorithms</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/hierarchies" target="_blank">/tour/hierarchies</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/interpreters" target="_blank">/tour/interpreters</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/motion" target="_blank">/tour/motion</a> <small>(depth 3, from /tour/hierarchies)</small></li>
+<li><a href="http://100.101.177.83/#/tour/professional" target="_blank">/tour/professional</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/scrolly" target="_blank">/tour/scrolly</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/scrolly2-legacy" target="_blank">/tour/scrolly2-legacy</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/simpsons" target="_blank">/tour/simpsons</a> <small>(depth 3, from /showcase)</small></li>
+<li><a href="http://100.101.177.83/#/tour/sonification" target="_blank">/tour/sonification</a> <small>(depth 2, from /tour)</small></li>
+<li><a href="http://100.101.177.83/#/tour/wealth-health" target="_blank">/tour/wealth-health</a> <small>(depth 3, from /showcase)</small></li>
+<li><a href="http://100.101.177.83/#/transitions" target="_blank">/transitions</a> <small>(depth 3, from /understanding/scenes)</small></li>
+<li><a href="http://100.101.177.83/#/tree-api" target="_blank">/tree-api</a> <small>(depth 3, from /tour/fpftw)</small></li>
+<li><a href="http://100.101.177.83/#/tree-builder" target="_blank">/tree-builder</a> <small>(depth 3, from /showcase)</small></li>
+<li><a href="http://100.101.177.83/#/tree-variants" target="_blank">/tree-variants</a> <small>(depth 3, from /understanding/tree-api)</small></li>
+<li><a href="http://100.101.177.83/#/type-safety" target="_blank">/type-safety</a> <small>(depth 3, from /understanding/selections)</small></li>
+<li><a href="http://100.101.177.83/#/understanding" target="_blank">/understanding</a> <small>(depth 1, from /)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/attributes" target="_blank">/understanding/attributes</a> <small>(depth 2, from /understanding)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/grammar" target="_blank">/understanding/grammar</a> <small>(depth 2, from /understanding)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/scenes" target="_blank">/understanding/scenes</a> <small>(depth 2, from /understanding)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/selections" target="_blank">/understanding/selections</a> <small>(depth 2, from /understanding)</small></li>
+<li><a href="http://100.101.177.83/#/understanding/tree-api" target="_blank">/understanding/tree-api</a> <small>(depth 2, from /understanding)</small></li>
+    </ul>
+  </div>
+
+  <div id="comparison" class="tab-content">
+    <div class="summary-grid">
+      <div class="summary-card total">
+        <div class="number">61</div>
+        <div class="label">Issues Found</div>
+      </div>
+      <div class="summary-card danger">
+        <div class="number">40</div>
+        <div class="label">Unreachable</div>
+      </div>
+      <div class="summary-card warning">
+        <div class="number">21</div>
+        <div class="label">Extra Routes</div>
+      </div>
+      <div class="summary-card">
+        <div class="number">2</div>
+        <div class="label">Archived</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="unreachable">Unreachable Routes</h3>
+      <p class="count">Defined in code but not reachable from navigation</p>
+      <ul><li class="unreachable"><a href="http://100.101.177.83/#AnimatedAttrTest" target="_blank">AnimatedAttrTest</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#ChartBuilder" target="_blank">ChartBuilder</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#Example" target="_blank">Example</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#ForceConfigPOC" target="_blank">ForceConfigPOC</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#ForceConfigV2Test" target="_blank">ForceConfigV2Test</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#ForcePlaygroundWASM" target="_blank">ForcePlaygroundWASM</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#GUPAnimatedTest" target="_blank">GUPAnimatedTest</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#GUPDebug" target="_blank">GUPDebug</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#GeneralUpdatePattern" target="_blank">GeneralUpdatePattern</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#HATSTransitionTest" target="_blank">HATSTransitionTest</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#HowtoTreeAPI" target="_blank">HowtoTreeAPI</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#HowtoTreeExplorer" target="_blank">HowtoTreeExplorer</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#Just" target="_blank">Just</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#LesMisGUP" target="_blank">LesMisGUP</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#LesMisGUPClean" target="_blank">LesMisGUPClean</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#LesMisGUPSimple" target="_blank">LesMisGUPSimple</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#LesMisGUPTree" target="_blank">LesMisGUPTree</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#LesMisGUPTreeAPI" target="_blank">LesMisGUPTreeAPI</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#LesMisQueryDemo" target="_blank">LesMisQueryDemo</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#NotFound" target="_blank">NotFound</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#PieDonutDemo" target="_blank">PieDonutDemo</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#ReferenceModule" target="_blank">ReferenceModule</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#SPLOM" target="_blank">SPLOM</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#SPLOMHATS" target="_blank">SPLOMHATS</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#SankeyDebug" target="_blank">SankeyDebug</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#SimpleChimera" target="_blank">SimpleChimera</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#SimpleTreeBuilder" target="_blank">SimpleTreeBuilder</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#Simpsons" target="_blank">Simpsons</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#TourFPFTW" target="_blank">TourFPFTW</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#TourLesMisGUP" target="_blank">TourLesMisGUP</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#TourMotionScrolly" target="_blank">TourMotionScrolly</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#TourMotionScrollyHATS" target="_blank">TourMotionScrollyHATS</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#TreeAPI" target="_blank">TreeAPI</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#TreeBuilder2" target="_blank">TreeBuilder2</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#TreeBuilder3" target="_blank">TreeBuilder3</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#UnderstandingEmmet" target="_blank">UnderstandingEmmet</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#UnderstandingTreeAPI" target="_blank">UnderstandingTreeAPI</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#UpdateJoinDemo" target="_blank">UpdateJoinDemo</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#VizMatrix" target="_blank">VizMatrix</a><span class="badge badge-unreachable">unreachable</span></li>
+<li class="unreachable"><a href="http://100.101.177.83/#Wizard" target="_blank">Wizard</a><span class="badge badge-unreachable">unreachable</span></li></ul>
+    </div>
+
+    <div class="section">
+      <h3 class="extra">Extra Routes</h3>
+      <p class="count">Found by spidering but not in route definitions</p>
+      <ul><li class="extra"><a href="http://100.101.177.83/#/architecture" target="_blank">/architecture</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/challenge" target="_blank">/challenge</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/code-explorer" target="_blank">/code-explorer</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/core-primitives" target="_blank">/core-primitives</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/home" target="_blank">/home</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/howto/tree-api" target="_blank">/howto/tree-api</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/indexed-monad" target="_blank">/indexed-monad</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/lesmis-gup-tree" target="_blank">/lesmis-gup-tree</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/limitations" target="_blank">/limitations</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/scene-structures" target="_blank">/scene-structures</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/selection-states" target="_blank">/selection-states</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/splom" target="_blank">/splom</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/state-machine" target="_blank">/state-machine</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/static-vs-gup" target="_blank">/static-vs-gup</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/tour/fpftw" target="_blank">/tour/fpftw</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/tour/scrolly2-legacy" target="_blank">/tour/scrolly2-legacy</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/transitions" target="_blank">/transitions</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/tree-api" target="_blank">/tree-api</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/tree-variants" target="_blank">/tree-variants</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/type-safety" target="_blank">/type-safety</a><span class="badge badge-extra">extra</span></li>
+<li class="extra"><a href="http://100.101.177.83/#/understanding/tree-api" target="_blank">/understanding/tree-api</a><span class="badge badge-extra">extra</span></li></ul>
+    </div>
+
+    <div class="section">
+      <h3 class="archived">Archived Routes</h3>
+      <p class="count">Routes marked as archived in code</p>
+      <ul><li class="archived">AnimatedAttrTest<span class="badge badge-archived">archived</span></li>
+<li class="archived">GUPAnimatedTest<span class="badge badge-archived">archived</span></li></ul>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+  </script>
+</body>
+</html>
