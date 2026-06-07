@@ -19,7 +19,8 @@ knowledge of the language, its toolchain, and its quirks:
 | purerl | `purescript-backends/purerl` (and consult `music/live-coding/purerl-tidal` for a working spago/package-set/FFI setup) | the live purerl deployment in this ecosystem |
 | purepy | `purescript-backends/purescript-python-new` | its own cross-backend harness is the prior art |
 | Julia | `purescript-backends/purescript-julia` (Jurist) | reference implementation of this whole process |
-| psgo | a fresh clone of `andyarvanitis/purescript-native` | not local yet |
+| psgo | `purescript-backends/purescript-native` (cloned 2026-06-07) | the Go column |
+| wasm | `purescript-backends/purescript-backend-wasm` (cloned 2026-06-07) | katsujukou's Wasm GC backend — see its dossier below |
 
 Results — runners, divergence entries, comparison-table columns,
 session notes — land back **here**. The harness itself currently lives
@@ -163,8 +164,8 @@ note the double application: fetch, then run).
 
 ## purescript-go (purescript-native)
 
-- **Not local yet.** Clone `github.com/andyarvanitis/purescript-native`
-  (driver: `psgo`) and its companion Go FFI:
+- **Local clone**: `purescript-backends/purescript-native` (driver:
+  `psgo`). Also clone its companion Go FFI when starting:
   `github.com/purescript-native/go-ffi`. Needs a Go toolchain
   (`brew install go` if `which go` fails).
 - psgo consumes corefn and produces **one executable per Main** — ten
@@ -178,6 +179,45 @@ note the double application: fetch, then run).
   the comparison table's "library coverage" row.
 - **Expected divergences**: Int is int (64-bit on arm64) — Julia-like;
   float formatting via strconv differs from JS; strings UTF-8.
+
+## wasm (katsujukou/purescript-backend-wasm)
+
+- **Local clone**: `purescript-backends/purescript-backend-wasm`.
+  Toolchain: pnpm + Node (the compiler is **written in PureScript**,
+  drives the Binaryen JS API; pinned purs v0.15.16 — note our other
+  work uses 0.15.x too, but check the pin). Start with the repo's own
+  `CLAUDE.md`, `docs/compilation-pipeline.md`, and `docs/interop.md` —
+  this is the best-documented backend in the family (25 ADRs).
+- **Inputs**: CoreFn JSON **and externs.cbor** (it reconstructs
+  foreign signatures from externs for boundary marshalling, ADR-0016).
+  Output: a single linked Wasm GC module; run under Node (V8) with the
+  host shim — see `bin/` and `examples/` for the actual invocation.
+- **Suite feasibility — set expectations**: its `ulib/` curated FFI
+  covers a *subset* of the core libraries (Array/Eq/Ord/Show/Foldable/
+  Functor/Int/CodeUnits, …). The differential suite's ten modules will
+  exceed that coverage initially. Run module-by-module, record SKIPPED
+  honestly, and treat each gap as a "library coverage" data point —
+  the matrix is allowed to have holes; silent shrinkage is the only
+  failure.
+- **Expected divergences**: few in principle — Int is true i32
+  (JS-aligned, so `INT64-` tests should match *JS*, not Julia);
+  strings are UTF-8 internally but the CodeUnits API semantics need
+  differential discovery; Number formatting at the JS boundary
+  (host-side `toString` vs in-module formatting) is worth probing
+  early, as ever.
+- **What to learn while there** (applies to the whole family):
+  - **ADR discipline** — every representation/optimization decision
+    recorded with status and date. Adopt for Jurist.
+  - **externs.cbor signature reconstruction** — typed FFI marshalling.
+    Directly relevant to Jurist's Tier-1 typed arrays (knowing a
+    foreign is `Vector Number` permits `Vector{Float64}`).
+  - **Benchmark methodology** — the same source timed across three
+    code generators, steady-state post-warmup, graphs in-repo
+    (`bench/`). This *is* the site's "run the same program everywhere"
+    strip, already practiced; adopt its shape.
+  - purs-backend-es appears as its comparison baseline — that
+    optimizing JS generator belongs in our matrix as a control column
+    (same habitat, different generator).
 
 ## Harness integration
 
