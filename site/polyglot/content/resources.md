@@ -30,6 +30,62 @@ so a performance-oriented backend tends to sit there. The Wasm GC backend is
 an outlier — it consumes CoreFn *and* `externs.cbor` to reconstruct foreign
 signatures for boundary marshalling.
 
+## Making a slow backend fast: two roads
+
+Most CoreFn source-emitters start the same way — every value boxed, every
+function a curried unary closure, every type-class method a dictionary lookup.
+Correct, but slow. There are two roads to speed, and the choice is more
+consequential than it looks (we know because for the Go backend we built the
+slow boxed emitter, then a Path-B consumer taken to full conformance — the
+emitter kept as the byte-identical oracle, Path A scoped against purerl but not
+built).
+
+- **Path A — hand-roll passes on your own AST.** Keep your existing compiler
+  and write your own inliner, uncurrier, dead-code pass. The reference is
+  **purerl**, whose `CodeGen/Optimizer/{Inliner,MagicDo,Memoize,Unused}` is
+  living proof you can hand-write a solid optimizer for a CoreFn backend.
+- **Path B — consume `purescript-backend-optimizer`.** It ingests CoreFn and
+  emits an *already-optimized* IR — uncurrying and inlining done — that you
+  walk. Flagship consumer `purs-backend-es`; also `purescm`, `backend-erl`.
+
+**The surprise that decides the shape:** the optimizer is **written in
+PureScript, not Haskell**. So Path B isn't "teach my Haskell compiler a new
+IR" — it's a *second codebase in a different language*, sharing only the
+conformance corpus with your existing backend (not code).
+
+**What the IR hands you for free:** multi-arg lambdas/apps pre-grouped
+(uncurrying), **typed primitive operators** (`OpIntNum OpAdd`, `OpStringAppend`
+— native arithmetic, not `Semiring`/`Eq` dictionary lookups), `Effect`
+special-cased (MagicDo built in), de Bruijn levels, and whole-program DCE +
+inlining. *Even a naïve walk of this IR beats a naïve walk of CoreFn.*
+
+**What it does NOT hand you** — and the names mislead here, because purerl,
+backend-erl and purescm all target dynamically-typed runtimes: **polymorphic
+dictionary-passing remains**, and **concrete typing / unboxing is yours to
+invent** (the references are MLton and Rust, not any PS backend). Those two —
+whole-program monomorphisation and concrete typing — are equally novel work on
+*both* roads.
+
+| | **Path A — hand-rolled** | **Path B — optimizer IR** |
+|---|---|---|
+| Language | your compiler's (e.g. Haskell) | PureScript |
+| Codebases | one | two (share corpus, not code) |
+| Uncurrying / inlining / DCE | you write it | free |
+| Primitive dict-elim | you write it | free (typed PrimOps) |
+| Monomorphisation / unboxing | you write it | you write it |
+| Reference to copy | purerl `CodeGen/Optimizer/*` | `backend-es`, `purescm` |
+| Boxed fallback / oracle | same codebase | separate codebase |
+
+**Lean Path B** if you want the uncurrying/inlining without reimplementing it,
+you're comfortable with a PureScript backend alongside your existing one, and
+especially if a collaborator is already on the optimizer-IR path (you compose
+with their work). **Lean Path A** if staying in one language matters more, or
+if your backend is compiler-integrated like purerl (where an external
+PureScript tool is an awkward fit). Either way, the boxed-to-real-target
+frictions — short-circuit `&&`/`||` must stay native, lazy init for cyclic
+dictionary CAFs, the whole-program build model — are *target* problems both
+roads meet.
+
 ## The contract
 
 "Adding a backend" to the differential suite means, concretely:
