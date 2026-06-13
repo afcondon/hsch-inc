@@ -3,3 +3,6 @@
 # content pages are not.
 public/backends/
 public/resources/
+node_modules/
+public/crossword-official/
+public/scrabble-official/

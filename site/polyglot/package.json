@@ -1,0 +1,13 @@
+{
+  "name": "polyglot-site-tools",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Build-time helpers for site/polyglot (crossword hero layout generation).",
+  "scripts": {
+    "crossword": "node tools/gen-crossword.mjs"
+  },
+  "dependencies": {
+    "crossword-layout-generator": "^0.1.1"
+  }
+}
