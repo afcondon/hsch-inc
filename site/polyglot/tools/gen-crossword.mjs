@@ -175,8 +175,11 @@ function normalise(b){
 
 const accentMap = JSON.stringify(Object.fromEntries(WORDS.map((w,i)=>[i,w.accent])));
 
+// The legend lists the "other languages" — POLYGLOT (the family) and PURESCRIPT
+// (the source) stay on the board but are not legend entries.
+const LEGEND_SKIP = new Set(['POLYGLOT', 'PURESCRIPT']);
 function legendHtml(L, pre){
-  return L.result.slice().sort((a,b)=>idxOf(a.answer)-idxOf(b.answer)).map(r=>{
+  return L.result.slice().filter(r=>!LEGEND_SKIP.has(r.answer)).sort((a,b)=>idxOf(a.answer)-idxOf(b.answer)).map(r=>{
     const wi=idxOf(r.answer),w=WORDS[wi],pts=[...w.answer].reduce((s,ch)=>s+(POINTS[ch]||0),0);
     return `<a class="leg" href="${pre}${w.href}" data-word="${wi}" style="--accent:${w.accent}">
       <span class="leg__sw"></span><span class="leg__word">${w.answer}</span>
@@ -187,11 +190,11 @@ function legendHtml(L, pre){
 const LEGEND_CSS = `
 .side{display:grid;gap:.8rem;}
 .side__kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-faint);font-weight:700;margin:0;}
-.side__title{font-family:var(--display);font-weight:700;font-size:clamp(1.3rem,3vw,1.9rem);line-height:1.12;margin:0 0 .35rem;}
-.side__title em{color:var(--primary);font-style:normal;}
-.side__title s{color:var(--ink-faint);text-decoration-line:line-through;text-decoration-color:var(--primary);text-decoration-thickness:3px;}
-.side__sub{font-family:var(--display);font-weight:600;font-size:clamp(1rem,2.2vw,1.35rem);line-height:1.2;color:var(--ink);margin:0 0 1.1rem;}
-.side__sub em{color:var(--primary);font-style:normal;}
+.side__title{font-family:var(--display);font-weight:700;font-size:clamp(1.3rem,3vw,1.9rem);line-height:1.12;margin:0 0 .55rem;}
+/* handwritten kicker under the headline — a gently tilted aside, not a strike.
+   Upright hand (Patrick Hand) so it doesn't read as italic; rotation on the
+   whole inline-block element, tunable via --hand-rot. */
+.side__hand{display:inline-block;position:relative;z-index:2;font-family:'Patrick Hand','Bradley Hand',cursive;color:var(--primary);font-size:clamp(1.45rem,3.4vw,2.1rem);line-height:1;margin:var(--hand-rise,-0.8em) 0 1.4rem var(--hand-shift,2rem);transform:rotate(var(--hand-rot,-5deg));transform-origin:left center;}
 .legend{display:grid;gap:.05rem;}
 .leg{display:grid;grid-template-columns:.7rem 1fr auto;column-gap:.6rem;row-gap:0;padding:.3rem .4rem;border-radius:5px;color:var(--ink);align-items:center;}
 .leg:hover,.leg.active{text-decoration:none;background:var(--paper-2);}
@@ -202,13 +205,13 @@ const LEGEND_CSS = `
 .leg.active .leg__word{color:var(--accent);}
 .leg.active .leg__label{color:var(--accent);}`;
 
-// Headline riffs on purescript.org ("…that compiles to JavaScript") — strike the
-// last clause, correct it with the subhead pointing at the board.
-const HEADLINE = 'A strongly-typed functional programming language that <s>compiles to JavaScript</s>';
-const SUBHEAD  = 'compiles &amp; interoperates with <em>all these</em> languages and runtimes.';
+// Headline is the purescript.org line, left whole. A gently-tilted handwritten
+// kicker underneath reframes it (no strike-through).
+const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap">';
 
-const SIDE = (L,pre)=>`<div class="side"><p class="side__kicker">One language, many runtimes</p>
-<h1 class="side__title">${HEADLINE}</h1><p class="side__sub">${SUBHEAD}</p>
+const SIDE = (L,pre)=>`<div class="side">
+<h1 class="side__title">A strongly-typed functional programming language that compiles to JavaScript</h1>
+<p class="side__hand">&amp; all these other languages, too</p>
 <div class="legend" id="legend">${legendHtml(L,pre)}</div></div>`;
 
 const SYNC_JS = (sel)=>`
@@ -230,7 +233,7 @@ function renderCrossword(L){
     grid+=`<span class="${cls}" data-words="${[...c.words].join(' ')}">${c.ch}</span>`;
   }
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Polyglot — crossword hero (prototype)</title><link rel="stylesheet" href="../style.css"><style>
+<title>Polyglot — crossword hero (prototype)</title>${FONTS}<link rel="stylesheet" href="../style.css"><style>
 .hero{min-height:100vh;display:grid;place-items:center;padding:4rem var(--space);background:radial-gradient(120% 80% at 80% 0%,var(--paper-2),var(--paper) 60%);}
 .wrap{display:grid;grid-template-columns:auto minmax(13rem,20rem);gap:clamp(2rem,5vw,4rem);align-items:center;}
 .board{display:grid;grid-template-columns:repeat(${L.cols},1fr);gap:2px;}
@@ -265,7 +268,7 @@ function renderScrabble(L){
       grid+=`<span class="sq ${cls}">${p==='*'?'★':(LBL[p]||'')}</span>`; }
   }
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Polyglot — Scrabble board (prototype)</title><link rel="stylesheet" href="../style.css"><style>
+<title>Polyglot — Scrabble board (prototype)</title>${FONTS}<link rel="stylesheet" href="../style.css"><style>
 .hero{min-height:100vh;display:grid;place-items:center;padding:3rem var(--space);background:var(--paper-2);}
 .wrap{display:grid;grid-template-columns:auto minmax(13rem,20rem);gap:clamp(2rem,5vw,4rem);align-items:center;}
 .board{display:grid;grid-template-columns:repeat(15,1fr);gap:3px;background:#2e6f4e;padding:10px;border-radius:6px;box-shadow:0 12px 40px rgba(0,0,0,.25);width:min(78vmin,620px);}
