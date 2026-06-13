@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polyglot PureScript — one language, many backends</title>
+  <meta name="description" content="PureScript compiles to far more than JavaScript. A field guide to the backend constellation — BEAM, Julia, Wasm GC, Go, Python, Racket and more — and how to build your own.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <nav class="topnav">
+    <a class="topnav__brand" href="/">polyglot<span class="dot">.</span>purescript</a>
+    <div class="topnav__links">
+      <a href="#showcase">Showcases</a>
+      <a href="#backends">Backends</a>
+      <a href="resources/">Writing a backend</a>
+    </div>
+  </nav>
+
+  <div class="hero__grid">
+    <!-- Left: the POLYGLOT acrostic -->
+    <div class="hero__acrostic-col">
+      <div class="acrostic" aria-label="POLYGLOT acrostic of PureScript backends">
+        <!-- prefix / LETTER / suffix ; data-backend drives the spine→grid highlight -->
+        <a class="word word--primary" href="#backends" data-backend="js">
+          <span class="lhs"></span><span class="letter">P</span><span class="rhs">ureScript</span>
+        </a>
+        <a class="word" href="backends/js/" data-backend="js">
+          <span class="lhs">n</span><span class="letter">O</span><span class="rhs">de</span>
+        </a>
+        <a class="word" href="backends/purerl/" data-backend="purerl">
+          <span class="lhs">er</span><span class="letter">L</span><span class="rhs">ang</span>
+        </a>
+        <a class="word" href="backends/purepy/" data-backend="purepy">
+          <span class="lhs">p</span><span class="letter">Y</span><span class="rhs">thon</span>
+        </a>
+        <a class="word" href="backends/wasm/" data-backend="wasm">
+          <span class="lhs">wasm</span><span class="letter">G</span><span class="rhs">c</span>
+        </a>
+        <a class="word" href="backends/jurist/" data-backend="jurist">
+          <span class="lhs">ju</span><span class="letter">L</span><span class="rhs">ia</span>
+        </a>
+        <a class="word" href="backends/psgo/" data-backend="psgo">
+          <span class="lhs">g</span><span class="letter">O</span><span class="rhs"></span>
+        </a>
+        <a class="word" href="backends/purkt/" data-backend="purkt">
+          <span class="lhs">racke</span><span class="letter">T</span><span class="rhs"></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: the thesis -->
+    <div class="hero__thesis-col">
+      <p class="kicker">One language, many runtimes</p>
+      <h1 class="hero__title">PureScript compiles to&nbsp;far more than JavaScript.</h1>
+      <p class="hero__lede">
+        The same typed source — same Prelude, same effect system — lands on the BEAM,
+        on Julia's numeric stack, on Wasm GC, on Go, on Python, on a Lisp. Each backend
+        borrows a runtime virtue the JS engines don't have, while PureScript's type
+        system stays the lingua franca.
+      </p>
+      <p class="hero__lede">
+        This is a field guide to that constellation: what each backend is for, how they
+        diverge, and how to build your own.
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="#backends">Meet the backends</a>
+        <a class="btn" href="resources/">Write a backend &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <a class="scroll-cue" href="#showcase" aria-label="Scroll to showcases">&darr;</a>
+</header>
+
+<!-- ===================== SHOWCASE STRIP ===================== -->
+<section id="showcase" class="section section--showcase">
+  <div class="section__head">
+    <p class="kicker">Run the same program everywhere</p>
+    <h2>One source, every backend</h2>
+    <p class="section__intro">
+      The backbone of the project is a differential corpus: a small, FFI-free set of
+      PureScript modules run on every backend, their output compared byte-for-byte.
+      Where they agree, the type system carried across. Where they diverge — bignum
+      <code>Int</code>, UTF-8 strings, float formatting — the difference is enumerated,
+      not papered over. Counterexamples are first-class content.
+    </p>
+  </div>
+
+  <figure class="diffstrip">
+    <pre class="diffstrip__src"><code>module Main where
+
+main :: Effect Unit
+main = log (show (sumTo 1000000))</code></pre>
+    <div class="diffstrip__outputs">
+      <div class="out"><span class="out__tag out__tag--js">JS</span><span class="out__val">-363189984</span><span class="out__note">int32 wrap</span></div>
+      <div class="out"><span class="out__tag out__tag--purerl">BEAM</span><span class="out__val">499999500000</span><span class="out__note">bignum</span></div>
+      <div class="out"><span class="out__tag out__tag--jurist">Julia</span><span class="out__val">499999500000</span><span class="out__note">Int64</span></div>
+      <div class="out"><span class="out__tag out__tag--purepy">Python</span><span class="out__val">499999500000</span><span class="out__note">bignum</span></div>
+      <div class="out"><span class="out__tag out__tag--wasm">Wasm</span><span class="out__val">-363189984</span><span class="out__note">i32, JS-aligned</span></div>
+    </div>
+    <figcaption>
+      Illustrative. The reference (JS) overflows; the bignum backends agree with each
+      other. Every cell on the published matrix links to the test that proves it.
+    </figcaption>
+  </figure>
+</section>
+
+<!-- ===================== BACKENDS GRID ===================== -->
+<section id="backends" class="section section--backends">
+  <div class="section__head">
+    <p class="kicker">The constellation</p>
+    <h2>The backend family</h2>
+    <p class="section__intro">
+      Grouped by <strong>generator lineage</strong> — because the architecture predicts
+      what a backend can cheaply do. Hover a letter in the acrostic to find its tile.
+    </p>
+  </div>
+
+  <h3 class="grid-label">Compiler-integrated</h3>
+  <div class="grid">
+    <a class="tile" href="backends/purerl/" data-backend="purerl">
+      <span class="tile__badge tile__badge--purerl">BEAM</span>
+      <h4>purerl</h4>
+      <p class="tile__by">id3as</p>
+      <p class="tile__desc">Erlang/OTP. Processes, supervision, soft-realtime. Production-mature.</p>
+    </a>
+  </div>
+
+  <h3 class="grid-label">CoreFn-JSON source-emitters</h3>
+  <div class="grid">
+    <a class="tile" href="backends/jurist/" data-backend="jurist">
+      <span class="tile__badge tile__badge--jurist">Julia</span>
+      <h4>Jurist</h4>
+      <p class="tile__by">this project</p>
+      <p class="tile__desc">Julia's numeric stack as FFI leaves. 422/426 differential parity.</p>
+    </a>
+    <a class="tile" href="backends/purepy/" data-backend="purepy">
+      <span class="tile__badge tile__badge--purepy">Python</span>
+      <h4>purepy</h4>
+      <p class="tile__by">this project</p>
+      <p class="tile__desc">Ubiquity + data tooling. Rebooted to 422/426 parity.</p>
+    </a>
+    <a class="tile" href="backends/psgo/" data-backend="psgo">
+      <span class="tile__badge tile__badge--psgo">Go</span>
+      <h4>psgo</h4>
+      <p class="tile__by">this project</p>
+      <p class="tile__desc">Single static binaries, goroutines. From-scratch; spike green.</p>
+    </a>
+    <a class="tile" href="backends/lua/" data-backend="lua">
+      <span class="tile__badge tile__badge--lua">Lua</span>
+      <h4>purescript-lua</h4>
+      <p class="tile__by">community</p>
+      <p class="tile__desc">Embeddable scripting target.</p>
+    </a>
+    <a class="tile" href="backends/native/" data-backend="native">
+      <span class="tile__badge tile__badge--native">C++</span>
+      <h4>purescript-native</h4>
+      <p class="tile__by">Andy Arvanitis</p>
+      <p class="tile__desc">Native C++/Go output.</p>
+    </a>
+  </div>
+
+  <h3 class="grid-label">Optimizer-IR consumers</h3>
+  <div class="grid">
+    <a class="tile" href="backends/purescm/" data-backend="purescm">
+      <span class="tile__badge tile__badge--purescm">Chez</span>
+      <h4>purescm</h4>
+      <p class="tile__by">Nathan Faubion / Arista</p>
+      <p class="tile__desc">Chez Scheme via the backend-optimizer IR.</p>
+    </a>
+    <a class="tile" href="backends/purkt/" data-backend="purkt">
+      <span class="tile__badge tile__badge--purkt">Racket</span>
+      <h4>Purkt</h4>
+      <p class="tile__by">Fabrizio Ferrai</p>
+      <p class="tile__desc">Racket — macros, language-building. Self-hosting in progress.</p>
+    </a>
+    <a class="tile" href="backends/es/" data-backend="es">
+      <span class="tile__badge tile__badge--es">ES</span>
+      <h4>purs-backend-es</h4>
+      <p class="tile__by">Faubion / Arista</p>
+      <p class="tile__desc">Optimizing JS — the control column.</p>
+    </a>
+  </div>
+
+  <h3 class="grid-label">Wasm GC</h3>
+  <div class="grid">
+    <a class="tile tile--wide" href="backends/wasm/" data-backend="wasm">
+      <span class="tile__badge tile__badge--wasm">Wasm GC</span>
+      <h4>purescript-backend-wasm</h4>
+      <p class="tile__by">katsujukou</p>
+      <p class="tile__desc">
+        The novel case: competes <em>in the same habitat as JS</em> and wins —
+        5–8× on allocation-heavy benchmarks via unboxed scalars, struct-subtyped
+        ADTs, eliminated dictionaries. The first family member whose differentiation
+        is performance, not habitat.
+      </p>
+    </a>
+  </div>
+
+  <h3 class="grid-label">Reference</h3>
+  <div class="grid">
+    <a class="tile" href="backends/js/" data-backend="js">
+      <span class="tile__badge tile__badge--js">JS</span>
+      <h4>JavaScript</h4>
+      <p class="tile__by">PureScript core team</p>
+      <p class="tile__desc">Browser &amp; Node. The semantic reference the others measure against.</p>
+    </a>
+  </div>
+</section>
+
+<!-- ===================== RESOURCES CTA ===================== -->
+<section class="section section--cta">
+  <div class="cta-card">
+    <h2>Want to add a runtime?</h2>
+    <p>
+      Everything we've gathered building these columns — the differential-suite contract,
+      the ground rules that cost us time, per-backend toolchain notes, and the prior-art
+      shelf — collected into one hub.
+    </p>
+    <a class="btn btn--primary" href="resources/">Writing a backend &rarr;</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>Polyglot PureScript — part of the <a href="https://hylograph.net">Hylograph</a> ecosystem.</p>
+  <p class="muted">Backend attributions are being verified before publication; see each backend page.</p>
+</footer>
+
+</body>
+</html>
