@@ -1,6 +1,7 @@
 /* =========================================================================
    Polyglot PureScript — Swiss/International Typographic, light theme.
-   Hero acrostic treatment carried forward from the original site (psd3.css).
+   The hero (crossword) is styled inline in index.html via tools/gen-crossword.mjs;
+   this sheet covers the nav, sections, grids, and content pages.
    ========================================================================= */
 
 :root {
@@ -71,75 +72,11 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--paper-2); p
 .topnav__links a { color: var(--ink-soft); margin-left: 1.5rem; font-size: 0.85rem; }
 .topnav__links a:hover { color: var(--ink); text-decoration: none; }
 
-/* ---------------------------------------------------- hero */
-.hero {
-  position: relative;
-  min-height: 100vh;
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 6rem var(--space) 4rem;
-  background:
-    radial-gradient(120% 80% at 80% 0%, var(--paper-2) 0%, var(--paper) 60%);
-  overflow: hidden;
-}
-.hero__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
-  gap: clamp(2rem, 6vw, 6rem);
-  align-items: center;
-  max-width: 80rem; margin: 0 auto; width: 100%;
-}
+/* ---------------------------------------------------- hero
+   The hero is the crossword, styled inline in index.html (injected by
+   tools/gen-crossword.mjs). The old POLYGLOT acrostic is retired. */
 
-/* ---- acrostic (carried from psd3.css) ---- */
-.hero__acrostic-col { display: flex; justify-content: center; }
-.acrostic {
-  font-family: var(--display);
-  font-size: clamp(1.6rem, 4.5vw, 3.2rem);
-  line-height: 1.12;
-  text-transform: uppercase;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;   /* lhs | LETTER | rhs */
-  align-items: baseline;
-  white-space: nowrap;
-  transform: rotate(-12deg);
-  transform-origin: center;
-}
-.word { display: contents; color: var(--ink); }
-.word .lhs { justify-self: end; }
-.word .rhs { justify-self: start; }
-.word--primary { color: var(--primary); }
-
-.letter {
-  text-align: center; justify-self: center;
-  padding: 0.04em 0.18em;
-  background: rgba(255,255,255,0.85);
-  border-left: 1px solid rgba(26,26,26,0.14);
-  border-right: 1px solid rgba(26,26,26,0.14);
-  transition: color 0.15s, background 0.15s;
-}
-.word:first-child .letter { border-top: 1px solid rgba(26,26,26,0.14); }
-.word:last-child .letter  { border-bottom: 1px solid rgba(26,26,26,0.14); }
-.word:hover { text-decoration: none; }
-.word:hover .lhs, .word:hover .rhs { color: var(--ink); }
-.word:hover .letter { color: var(--paper); }
-.word[data-backend="js"]:hover .letter      { background: var(--c-js); }
-.word[data-backend="purerl"]:hover .letter  { background: var(--c-purerl); }
-.word[data-backend="purepy"]:hover .letter  { background: var(--c-purepy); }
-.word[data-backend="wasm"]:hover .letter    { background: var(--c-wasm); }
-.word[data-backend="jurist"]:hover .letter  { background: var(--c-jurist); }
-.word[data-backend="psgo"]:hover .letter    { background: var(--c-psgo); }
-.word[data-backend="purkt"]:hover .letter   { background: var(--c-purkt); }
-
-/* ---- thesis ---- */
-.hero__title {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: clamp(2rem, 5vw, 3.4rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  margin: 0 0 1.25rem;
-}
-.hero__lede { font-size: 1.05rem; color: var(--ink-soft); max-width: 34rem; margin: 0 0 1rem; }
-.hero__cta { margin-top: 1.75rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+/* ---------------------------------------------------- buttons + scroll cue */
 
 .btn {
   display: inline-block;
@@ -258,9 +195,6 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--paper-2); p
 .tile__badge--native { background: var(--c-native); }
 .tile__badge--es { background: var(--c-es); }
 
-/* spine → grid highlight: hovering an acrostic word lifts its tile */
-.acrostic .word[data-backend]:hover { cursor: pointer; }
-
 /* ---------------------------------------------------- CTA + footer */
 .section--cta { padding-top: 0; }
 .cta-card {
@@ -301,8 +235,5 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--paper-2); p
 
 /* ---------------------------------------------------- responsive */
 @media (max-width: 820px) {
-  .hero__grid { grid-template-columns: 1fr; }
-  .hero__acrostic-col { order: 2; margin-top: 2.5rem; }
-  .acrostic { transform: rotate(-8deg); font-size: clamp(1.5rem, 9vw, 2.6rem); }
   .topnav__links { display: none; }
 }

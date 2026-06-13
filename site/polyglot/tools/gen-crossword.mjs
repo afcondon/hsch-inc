@@ -1,11 +1,7 @@
-// Generate the interlocking-word hero(s) for the polyglot landing.
+// Generate the interlocking-word crossword hero and inject it into the landing
+// page (public/index.html), between the <!-- CWHERO:START/END --> markers.
 //
 //   npm run crossword
-//
-// Emits two static, self-contained prototypes from the SAME packed layout:
-//   public/crossword/index.html   — clean criss-cross hero
-//   public/scrabble/index.html    — Scrabble-board knockoff (15×15, premiums,
-//                                    tile point values)
 //
 // We pack the grid OURSELVES (a greedy crossing packer) rather than using
 // crossword-layout-generator, which ignores input order and sprawls past 15
@@ -13,7 +9,7 @@
 // candidates scored by resulting compactness. Reproducible (seeded). POLYGLOT
 // is just another word, tinted red.  Add a backend → edit WORDS → re-run.
 
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -80,14 +76,6 @@ const WORDS = [
 
 const POINTS = { A:1,B:3,C:3,D:2,E:1,F:4,G:2,H:4,I:1,J:8,K:5,L:1,M:3,N:1,O:1,P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10 };
 const idxOf = (answer) => WORDS.findIndex((w) => w.answer === answer);
-
-// Standard Scrabble premium grid. 3=TW 2=DW t=TL d=DL *=center .=plain.
-const PREMIUM = [
-  '3..d...3...d..3', '.2...t...t...2.', '..2...d.d...2..', 'd..2...d...2..d',
-  '....2.....2....', '.t...t...t...t.', '..d...d.d...d..', '3..d...*...d..3',
-  '..d...d.d...d..', '.t...t...t...t.', '....2.....2....', 'd..2...d...2..d',
-  '..2...d.d...2..', '.2...t...t...2.', '3..d...3...d..3',
-];
 
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
 function shuffled(arr, rng){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -206,9 +194,8 @@ const LEGEND_CSS = `
 .leg.active .leg__label{color:var(--accent);}`;
 
 // Headline is the purescript.org line, left whole. A gently-tilted handwritten
-// kicker underneath reframes it (no strike-through).
-const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap">';
-
+// kicker underneath reframes it (no strike-through). The Patrick Hand webfont is
+// linked from index.html's <head>.
 const SIDE = (L,pre)=>`<div class="side">
 <h1 class="side__title">A strongly-typed functional programming language that compiles to JavaScript</h1>
 <p class="side__hand">&amp; all these other languages, too</p>
@@ -222,7 +209,7 @@ const SYNC_JS = (sel)=>`
   legend.querySelectorAll('.leg').forEach(l=>{const id=l.dataset.word;l.onmouseenter=()=>on(id);l.onmouseleave=()=>off(id);});
   board.querySelectorAll('${sel}[data-words]').forEach(c=>{const ids=c.dataset.words.split(' ');c.onmouseenter=()=>ids.forEach(on);c.onmouseleave=()=>ids.forEach(off);});`;
 
-function renderCrossword(L){
+function boardCells(L){
   let grid='';
   for(let y=1;y<=L.rows;y++) for(let x=1;x<=L.cols;x++){
     const c=L.cells.get(`${x},${y}`);
@@ -232,59 +219,29 @@ function renderCrossword(L){
     if(c.words.has(idxOf('PURESCRIPT'))) cls+=' cell--pure';
     grid+=`<span class="${cls}" data-words="${[...c.words].join(' ')}">${c.ch}</span>`;
   }
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Polyglot — crossword hero (prototype)</title>${FONTS}<link rel="stylesheet" href="../style.css"><style>
-.hero{min-height:100vh;display:grid;place-items:center;padding:4rem var(--space);background:radial-gradient(120% 80% at 80% 0%,var(--paper-2),var(--paper) 60%);}
-.wrap{display:grid;grid-template-columns:auto minmax(13rem,20rem);gap:clamp(2rem,5vw,4rem);align-items:center;}
-.board{display:grid;grid-template-columns:repeat(${L.cols},1fr);gap:2px;}
-.cell{aspect-ratio:1;display:grid;place-items:center;font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:clamp(.8rem,1.9vw,1.5rem);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:2px;transition:.12s;}
+  return grid;
+}
+
+// The landing hero: a self-contained <style>+markup+<script> block injected into
+// public/index.html between the CWHERO markers. Class names are unique to the
+// crossword (board/cell/side/leg/…); only the container is renamed (.cwhero/
+// .cw-wrap) so it can't collide with the page's own .hero/.wrap.
+function renderLandingHero(L){
+  return `<style>
+.cwhero-shell{position:relative;}
+.cwhero{min-height:100vh;display:grid;place-items:center;padding:6rem var(--space) 4rem;background:radial-gradient(120% 80% at 80% 0%,var(--paper-2),var(--paper) 60%);}
+.cw-wrap{display:grid;grid-template-columns:auto minmax(12rem,20rem);gap:clamp(2.5rem,5vw,5rem);align-items:center;}
+.board{display:grid;grid-template-columns:repeat(${L.cols},clamp(24px,2.9vw,42px));gap:2px;}
+.cell{aspect-ratio:1;display:grid;place-items:center;font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:clamp(.85rem,1.9vw,1.55rem);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:2px;transition:.12s;}
 .cell--blank{background:transparent;border:none;}
 .cell--brand{color:var(--primary);border-color:rgba(194,59,34,.4);}
 .cell.hl{color:#fff;background:var(--hl,var(--ink));border-color:transparent;transform:scale(1.05);}
-/* PureScript lit by default — the resting through-line. Reverts to plain the
-   moment any word is hovered (board then contains a .hl cell). */
 .board:not(:has(.cell.hl)) .cell--pure{background:var(--ink);color:#fff;border-color:var(--ink);}
-.proto{position:fixed;top:1rem;left:1rem;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}.proto a{color:var(--link);}
-${LEGEND_CSS}@media(max-width:760px){.wrap{grid-template-columns:1fr;}}
-</style></head><body>
-<p class="proto">Prototype · crossword · <a href="../scrabble/index.html">scrabble board</a> · <a href="../index.html">acrostic</a></p>
-<main class="hero"><div class="wrap"><div class="board" id="board">${grid}</div>
-${SIDE(L,'../')}</div></main>
-<script>${SYNC_JS('.cell')}</script></body></html>`;
-}
-
-function renderScrabble(L){
-  const ox=Math.floor((15-L.cols)/2), oy=Math.floor((15-L.rows)/2);
-  const placed=new Map();
-  for(const [k,c] of L.cells){const [x,y]=k.split(',').map(Number);placed.set(`${ox+x-1},${oy+y-1}`,c);}
-  const LBL={'3':'TW','2':'DW','t':'TL','d':'DL'};
-  let grid='';
-  for(let r=0;r<15;r++) for(let q=0;q<15;q++){
-    const c=placed.get(`${q},${r}`);
-    if(c){const brand=c.words.has(idxOf('POLYGLOT'));
-      grid+=`<span class="sq tile${brand?' tile--brand':''}" data-words="${[...c.words].join(' ')}">${c.ch}<i>${POINTS[c.ch]||''}</i></span>`;
-    } else { const p=PREMIUM[r][q];
-      const cls=p==='*'?'star':p==='3'?'tw':p==='2'?'dw':p==='t'?'tl':p==='d'?'dl':'plain';
-      grid+=`<span class="sq ${cls}">${p==='*'?'★':(LBL[p]||'')}</span>`; }
-  }
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Polyglot — Scrabble board (prototype)</title>${FONTS}<link rel="stylesheet" href="../style.css"><style>
-.hero{min-height:100vh;display:grid;place-items:center;padding:3rem var(--space);background:var(--paper-2);}
-.wrap{display:grid;grid-template-columns:auto minmax(13rem,20rem);gap:clamp(2rem,5vw,4rem);align-items:center;}
-.board{display:grid;grid-template-columns:repeat(15,1fr);gap:3px;background:#2e6f4e;padding:10px;border-radius:6px;box-shadow:0 12px 40px rgba(0,0,0,.25);width:min(78vmin,620px);}
-.sq{aspect-ratio:1;display:grid;place-items:center;position:relative;font-family:var(--display);font-weight:700;border-radius:2px;font-size:clamp(.4rem,1vw,.62rem);color:#fff;}
-.plain{background:#cdbf9b;}.dl{background:#a9d3ec;color:#1a3a4a;}.tl{background:#3f7fc4;}.dw{background:#e7a9b3;color:#5a1f2a;}.tw{background:#d4503f;}.star{background:#e7a9b3;color:#5a1f2a;font-size:1rem;}
-.tile{background:linear-gradient(160deg,#f3e3b3,#e6cf94);color:#3a2a12;border:1px solid #caa95f;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.25);font-size:clamp(.85rem,2vw,1.4rem);text-transform:uppercase;}
-.tile i{position:absolute;right:9%;bottom:3%;font-style:normal;font-size:.4em;opacity:.7;}
-.tile--brand{color:var(--primary);}
-.tile.hl{transform:translateY(-2px) scale(1.08);box-shadow:0 0 0 2px var(--hl,#fff),0 5px 12px rgba(0,0,0,.4);z-index:2;}
-.proto{position:fixed;top:1rem;left:1rem;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}.proto a{color:var(--link);}
-${LEGEND_CSS}@media(max-width:760px){.wrap{grid-template-columns:1fr;}}
-</style></head><body>
-<p class="proto">Prototype · scrabble board · <a href="../crossword/index.html">crossword</a> · <a href="../index.html">acrostic</a></p>
-<main class="hero"><div class="wrap"><div class="board" id="board">${grid}</div>
-${SIDE(L,'../')}</div></main>
-<script>${SYNC_JS('.tile')}</script></body></html>`;
+${LEGEND_CSS}
+@media(max-width:820px){.cw-wrap{grid-template-columns:1fr;}.board{order:2;}}
+</style>
+<div class="cwhero"><div class="cw-wrap"><div class="board" id="board">${boardCells(L)}</div>${SIDE(L,'')}</div></div>
+<script>${SYNC_JS('.cell')}</script>`;
 }
 
 // ---- run ----
@@ -292,12 +249,21 @@ const b = bestPacking();
 if(!b){ console.error('No all-placed packing found.'); process.exit(1); }
 const L = normalise(b);
 
-const cwDir = PALETTE==='official' ? 'crossword-official' : 'crossword';
-const sbDir = PALETTE==='official' ? 'scrabble-official' : 'scrabble';
-mkdirSync(join(PUBLIC,cwDir),{recursive:true});
-mkdirSync(join(PUBLIC,sbDir),{recursive:true});
-writeFileSync(join(PUBLIC,cwDir,'index.html'), renderCrossword(L));
-writeFileSync(join(PUBLIC,sbDir,'index.html'), renderScrabble(L));
+// Inject the crossword hero into the landing between the CWHERO markers.
+// PALETTE selects the colour set (default 'curated').
+{
+  const idxPath=join(PUBLIC,'index.html');
+  const S='<!-- CWHERO:START -->', E='<!-- CWHERO:END -->';
+  let idx=readFileSync(idxPath,'utf8');
+  const i=idx.indexOf(S), j=idx.indexOf(E);
+  if(i!==-1 && j!==-1 && j>i){
+    idx = idx.slice(0,i+S.length) + '\n' + renderLandingHero(L) + '\n  ' + idx.slice(j);
+    writeFileSync(idxPath, idx);
+    console.log('Injected crossword hero into public/index.html');
+  } else {
+    console.log('NOTE: CWHERO markers not found in public/index.html — landing hero NOT updated.');
+  }
+}
 
 // ASCII preview
 let preview='';
@@ -305,5 +271,5 @@ for(let y=1;y<=L.rows;y++){let row='';for(let x=1;x<=L.cols;x++){const c=L.cells
 console.log(`Best packing: ${L.cols}×${L.rows}, ${b.crossings} crossings, fits-board=${b.fits}`);
 const unplaced=b.p.placements.filter(q=>q.unplaced).map(q=>q.answer);
 if(unplaced.length) console.log('UNPLACED:', unplaced.join(', '));
-console.log('Wrote public/crossword/ and public/scrabble/\n');
+console.log('');
 console.log(preview);
