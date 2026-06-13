@@ -76,17 +76,71 @@
   <a class="scroll-cue" href="#showcase" aria-label="Scroll to showcases">&darr;</a>
 </header>
 
-<!-- ===================== SHOWCASE STRIP ===================== -->
+<!-- ===================== PROOF 1 · PER-RUNTIME SHOWCASES ===================== -->
 <section id="showcase" class="section section--showcase">
   <div class="section__head">
-    <p class="kicker">Run the same program everywhere</p>
-    <h2>One source, every backend</h2>
+    <p class="kicker">Proof 1 — one app per runtime</p>
+    <h2>Clean functional programming, on the runtime of your choice</h2>
+    <p class="section__intro">
+      Each exhibit is one real application, running on one backend — the type system
+      intact all the way down to a foreign scientific library, a music rig, or an edge
+      router. They live in their own repos; this site is the magazine that curates them.
+    </p>
+  </div>
+
+  <div class="exhibits">
+    <a class="exhibit" href="backends/purepy/" data-backend="purepy">
+      <span class="exhibit__pill exhibit__pill--live">Live</span>
+      <span class="tile__badge tile__badge--purepy">Python</span>
+      <h4>Embedding Explorer</h4>
+      <p>UMAP embeddings (umap-learn), 140 points, over typed Flask routes — PureScript reaching the ML/data stack.</p>
+    </a>
+    <a class="exhibit" href="backends/purepy/" data-backend="purepy">
+      <span class="exhibit__pill exhibit__pill--live">Live</span>
+      <span class="tile__badge tile__badge--purepy">Python</span>
+      <h4>Grid Explorer</h4>
+      <p>AC power-flow on IEEE case14 (pandapower): N-1 contingency, cascading failures, resilience metrics — the power-line-faults demo.</p>
+    </a>
+    <a class="exhibit" href="backends/jurist/" data-backend="jurist">
+      <span class="exhibit__pill exhibit__pill--soon">Deploy pending</span>
+      <span class="tile__badge tile__badge--jurist">Julia</span>
+      <h4>Stability Atlas</h4>
+      <p>Basins of attraction — a heat-map sweep and click-to-stream orrery, computed PS-on-Julia and streamed over a typed WebSocket. The distributed compute <em>is</em> the showcase.</p>
+    </a>
+    <a class="exhibit" href="backends/purerl/" data-backend="purerl">
+      <span class="exhibit__pill exhibit__pill--video">Video</span>
+      <span class="tile__badge tile__badge--purerl">BEAM</span>
+      <h4>Atlantis · purerl-tidal</h4>
+      <p>Live-coded music with OTP supervision on the BEAM. The full multi-runtime rig can't run in a tab — shown as a video.</p>
+    </a>
+    <a class="exhibit" href="backends/wasm/" data-backend="wasm">
+      <span class="exhibit__pill exhibit__pill--planned">Dogfood</span>
+      <span class="tile__badge tile__badge--wasm">Wasm GC</span>
+      <h4>This site, on Wasm</h4>
+      <p>The exhibit is the page you're reading — compiled by katsujukou's Wasm GC backend. The performance backend, proving itself by hosting the magazine.</p>
+    </a>
+    <a class="exhibit" href="backends/lua/" data-backend="lua">
+      <span class="exhibit__pill exhibit__pill--infra">Infra</span>
+      <span class="tile__badge tile__badge--lua">Lua</span>
+      <h4>Scuppered Ligature</h4>
+      <p>The edge router that fronts the rig — already PureScript&nbsp;&rarr;&nbsp;Lua in production. Quiet proof the Lua backend works.</p>
+    </a>
+  </div>
+</section>
+
+<!-- ===================== PROOF 2 · THE HONESTY LAYER ===================== -->
+<section id="honesty" class="section section--honesty">
+  <div class="section__head">
+    <p class="kicker">Proof 2 — mixed runtimes, one type system</p>
+    <h2>The honesty layer</h2>
     <p class="section__intro">
       The backbone of the project is a differential corpus: a small, FFI-free set of
       PureScript modules run on every backend, their output compared byte-for-byte.
       Where they agree, the type system carried across. Where they diverge — bignum
       <code>Int</code>, UTF-8 strings, float formatting — the difference is enumerated,
-      not papered over. Counterexamples are first-class content.
+      not papered over. Counterexamples are first-class content. The claim is not that
+      types <em>guard the channel</em> — it's that they <em>shrink the space</em>:
+      illegal states are unrepresentable, so a saboteur's blast radius is always&nbsp;1.
     </p>
   </div>
 
@@ -107,6 +161,14 @@ main = log (show (sumTo 1000000))</code></pre>
       other. Every cell on the published matrix links to the test that proves it.
     </figcaption>
   </figure>
+
+  <p class="honesty-coming">
+    <strong>Coming:</strong> the honesty layer, made playable — <strong>the Saboteur</strong>
+    (attack the wires of a live four-runtime ring; score&nbsp;=&nbsp;blast radius, a game
+    that's only fun without types), <strong>the Silhouette</strong> (the state space as a
+    shape, one identical outline per typed runtime), and an interpretation-identity slot
+    machine that round-trips 10,000 fuzzed values through every codec for zero divergence.
+  </p>
 </section>
 
 <!-- ===================== BACKENDS GRID ===================== -->

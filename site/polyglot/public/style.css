@@ -193,6 +193,36 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--paper-2); p
 .out__note { font-size: 0.72rem; color: var(--ink-faint); }
 .diffstrip figcaption { font-size: 0.82rem; color: var(--ink-faint); max-width: 40rem; }
 
+/* ---- proof 1: exhibit gallery ---- */
+.exhibits { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1rem; }
+.exhibit {
+  position: relative; display: block; padding: 1.4rem; color: var(--ink);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.exhibit:hover { text-decoration: none; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); border-color: var(--ink); }
+.exhibit h4 { font-family: var(--display); font-size: 1.2rem; margin: 0.2rem 0 0.4rem; }
+.exhibit p { font-size: 0.9rem; color: var(--ink-soft); margin: 0; }
+.exhibit .tile__badge { margin-bottom: 0; }
+.exhibit__pill {
+  position: absolute; top: 1.1rem; right: 1.1rem;
+  font-family: var(--display); font-size: 0.58rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 0.2em 0.55em; border-radius: 999px; border: 1px solid currentColor;
+}
+.exhibit__pill--live    { color: #1a7f37; }   /* green — running */
+.exhibit__pill--video   { color: var(--c-purerl); }
+.exhibit__pill--soon    { color: var(--c-jurist); }
+.exhibit__pill--planned { color: var(--c-wasm); }
+.exhibit__pill--infra   { color: var(--ink-faint); }
+
+.honesty-coming {
+  margin-top: 1.75rem; padding: 1.1rem 1.3rem;
+  border-left: 3px solid var(--primary); background: var(--paper-2); border-radius: 0 6px 6px 0;
+  font-size: 0.9rem; color: var(--ink-soft);
+}
+.honesty-coming strong { color: var(--ink); }
+
 /* ---- backends grid ---- */
 .grid-label {
   font-family: var(--display); text-transform: uppercase; letter-spacing: 0.1em;
