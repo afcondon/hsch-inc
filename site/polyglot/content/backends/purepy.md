@@ -1,12 +1,12 @@
-# purepy — Python
+# Pythia — Python
 
 <p class="meta-row"><strong>Target:</strong> Python ·
-<strong>Lineage:</strong> CoreFn-JSON source-emitter (Jurist architecture) ·
+<strong>Lineage:</strong> CoreFn-JSON source-emitter (purepy, Jurist architecture) ·
 <strong>By:</strong> this project (Claude-authored, afc-maintained) ·
 <strong>Status:</strong> 422/426 differential parity ·
-<strong>Repo:</strong> in-ecosystem (<code>purescript-backends/purescript-python-new</code>)</p>
+<strong>Repo:</strong> in-ecosystem (<code>purescript-backends/purescript-python</code>)</p>
 
-purepy borrows Python's **ubiquity and data tooling** — the inverse argument
+Pythia borrows Python's **ubiquity and data tooling** — the inverse argument
 to most of the family: the libraries are the reason to be there. Rebooted from
 scratch on the Jurist architecture (ADR-0001), it reached **422/426
 byte-identical** — the same score as Jurist on the shared corpus.
@@ -17,7 +17,7 @@ otherwise blow.
 
 ## At a glance
 
-| | purepy |
+| | Pythia |
 |---|---|
 | **Int** | Python bignum |
 | **Strings** | `str` — Unicode codepoints |

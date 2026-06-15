@@ -19,7 +19,7 @@ can cheaply do:
 - **Compiler-integrated** — runs its own PureScript frontend and carries its
   own optimizer (e.g. `purerl`).
 - **CoreFn-JSON source-emitters** — consume `purs`'s CoreFn JSON and print
-  target source directly (Jurist, purepy, psgo, purescript-native, lua).
+  target source directly (Jurist, Pythia, Gnomon, purescript-native, lua).
 - **Optimizer-IR consumers** — consume the optimized IR from
   [`purescript-backend-optimizer`](https://github.com/aristanetworks/purescript-backend-optimizer)
   (uncurrying, inlining) rather than rolling their own (purs-backend-es,
@@ -159,7 +159,7 @@ wherever they apply.
 - **Reference implementation of the column-adding process** — Jurist's
   `test-suite/` (the harness currently lives there; generalizing it into this
   repo is part of the site build).
-- **purepy's `cross_backend_test.py`** — prior art for this exact task, with a
+- **Pythia's `cross_backend_test.py`** — prior art for this exact task, with a
   curated KNOWN_DIVERGENCES set worth porting rather than rediscovering.
 - **katsujukou's Wasm backend** — the best-documented in the family (25 ADRs,
   CI, benchmarks). Adopt its **ADR discipline**, its **externs.cbor signature

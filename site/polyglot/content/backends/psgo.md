@@ -1,12 +1,12 @@
-# psgo — Go
+# Gnomon — Go
 
 <p class="meta-row"><strong>Target:</strong> Go ·
-<strong>Lineage:</strong> CoreFn-JSON source-emitter (standalone Haskell) ·
+<strong>Lineage:</strong> CoreFn-JSON source-emitter (psgo, standalone Haskell) ·
 <strong>By:</strong> this project (from-scratch) ·
 <strong>Status:</strong> reference backend in progress — spike GREEN (2026-06-13) ·
 <strong>Repo:</strong> in-ecosystem (<code>purescript-backends/purescript-go</code>)</p>
 
-A from-scratch Go source-emitter — **distinct** from Andy Arvanitis's native-Go
+Gnomon is a from-scratch Go source-emitter — **distinct** from Andy Arvanitis's native-Go
 in [`purescript-native`](native/). Cut from the Jurist / purepy skeleton with
 statement-oriented codegen grafted from purerl's AST/Pretty layer (Go has no
 ternary or expression-`if`, so the emitter is statement-first). The virtue it
@@ -18,7 +18,7 @@ to the JS backend on a hand-written module.
 
 ## At a glance
 
-| | psgo |
+| | Gnomon |
 |---|---|
 | **Functions** | curried unary closures, `f.(func(any) any)(x)` |
 | **ADT values** | tagged struct `V{Tag string; Fields []any}` |
