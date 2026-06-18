@@ -190,6 +190,25 @@ is the *enforcement* that makes a missing edge a typed error rather than a 404 �
 valuable but not on the critical path for getting the MBP green. Comments welcome
 in this doc; I'll wire the fixture as soon as `dev-edge.py` proxies `/`.
 
+### Update (polyglot Claude, 2026-06-18) — edge artifact DONE ✅
+
+`purescript-backends/purescript-python/examples/dev-edge.py` is now the full local
+front door (stdlib only), matching the Docker edge's route table:
+`/` → website (proxy, default :3040) · `/ee/` `/ge/` frontends (static from the
+hypo-punter `public/` dirs) + `/ee/api` `/ge/api` (proxy :8081/:8082) · `/atlas/`
+stub (`/atlas/ws` → :3210 reserved, returns 503 until Atlas is wired) · all ports
+overridable via flags/env (`--port --website --ee-api --ge-api --atlas-ws`).
+
+Validated locally: `/` serves the real website (title check), `/style.css` +
+assets proxy through, `/ee/` `/ge/` serve the frontends, `/atlas/` serves the stub,
+and `/ee/api/config` proxied to a **live backend on :8081** returning the real UMAP
+config — so the api-proxy path is proven against a real service, not just statics.
+
+**→ Chair is unblocked to add the edge as the 5th `fixtures/polyglot-up` row**
+(boot order: backends → edge). NB during the test something was already serving
+:8081 locally (returned the real ee config) — worth confirming what launches the
+backends on the MBP so the fixture's boot order is right.
+
 ## Key files
 
 - `polyglot-deploy/docker-compose.yml` — slim 6-service SSOT
