@@ -10,7 +10,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ---
 
-## Architecture (11 documents)
+## Architecture (13 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
@@ -25,12 +25,15 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | purerl-tidal Architecture | active | `showcases/psd3-tilted-radio/purerl-tidal/docs/ARCHITECTURE.md` | music, Tidal, Erlang |
 | Kernel Separation Architecture | active | `docs/kb/architecture/kernel-separation.md` | WASM, performance, kernels |
 | Polyglot FFI Proposal | active | `docs/kb/architecture/polyglot-ffi.md` | FFI, backends, PureScript |
+| Agent Skills and Deployment Data Model | active | `docs/kb/architecture/agent-skills-and-deployment-model.md` | marginalia, skills, deployment, environments, tooling |
+| Polyglot Showcase Deploy — State & Handoff | living | `docs/kb/architecture/polyglot-showcase-deploy-status.md` | polyglot, deploy, build-once-ship, bosun, chair, registry, edge, cross-claude |
 
 ## Plans (34 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
 | Minard Future Work | active | `docs/kb/plans/minard-future-work.md` | minard, code-explorer, api-routes, visualization, Napoleon |
+| Minard Architectural Enforcement | active | `docs/kb/plans/minard-architectural-enforcement.md` | minard, architecture, layers, violations, fitness-function, shaped-steer |
 | L-Systems Visualization | planned | `docs/kb/plans/l-systems-visualization.md` | l-systems, recursion-schemes, hylomorphism, apomorphism, generative |
 | Sugiyama Layered Graph Layout | planned | `docs/kb/plans/sugiyama-layered-graph.md` | graph-layout, sugiyama, dag, graphviz-alternative, algorithms |
 | CE2 Links, Hover, Navigation | active | `docs/kb/plans/ce2-links-hover-navigation.md` | ce2, code-explorer, visualization, navigation, pursuit, hover |
@@ -62,13 +65,13 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | AST Builder Redesign for HATS | active | `docs/kb/plans/ast-builder-redesign.md` | hylograph, hats, ast-builder, showcase, ui-design |
 | Hylograph: The Interactive Guide | active | `docs/kb/plans/hylograph-guide-unified.md` | hylograph, hats, tour, demo, ast-builder, unified |
 | Beads PureScript Port | implemented | `docs/kb/plans/beads-purescript-port.md` | beads, issue-tracking, purescript, cli, graph |
-| Hylograph & Polyglot Release Plan | active | `docs/kb/plans/release-plan-2026.md` | release, hylograph, polyglot, deployment, cloudflare |
+| 2026 Release Plan: Hylograph, Minard & Polyglot | active | `docs/kb/plans/release-plan-2026.md` | release, hylograph, minard, polyglot, deployment, cloudflare, shaped-steer |
 | Hylograph Cloudflare Deployment | active | `docs/kb/plans/hylograph-cloudflare-deployment.md` | hylograph, cloudflare, deployment, infrastructure |
 | Beads Visualization Showcase | planned | `docs/kb/plans/beads-viz-showcase.md` | beads, visualization, force-graph, hats, showcase |
 | Code Explorer Evolution | active | `docs/kb/plans/code-explorer-evolution.md` | code-explorer, cli, visualization, halogen, developer-tools |
 | Type Explorer Plan | active | `docs/kb/plans/type-explorer-plan.md` | type-explorer, visualization, hylograph, minard, types |
 
-## Research (18 documents)
+## Research (21 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
@@ -89,6 +92,9 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Booklet Printing Automation | research | `docs/kb/research/booklet-printing-automation.md` | macos, printing, automation, pdf |
 | PureScript .NET Backend Feasibility | active | `docs/kb/research/purescript-dotnet-backend-feasibility.md` | PureScript, .NET, CLR, compiler, backend, F# |
 | PureScript Alternative Backends Comparison | active | `docs/kb/research/purescript-alternative-backends-comparison.md` | PureScript, backends, purerl, purepy, purescm, .NET, FFI, cross-backend |
+| purescm → Racket Port Report Digest | archival-reference | `docs/kb/research/purescm-racket-port-report-digest.md` | PureScript, backends, purescm, racket, purekt, purkt, Chez, FFI, pstring, PCRE2, cross-backend-testing |
+| LightRAG vs. Infovore — and shared KB implications | active | `docs/kb/research/lightrag-and-shared-kb-2026-04-26.md` | rag, knowledge-graph, infovore, manuals-viewer, shared-kb, retrieval, claude |
+| purerl-tidal Live-Coding Feasibility | active | `../../purescript-ports/purerl-tidal/docs/live-coding-feasibility.md` | live-coding, eDSL, tagless-final, BEAM, OTP, gen_server, hot-code-load, GHCI, TidalCycles, compile-latency |
 
 ## Reference (11 documents)
 
