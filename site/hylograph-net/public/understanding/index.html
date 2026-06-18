@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Understanding Hylograph - Hylograph</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .page { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem; }
+    .back { font-size: 0.85rem; color: #999; text-decoration: none; display: block; margin-bottom: 2rem; }
+    .back:hover { color: #333; }
+    .page-header { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 2rem; }
+    .logo-mark { height: 64px; width: auto; }
+    h1 { font-size: 1.75rem; font-weight: 300; }
+    h2 { font-size: 1.05rem; font-weight: 700; margin: 2.5rem 0 0.75rem; }
+    p { margin-bottom: 1rem; line-height: 1.7; }
+    a { color: #2563eb; }
+    a:hover { text-decoration: none; }
+    code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88em; background: #eee; padding: 0.15em 0.35em; border-radius: 3px; }
+    pre { background: #1a1a1a; color: #e8e8e8; padding: 1rem 1.25rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; font-family: 'SF Mono', monospace; font-size: 0.82rem; line-height: 1.6; }
+    pre code { background: none; padding: 0; color: inherit; }
+    blockquote { border-left: 3px solid #ddd; padding-left: 1rem; margin: 1rem 0 1.5rem; color: #555; font-style: italic; }
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 3rem 0; }
+    ul { margin-bottom: 1rem; line-height: 1.8; padding-left: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #999; padding: 0.5rem; border-bottom: 2px solid #e0e0e0; }
+    td { padding: 0.5rem; border-bottom: 1px solid #e0e0e0; }
+    .bookmark { position: fixed; left: 0; top: 0; bottom: 0; width: 64px; z-index: 10; pointer-events: none; }
+    .bookmark img { width: 100%; height: 100%; object-fit: cover; }
+    @media (max-width: 900px) { .bookmark { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="bookmark"><img src="../images/understanding.jpeg" alt=""></div>
+  <main class="page">
+    <a href="../" class="back">&larr; Hylograph</a>
+    <div class="page-header">
+      <img src="../images/logo.png" alt="Hylograph" class="logo-mark">
+    </div>
+<h1 id="understanding-hylograph">Understanding Hylograph</h1>
+<p><em>The ideas behind the library. Why it exists, what it’s for, and
+the principles that shape its design.</em></p>
+<h2 id="operate-directly-on-complex-systems">1. Operate directly on
+complex systems</h2>
+<p>Hylograph exists at least in part to go beyond data visualization for
+reading and understanding data and to use the same techniques to build
+interfaces where you manipulate the actual elements of a system
+directly. In many domains of the modern world - economics, ecology,
+energy transition, psephology, etc — we have imperatives now to directly
+engage with the complexity of things in ways that are not well-served by
+Web 2.0 HTML forms and dashboards. This is not in any way to negate the
+value of statistics and summaries. But as the foundational example of
+Anscombe’s Quartet shows (and political discourse confirms daily) there
+are times when the statistical summary lacks discriminatory power. You
+can’t fix what you can’t measure and you can’t spot a pattern that is
+collapsed out of existence by your statistical summary.</p>
+<p>A concrete example of this exists in the form of <a
+href="https://minard.app">Minard</a>: a code cartography tool built
+entirely with Hylograph. Here, the domain is software, you have agents
+writing code far more rapidly than any human team ever could. Reviewing
+line by line undoes much of the benefit and makes the reviewer an
+extremely tight bottleneck. In Minard, by contrast you see all the
+modules, all the functions, dependencies, data flows as visual objects.
+More importantly you see relationships between things that are simply
+not perceptible in a Git PR. You click, hover, brush, and drag
+<em>them</em>. The visualization <em>is</em> the interface.</p>
+<p>Treemaps show module size. Force-directed graphs show dependency
+structure. Beeswarms show change frequency. Edge bundles show call
+relationships. Each of these is a direct manipulation surface, not a
+report. This is the application of Edward Tufte’s idea “to clarify, add
+detail” to interface design.</p>
+<h2 id="the-hylomorphism-unfold-data-fold-structure">2. The
+hylomorphism: unfold data, fold structure</h2>
+<p>This library system builds upon a lot of previous work. Most obvious
+is probably Mike Bostock’s incredibly successful and useful D3.js. We’ll
+discuss the “js” part later but just conceptually here we’re concerned
+with the mechanism independent of language.</p>
+<p>D3’s “data join” can be seen to be a special case of a more general
+operation. In Hylograph, a visualization is a <em>hylomorphism</em>: an
+unfold that takes data apart (the enumeration) composed with a fold that
+assembles output (the assembly). Any input shape composes with any
+output shape.</p>
+<p>An array can unfold into a tree. A tree can fold into a flat list. A
+map can project three different ways into the same diagram. The fold
+doesn’t care what shape the data has — it only needs to know how to take
+one step.</p>
+<p><em>See: <a
+href="https://afcondon.github.io/purescript-hylograph-selection/">The
+Hylographic Fold</a> — Chapters 0–3 of the interactive demo.</em></p>
+<p><em>See: <a
+href="https://afcondon.github.io/purescript-psd3-prim-zoo-mosh/">The
+Morphism Zoo</a> — type substitution walkthrough showing how abstract
+morphisms specialise to concrete operations.</em></p>
+<h2 id="enumeration-assembly">3. Enumeration × Assembly</h2>
+<p>This re-conceptualization of the direct “join” of data elements to
+DOM elements allows us to tease out four concerns from one: iterating
+over data, creating elements, structuring the DOM, and handling updates
+and thus animation. <em>Enumeration</em> is how you traverse the input.
+<em>Assembly</em> is how you structure the output. These are independent
+— any enumeration strategy combines with any assembly strategy, giving
+you an N×M matrix of possibilities from a single primitive.</p>
+<p>The same chess board emerges from a flat fold over 64 cells or a
+nested fold over 8 rows of 8. Same output, different structure — and the
+nested fold remembers the grouping, enabling row-level operations that
+the flat fold can’t express. D3 has nested joins and D3 has a general
+update pattern but in Hylograph these are cleanly orthogonal issues.</p>
+<p><em>See: <a
+href="https://afcondon.github.io/purescript-hylograph-selection/#ch2">Chapter
+2: Any Structure</a></em></p>
+<h2 id="type-safety-eliminates-the-ball-of-mud">4. Type safety
+eliminates the ball of mud</h2>
+<p>Now let’s return to the issues with JavaScript, the Assembly Language
+of the browser.</p>
+<p>In D3.js visualization, attribute accessors are strings:
+<code>d =&gt; d.value</code>, JavaScript is an untyped language so this
+is quite normal. If the data doesn’t have a <code>value</code> field,
+you get a blank screen. As is well-understood now - if only up to the
+level of type-checking of JavaScript’s successor, TypeScript, this is
+NOT GOOD.</p>
+<p>It’s possible to do a lot better than TypeScript, however. I’m not
+going to make that argument here but ML-family languages such as
+Haskell, PureScript, etc have much, much more powerful type systems.</p>
+<p>In Hylograph, attributes are typed PureScript expressions. If your
+accessor doesn’t match the data type, the compiler tells you — before
+the page ever loads. And this happens without any loss of
+generalisability at all - because types are parameterisable. Again, this
+is not the place to make the argument, suffice to say that this library
+is written in PureScript in order to get these advantages.</p>
+<p>This isn’t an incremental improvement. It means visualization
+components are genuinely reusable: one bar chart implementation works
+for all data shapes, verified at compile time. No runtime checks, no
+configuration objects, no accessor strings.</p>
+<p>With componentisation, we get the possibility of UI with
+visualisation techniques. When a visualization component is truly
+reusable and type-safe, it becomes a UI primitive — as reliable as a
+button or a text field, but capable of showing structure.</p>
+<p><em>See: <a
+href="https://afcondon.github.io/purescript-hylograph-selection/#ch4">Chapter
+4: HATS</a> — notice the <code>d.value</code> and <code>d.label</code>
+in the code are type-checked against the data.</em></p>
+<p><em>See: <a
+href="https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system">Hindley–Milner
+type system</a> (Wikipedia) — the theoretical foundation for
+PureScript’s type inference. </em></p>
+<p><em>Also: <a
+href="https://homepages.inf.ed.ac.uk/wadler/papers/propositions-as-types/propositions-as-types.pdf">Propositions
+as Types</a> (Wadler, 2015) — the deep connection between types and
+proofs.</em></p>
+<h2 id="multiple-interpreters-from-one-tree">5. Multiple interpreters
+from one tree</h2>
+<p>A HATS tree is data, not instructions. It describes <em>what</em> to
+build, not <em>how</em>. Different interpreters walk the same tree and
+produce entirely different outputs: SVG for the browser, plain English
+for accessibility, a meta-visualization of the tree’s own structure, a
+musical rendition of a chart for a sight-impaired user.</p>
+<p>This is made possible due to the <em>finally tagless</em> pattern in
+functional programming: you define an algebra of operations, and each
+interpreter provides a different semantics. The tree doesn’t know or
+care which interpreter reads it, and amazingly it overcomes what’s known
+as “the Expression Problem” for embedded languages. It allows us to
+write the functions which compute our visualisation’s attributes using
+perfectly normal PureScript functions which in turn have available to
+them all the massive PureScript library ecosystem and, via FFI if
+necessary, JavaScript libraries too.</p>
+<p><em>See: <a
+href="https://afcondon.github.io/purescript-hylograph-selection/#ch5">Chapter
+5: Interpreters</a> and <a
+href="https://afcondon.github.io/purescript-hylograph-selection/#ch6">Chapter
+6: The Meta Fold</a></em></p>
+<h2 id="visualization-as-active-infrastructure">6. Visualization as
+active infrastructure</h2>
+<p>Many visualizations, even “interactive” ones are pretty passive —
+they show you what happened, perhaps allow some filtering or
+highlighting, maybe some brushing (all very valid and useful
+techniques).</p>
+<p>Hylograph is designed to build visualizations that are interactive in
+a different sense, in that the affordances of the user interface are
+themselves formed from visualisations. This combined with modern
+high-resolution displays, fast computers etc vastly increases the
+surface area of the UI without creating any interface “chrome” at all.
+You manipulate what you see.</p>
+<p>Its particularly aimed at enabling the creation of applications where
+it is essential to see both detail and “big picture” at once. Where you
+want to project many dimensions of data down to two dimensions, which is
+the hallmark of great data visualization since the original Minard made
+his famous map of Napoleon’s military adventure in Russia.</p>
+<p>Programmers often seem to imagine that adding a third dimension will
+fix the data complexity problem but, although we are stereoscopic
+animals we don’t actually see in three dimensions, so the third
+dimension necessarily obscures as much as it shows. Good for games, bad
+for understanding the world of data that surrounds us.</p>
+<p>For that, we need chromeless, high-resolution, direct-representation
+and manipulation, data-driven interfaces.</p>
+<hr />
+<h2 id="bibliography">Bibliography</h2>
+<ul>
+<li><strong>Bostock, M., Ogievetsky, V., &amp; Heer, J.</strong> (2011).
+<em>D3: Data-Driven Documents.</em> IEEE Trans. Vis. &amp; Comp.
+Graphics. <a href="https://doi.org/10.1109/TVCG.2011.185">doi</a></li>
+<li><strong>Meijer, E., Fokkinga, M., &amp; Paterson, R.</strong>
+(1991). <em>Functional Programming with Bananas, Lenses, Envelopes and
+Barbed Wire.</em> FPCA ’91.</li>
+<li><strong>Carette, J., Kiselyov, O., &amp; Shan, C.</strong> (2009).
+<em>Finally Tagless, Partially Evaluated.</em> JFP 19(5).</li>
+<li><strong>Wilkinson, L.</strong> (2005). <em>The Grammar of
+Graphics.</em> Springer.</li>
+<li><strong>Tufte, E.</strong> (1983). <em>The Visual Display of
+Quantitative Information.</em> Graphics Press.</li>
+<li><strong>Bertin, J.</strong> (1967). <em>Sémiologie Graphique.</em>
+Mouton/Gauthier-Villars.</li>
+<li><strong>Munzner, T.</strong> (2014). <em>Visualization Analysis and
+Design.</em> CRC Press.</li>
+<li><strong>Victor, B.</strong> (2011). <a
+href="http://worrydream.com/LadderOfAbstraction/"><em>Up and Down the
+Ladder of Abstraction.</em></a> worrydream.com.</li>
+<li><strong>Victor, B.</strong> (2013). <a
+href="https://vimeo.com/66085662"><em>Drawing Dynamic
+Visualizations.</em></a> Talk at Stanford HCI.</li>
+<li><strong>Neurath, O.</strong> (1936). <em>International Picture
+Language: The First Rules of Isotype.</em> Kegan Paul. — The ISOTYPE
+system: visual education through pictorial statistics.</li>
+<li><strong>McCandless, D.</strong> (2009). <em>Information is
+Beautiful.</em> Collins.</li>
+<li><strong>Wadler, P.</strong> (2015). <a
+href="https://homepages.inf.ed.ac.uk/wadler/papers/propositions-as-types/propositions-as-types.pdf"><em>Propositions
+as Types.</em></a> Communications of the ACM.</li>
+<li><strong>Anscombe, F. J.</strong> (1973). <em>Graphs in Statistical
+Analysis.</em> The American Statistician 27(1).</li>
+<li><strong>Shneiderman, B.</strong> (1996). <em>The Eyes Have It: A
+Task by Data Type Taxonomy for Information Visualizations.</em> IEEE
+Symposium on Visual Languages. — The mantra: overview first, zoom and
+filter, details on demand.</li>
+<li><strong>Card, S., Mackinlay, J., &amp; Shneiderman, B.</strong>
+(1999). <em>Readings in Information Visualization: Using Vision to
+Think.</em> Morgan Kaufmann.</li>
+</ul>
+<h3 id="further-viewing">Further viewing</h3>
+<ul>
+<li><strong><a
+href="https://www.youtube.com/@interfacestudies">Interface
+Studies</a></strong> — Saleh’s excellent YouTube channel exploring the
+design space of direct-manipulation interfaces, interactive
+visualizations, and the future of human-computer interaction.</li>
+</ul>
+  </main>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started - Hylograph</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+
+    .back { font-size: 0.85rem; color: #999; text-decoration: none; display: block; margin-bottom: 2rem; }
+    .back:hover { color: #333; }
+
+    .page-header { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 0.5rem; }
+    .logo-mark { height: 64px; width: auto; }
+
+    h1 { font-size: 1.75rem; font-weight: 300; margin-bottom: 0.5rem; }
+
+    /* Balloon bookmark strip */
+    .bookmark { position: fixed; left: 0; top: 0; bottom: 0; width: 64px; z-index: 10; pointer-events: none; }
+    .bookmark img { width: 100%; height: 100%; object-fit: cover; opacity: 1; }
+    @media (max-width: 900px) { .bookmark { display: none; } }
+    .subtitle { color: var(--text-muted); margin-bottom: 2.5rem; }
+
+    h2 { font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 2.5rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 0.9rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+
+    p { margin-bottom: 1rem; }
+    code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88em; background: #eee; padding: 0.15em 0.35em; border-radius: 3px; }
+    pre { background: #1a1a1a; color: #e8e8e8; padding: 1rem 1.25rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.6; }
+    pre code { background: none; padding: 0; color: inherit; }
+
+    a { color: #2563eb; }
+    a:hover { text-decoration: none; }
+
+    .lib-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .lib-table th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #999; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border); }
+    .lib-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .lib-table td:first-child { font-family: monospace; font-size: 0.85rem; white-space: nowrap; }
+    .lib-table td:first-child a { text-decoration: none; }
+
+    .note { background: #f0f7ff; border-left: 3px solid #2563eb; padding: 0.75rem 1rem; margin-bottom: 1.5rem; border-radius: 0 4px 4px 0; font-size: 0.9rem; }
+
+    .demo-tag { display: inline-block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: #16a34a; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 3px; padding: 0.1em 0.4em; margin-left: 0.5rem; vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <div class="bookmark"><img src="../images/getting-started.jpeg" alt=""></div>
+  <main class="page">
+    <a href="../" class="back">&larr; Hylograph</a>
+
+    <div class="page-header">
+      <img src="../images/logo.png" alt="Hylograph" class="logo-mark">
+      <h1>Getting Started</h1>
+    </div>
+    <p class="subtitle">From zero to a running visualization in five minutes.</p>
+
+    <h2>Prerequisites</h2>
+
+    <p>You need three tools:</p>
+
+    <table class="lib-table">
+      <tr>
+        <th>Tool</th><th>Purpose</th><th>Install</th>
+      </tr>
+      <tr>
+        <td><a href="https://nodejs.org">Node.js</a></td>
+        <td>JavaScript runtime (v18+)</td>
+        <td><code>brew install node</code> or <a href="https://nodejs.org">nodejs.org</a></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/purescript/purescript">PureScript</a></td>
+        <td>Compiler</td>
+        <td><code>npm install -g purescript</code></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/purescript/spago">Spago</a></td>
+        <td>Build tool and package manager</td>
+        <td><code>npm install -g spago</code></td>
+      </tr>
+    </table>
+
+    <p>Verify your setup:</p>
+    <pre><code>purs --version    # 0.15.x
+spago --version   # 0.93.x or later
+node --version    # v18+</code></pre>
+
+    <h2>Try a Demo</h2>
+
+    <p>The fastest way to see Hylograph in action is to clone a library and run its demo. Every library with a demo builds clean from a fresh clone using only registry dependencies.</p>
+
+    <h3>The Hylographic Fold (recommended first)</h3>
+
+    <p>A seven-chapter interactive guide to how Hylograph works:</p>
+
+    <pre><code>git clone https://github.com/afcondon/purescript-hylograph-selection.git
+cd purescript-hylograph-selection/demo
+spago build
+spago bundle -p hylograph-selection-demo
+# Open public/index.html in your browser</code></pre>
+
+    <p>Or see it live: <a href="https://afcondon.github.io/purescript-hylograph-selection/">afcondon.github.io/purescript-hylograph-selection</a></p>
+
+    <h3>Other demos</h3>
+
+    <p>Same pattern for any library with a demo &mdash; clone, <code>cd demo</code>, <code>spago build</code>, <code>spago bundle</code>, open <code>public/index.html</code>.</p>
+
+    <h2>Libraries</h2>
+
+    <table class="lib-table">
+      <tr>
+        <th>Package</th><th>Description</th><th></th>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-selection">hylograph-selection</a></td>
+        <td>Core: HATS tree construction, interpreters (SVG, English, Mermaid, MetaHATS), scales, color schemes, coordinated highlighting, zoom, brush, pointer events.</td>
+        <td><span class="demo-tag">demo</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-simulation">hylograph-simulation</a></td>
+        <td>Force simulation &mdash; n-body, collision, link forces, centering.</td>
+        <td><span class="demo-tag">demo</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-simulation-halogen">hylograph-simulation-halogen</a></td>
+        <td>Halogen component wrapper for force simulations with tick-driven rendering.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-layout">hylograph-layout</a></td>
+        <td>Layout algorithms &mdash; tree layouts, edge bundling, Sankey diagrams, treemaps, beeswarm.</td>
+        <td><span class="demo-tag">demo</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-graph">hylograph-graph</a></td>
+        <td>Graph data structures &mdash; adjacency lists, traversals, connected components, topological sort.</td>
+        <td><span class="demo-tag">demo</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-music">hylograph-music</a></td>
+        <td>Proof of concept: data to sound. Same fold, different output.</td>
+        <td><span class="demo-tag">demo</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-canvas">hylograph-canvas</a></td>
+        <td>Canvas rendering backend for high-performance visualizations.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-optics">hylograph-optics</a></td>
+        <td>Optics (lenses, prisms) for traversing and transforming HATS trees.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-transitions">hylograph-transitions</a></td>
+        <td>Transition and animation engine for smooth visual updates.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-sigil">sigil</a></td>
+        <td>Typographic rendering for PureScript type signatures (HTML + SVG).</td>
+        <td><span class="demo-tag">demo</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-sigil-hats">sigil-hats</a></td>
+        <td>Bridge from Sigil layout trees to HATS for declarative composition.</td>
+        <td><span class="demo-tag">demo</span></td>
+      </tr>
+    </table>
+
+    <div class="note">
+      All packages are published to the <a href="https://pursuit.purescript.org">PureScript Registry</a>. Install any of them with <code>spago install hylograph-selection</code> (or whichever package you need).
+    </div>
+
+    <h2>Your First Visualization</h2>
+
+    <p>Create a new project and add hylograph-selection:</p>
+
+    <pre><code>spago init
+spago install hylograph-selection</code></pre>
+
+    <p>In <code>src/Main.purs</code>:</p>
+
+    <pre><code>module Main where
+
+import Prelude
+import Effect (Effect)
+import Hylograph.HATS (Tree, elem, forEach, staticStr)
+import Hylograph.HATS.Friendly as F
+import Hylograph.HATS.InterpreterTick (rerender)
+import Hylograph.Internal.Element.Types (ElementType(..))
+
+myViz :: Tree
+myViz =
+  elem SVG [ F.viewBox 0.0 0.0 400.0 200.0, F.width 400.0, F.height 200.0 ]
+    [ forEach "dots" Circle
+        [ { x: 80.0, label: "A" }
+        , { x: 200.0, label: "B" }
+        , { x: 320.0, label: "C" }
+        ]
+        _.label
+        \d ->
+          elem Circle
+            [ F.cx d.x, F.cy 100.0, F.r 30.0
+            , F.fill "#2563eb"
+            , staticStr "textContent" d.label
+            ] []
+    ]
+
+main :: Effect Unit
+main = void $ rerender "#app" myViz</code></pre>
+
+    <p>Create an <code>index.html</code> with a <code>&lt;div id="app"&gt;&lt;/div&gt;</code>, bundle with <code>spago bundle</code>, and open it in a browser. Three blue circles.</p>
+
+    <p>From here, explore the <a href="https://afcondon.github.io/purescript-hylograph-selection/">interactive demo</a> to understand how folds, composition, and interpreters work together.</p>
+
+  </main>
+</body>
+</html>

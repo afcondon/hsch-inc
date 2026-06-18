@@ -78,10 +78,14 @@
   </footer>
 
   <script>
-    // Fade out the curtain after a moment
-    setTimeout(() => {
-      document.getElementById('curtain').classList.add('curtain--hidden');
-    }, 1200);
+    // Show curtain animation only on first visit per session
+    const curtain = document.getElementById('curtain');
+    if (sessionStorage.getItem('hylograph-visited')) {
+      curtain.classList.add('curtain--hidden');
+    } else {
+      sessionStorage.setItem('hylograph-visited', '1');
+      setTimeout(() => curtain.classList.add('curtain--hidden'), 1200);
+    }
   </script>
 </body>
 </html>

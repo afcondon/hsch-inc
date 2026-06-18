@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Reference - Hylograph</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+
+    .back { font-size: 0.85rem; color: #999; text-decoration: none; display: block; margin-bottom: 2rem; }
+    .back:hover { color: #333; }
+
+    .page-header { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 0.5rem; }
+    .logo-mark { height: 64px; width: auto; }
+
+    h1 { font-size: 1.75rem; font-weight: 300; margin-bottom: 0.5rem; }
+    .subtitle { color: var(--text-muted); margin-bottom: 2.5rem; }
+
+    h2 { font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 2.5rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+
+    p { margin-bottom: 1rem; }
+    code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88em; background: #eee; padding: 0.15em 0.35em; border-radius: 3px; }
+    a { color: #2563eb; }
+    a:hover { text-decoration: none; }
+
+    .pursuit-card {
+      display: block;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .pursuit-card:hover { box-shadow: var(--shadow-card); border-color: #999; }
+
+    .pursuit-card-name {
+      font-family: monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+    .pursuit-card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: block;
+    }
+    .pursuit-badge {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #7c3aed;
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .module-group { margin-bottom: 2rem; }
+    .module-group h3 { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-bottom: 0.75rem; }
+    .module-list { list-style: none; font-family: monospace; font-size: 0.85rem; line-height: 2; }
+    .module-list a { text-decoration: none; }
+    .module-list .desc { font-family: -apple-system, sans-serif; color: var(--text-muted); font-size: 0.8rem; margin-left: 0.5rem; }
+
+    .sig-section { margin-bottom: 2rem; }
+    .sig-section .sig-full { margin-bottom: 0.25rem; padding: 0.75rem 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .sig-note { font-size: 0.8rem; color: var(--text-muted); margin: 0 0 1.25rem 1rem; font-style: italic; }
+
+    /* Sigil CSS (canonical) */
+    .sig-full { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.5; display: block; font-style: normal; }
+    .sig-decl { display: flex; align-items: baseline; gap: 0.4em; }
+    .sig-name { color: #1a1a1a; font-weight: 700; font-style: normal; }
+    .sig-dcolon { color: #999; font-size: inherit; }
+    .sig-body { display: flex; flex-direction: column; gap: 2px; border-left: 2px solid #d0ccc4; padding-left: 12px; margin-left: 4px; margin-top: 2px; }
+    .sig-arrow-chain { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px; list-style: none; margin: 0; padding: 0; }
+    .sig-arrow-chain > li { display: inline-flex; align-items: center; }
+    .sig-arrow-chain > li + li::before { content: "\2192"; color: #71717a; padding: 0 5px; font-style: normal; font-weight: 600; font-size: 1.15em; }
+    .sig-var { color: var(--vc, #0369a1); font-weight: 600; font-style: italic; font-size: 0.92em; }
+    .sig-con { color: #16653e; font-weight: 600; }
+    .sig-con-effect { color: #9333ea; }
+    .sig-app { display: inline-flex; align-items: center; gap: 5px; }
+    .sig-paren { color: #aaa; font-size: inherit; }
+
+    .bookmark { position: fixed; left: 0; top: 0; bottom: 0; width: 64px; z-index: 10; pointer-events: none; }
+    .bookmark img { width: 100%; height: 100%; object-fit: cover; opacity: 1; }
+    @media (max-width: 900px) { .bookmark { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="bookmark"><img src="../images/reference.jpeg" alt=""></div>
+  <main class="page">
+    <a href="../" class="back">&larr; Hylograph</a>
+
+    <div class="page-header">
+      <img src="../images/logo.png" alt="Hylograph" class="logo-mark">
+      <h1>API Reference</h1>
+    </div>
+    <p class="subtitle">Full type signatures and module documentation are on Pursuit. This page maps the territory.</p>
+
+    <h2>Pursuit Documentation</h2>
+
+    <p>Each package has auto-generated API docs on <a href="https://pursuit.purescript.org">Pursuit</a>, the PureScript documentation hub. Click any package to browse its types, functions, and module structure.</p>
+
+    <a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection" class="pursuit-card">
+      <span class="pursuit-card-name">hylograph-selection <span class="pursuit-badge">v0.5.0</span></span>
+      <span class="pursuit-card-desc">Core: HATS trees, interpreters, scales, color schemes, coordinated highlighting, interactions.</span>
+    </a>
+    <a href="https://pursuit.purescript.org/packages/purescript-hylograph-simulation" class="pursuit-card">
+      <span class="pursuit-card-name">hylograph-simulation <span class="pursuit-badge">v0.5.0</span></span>
+      <span class="pursuit-card-desc">Force simulation engine &mdash; n-body, collision, link, centering forces.</span>
+    </a>
+    <a href="https://pursuit.purescript.org/packages/purescript-hylograph-simulation-halogen" class="pursuit-card">
+      <span class="pursuit-card-name">hylograph-simulation-halogen <span class="pursuit-badge">v0.5.0</span></span>
+      <span class="pursuit-card-desc">Halogen component wrapper for tick-driven force simulation rendering.</span>
+    </a>
+    <a href="https://pursuit.purescript.org/packages/purescript-hylograph-layout" class="pursuit-card">
+      <span class="pursuit-card-name">hylograph-layout <span class="pursuit-badge">v0.2.1</span></span>
+      <span class="pursuit-card-desc">Layout algorithms &mdash; tree, edge bundle, Sankey, treemap, beeswarm.</span>
+    </a>
+    <a href="https://pursuit.purescript.org/packages/purescript-hylograph-graph" class="pursuit-card">
+      <span class="pursuit-card-name">hylograph-graph <span class="pursuit-badge">v0.2.0</span></span>
+      <span class="pursuit-card-desc">Graph data structures &mdash; adjacency lists, traversals, components, topo sort.</span>
+    </a>
+    <a href="https://pursuit.purescript.org/packages/purescript-hylograph-music" class="pursuit-card">
+      <span class="pursuit-card-name">hylograph-music <span class="pursuit-badge">v0.4.0</span></span>
+      <span class="pursuit-card-desc">Data to sound &mdash; same fold, audio output.</span>
+    </a>
+
+    <h2>Key Signatures</h2>
+
+    <p>Five functions that tell the whole programming model. Build a tree with <code>elem</code> and <code>forEach</code>, add interactivity with <code>withBehaviors</code>, render with <code>rerender</code>.</p>
+
+    <div class="sig-section">
+
+      <!-- elem -->
+      <code class="sig-full"><div class="sig-decl"><dfn class="sig-name">elem</dfn><small class="sig-dcolon"> ::</small></div><div class="sig-body"><ol class="sig-arrow-chain"><li class="sig-param"><code class="sig-con">ElementType</code></li><li class="sig-param"><code class="sig-app"><code class="sig-con">Array</code><code class="sig-con">Attr</code></code></li><li class="sig-param"><code class="sig-app"><code class="sig-con">Array</code><code class="sig-con">Tree</code></code></li><li class="sig-param"><code class="sig-con">Tree</code></li></ol></div></code>
+      <p class="sig-note">Construct a tree node: element type, attributes, children.</p>
+
+      <!-- forEach -->
+      <code class="sig-full"><div class="sig-decl"><dfn class="sig-name">forEach</dfn><small class="sig-dcolon"> ::</small></div><div class="sig-body"><ol class="sig-arrow-chain"><li class="sig-param"><code class="sig-con">String</code></li><li class="sig-param"><code class="sig-con">ElementType</code></li><li class="sig-param"><code class="sig-app"><code class="sig-con">Array</code><var class="sig-var" style="--vc:#0284c7">a</var></code></li><li class="sig-param"><code class="sig-app"><small class="sig-paren">(</small><ol class="sig-arrow-chain"><li class="sig-param"><var class="sig-var" style="--vc:#0284c7">a</var></li><li class="sig-param"><code class="sig-con">String</code></li></ol><small class="sig-paren">)</small></code></li><li class="sig-param"><code class="sig-app"><small class="sig-paren">(</small><ol class="sig-arrow-chain"><li class="sig-param"><var class="sig-var" style="--vc:#0284c7">a</var></li><li class="sig-param"><code class="sig-con">Tree</code></li></ol><small class="sig-paren">)</small></code></li><li class="sig-param"><code class="sig-con">Tree</code></li></ol></div></code>
+      <p class="sig-note">The fold: name, element type, data, key function, template &mdash; produces a tree.</p>
+
+      <!-- withBehaviors -->
+      <code class="sig-full"><div class="sig-decl"><dfn class="sig-name">withBehaviors</dfn><small class="sig-dcolon"> ::</small></div><div class="sig-body"><ol class="sig-arrow-chain"><li class="sig-param"><code class="sig-app"><code class="sig-con">Array</code><code class="sig-con">ThunkedBehavior</code></code></li><li class="sig-param"><code class="sig-con">Tree</code></li><li class="sig-param"><code class="sig-con">Tree</code></li></ol></div></code>
+      <p class="sig-note">Attach interactive behaviors (hover, drag, zoom) to a tree node.</p>
+
+      <!-- rerender -->
+      <code class="sig-full"><div class="sig-decl"><dfn class="sig-name">rerender</dfn><small class="sig-dcolon"> ::</small></div><div class="sig-body"><ol class="sig-arrow-chain"><li class="sig-param"><code class="sig-con">String</code></li><li class="sig-param"><code class="sig-con">Tree</code></li><li class="sig-param"><code class="sig-app"><code class="sig-con sig-con-effect">Effect</code><code class="sig-con">Unit</code></code></li></ol></div></code>
+      <p class="sig-note">The interpreter boundary: pure tree in, effectful DOM out.</p>
+
+      <!-- applyScale -->
+      <code class="sig-full"><div class="sig-decl"><dfn class="sig-name">applyScale</dfn><small class="sig-dcolon"> ::</small></div><div class="sig-body"><ol class="sig-arrow-chain"><li class="sig-param"><code class="sig-con">ContinuousScale</code></li><li class="sig-param"><code class="sig-con">Number</code></li><li class="sig-param"><code class="sig-con">Number</code></li></ol></div></code>
+      <p class="sig-note">Scales are just functions. Pure, no D3.</p>
+
+    </div>
+
+    <h2>Key Modules (hylograph-selection)</h2>
+
+    <p>The selection package is the foundation. Here are its main module groups:</p>
+
+    <div class="module-group">
+      <h3>Tree Construction</h3>
+      <ul class="module-list">
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.HATS">Hylograph.HATS</a> <span class="desc">&mdash; Tree type, elem, forEach, withBehaviors</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.HATS.Friendly">Hylograph.HATS.Friendly</a> <span class="desc">&mdash; F.width, F.cx, F.fill and friends</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.HATS.InterpreterTick">Hylograph.HATS.InterpreterTick</a> <span class="desc">&mdash; rerender (SVG interpreter)</span></li>
+      </ul>
+    </div>
+
+    <div class="module-group">
+      <h3>Scales &amp; Color</h3>
+      <ul class="module-list">
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Scale">Hylograph.Scale</a> <span class="desc">&mdash; Facade: linear, log, pow, sqrt + color schemes + interpolators</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Scale.Pure">Hylograph.Scale.Pure</a> <span class="desc">&mdash; Pure implementation (no D3)</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Scale.Sequential">Hylograph.Scale.Sequential</a> <span class="desc">&mdash; 37 color interpolators (Viridis, Blues, RdYlGn, etc.)</span></li>
+      </ul>
+    </div>
+
+    <div class="module-group">
+      <h3>Interpreters</h3>
+      <ul class="module-list">
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interpreter.English">Hylograph.Interpreter.English</a> <span class="desc">&mdash; Plain English description of a tree</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interpreter.Mermaid">Hylograph.Interpreter.Mermaid</a> <span class="desc">&mdash; Mermaid diagram syntax</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interpreter.MetaHATS">Hylograph.Interpreter.MetaHATS</a> <span class="desc">&mdash; Tree &rarr; Tree structure visualization</span></li>
+      </ul>
+    </div>
+
+    <div class="module-group">
+      <h3>Interactions</h3>
+      <ul class="module-list">
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interaction.Coordinated">Hylograph.Interaction.Coordinated</a> <span class="desc">&mdash; Cross-view hover, brush, selection</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interaction.Zoom">Hylograph.Interaction.Zoom</a> <span class="desc">&mdash; Zoom and pan</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interaction.Brush">Hylograph.Interaction.Brush</a> <span class="desc">&mdash; Brush selection</span></li>
+      </ul>
+    </div>
+
+  </main>
+</body>
+</html>

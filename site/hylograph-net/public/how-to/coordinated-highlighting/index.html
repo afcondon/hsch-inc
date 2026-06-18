@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coordinated Highlighting</title>
+  <style>
+    body {
+      margin: 40px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #fafafa;
+      color: #333;
+    }
+    h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    p  { font-size: 14px; color: #666; margin-bottom: 24px; }
+    .panels { display: flex; gap: 32px; }
+
+    /* Coordinated highlight classes (applied by hylograph runtime) */
+    .highlight-primary  { opacity: 1 !important; }
+    .highlight-primary circle { stroke: #333 !important; stroke-width: 3px !important; }
+    .highlight-primary rect { stroke: #333 !important; stroke-width: 2px !important; }
+    .highlight-primary text { font-weight: 700 !important; }
+    .highlight-related  { opacity: 0.85 !important; }
+    .highlight-dimmed   { opacity: 0.15 !important; transition: opacity 0.15s; }
+  </style>
+</head>
+<body>
+  <h1>Coordinated Highlighting</h1>
+  <p>Hover a category in the key. All matching circles light up.</p>
+  <div class="panels">
+    <div id="key"></div>
+    <div id="scatter"></div>
+  </div>
+  <script src="bundle.js"></script>
+</body>
+</html>

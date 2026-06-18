@@ -1,24 +1,28 @@
 ---
-title: "Hylograph & Polyglot PureScript Release Plan"
+title: "2026 Release Plan: Hylograph, Minard & Polyglot PureScript"
 category: plan
 status: active
-tags: [release, hylograph, polyglot, deployment, infrastructure]
+tags: [release, hylograph, minard, polyglot, deployment, infrastructure, shaped-steer]
 created: 2026-01-29
-summary: Comprehensive plan for releasing the Hylograph library suite at hylograph.net and Polyglot PureScript ecosystem at polyglot.purescri.pt
+updated: 2026-03-05
+summary: Comprehensive plan for releasing the Hylograph library suite, Minard code cartography tool, and Polyglot PureScript ecosystem — clearing the decks before the ShapedSteer intensive
 ---
 
-# Release Plan: Hylograph & Polyglot PureScript
+# Release Plan: Hylograph, Minard & Polyglot PureScript
 
 ## Executive Summary
 
-Two related but distinct projects need public release:
+Three related projects need public release before the ShapedSteer intensive begins:
 
 | Domain | Purpose | Hosting |
 |--------|---------|---------|
 | **hylograph.net** | Visualization library suite | Cloudflare Pages + Tunnel |
+| **Minard / Code Explorer** | Code cartography tool (flagship app) | live.hylograph.net/code-explorer |
 | **polyglot.purescri.pt** | Backend ecosystem showcase | GitHub Pages + link to live demos |
 
-**Relationship**: Hylograph is the *what* (visualization libraries), Polyglot is the *how* (proves PureScript works everywhere). Many Polyglot demos use Hylograph for visualization.
+**Relationships**: Hylograph is the *what* (visualization libraries). Minard is the *proof* (real-world application built with Hylograph). Polyglot is the *how* (PureScript compiles everywhere). Many Polyglot demos use Hylograph for visualization. Minard gains architectural enforcement features that are a prerequisite for the ShapedSteer intensive.
+
+**What follows**: once all three ship, the ShapedSteer intensive begins (~8 weeks). Minard's architectural enforcement features are used to develop ShapedSteer with continuous structural validation. See `ShapedSteer/docs/plan-for-a-plan.md`.
 
 ---
 
@@ -321,7 +325,90 @@ Phase 5: Documentation
 
 ---
 
-## Part 3: Shared Infrastructure
+## Part 3: Minard / Code Explorer Release
+
+### 3.1 What Ships
+
+Minard is the flagship demo of the Hylograph ecosystem — a real-world application, not just a library showcase. It deserves its own release alongside the libraries.
+
+**Core product**: Code cartography tool that visualizes PureScript codebases as interactive maps (treemaps, dependency graphs, declaration arc diagrams, type class grids).
+
+**Stack**: Rust loader → DuckDB → PureScript/HTTPurple API → PureScript/Halogen/Hylograph frontend
+
+**What's ready today**:
+- Loader ingests source + compiler output + git history + spago.lock
+- 13 interconnected visualization views
+- 7 color modes (topological depth, git status, reachability, clusters, etc.)
+- Type class grid, declaration detail, module signatures via Sigil
+- Annotation system (AI + human review)
+- Multi-project, multi-snapshot support
+
+### 3.2 Architectural Enforcement Features (new for release)
+
+These features turn Minard from a passive code map into an active architectural fitness function. They are also a prerequisite for the ShapedSteer intensive that follows.
+
+Full details: `docs/kb/plans/minard-architectural-enforcement.md`
+
+| Feature | What it does | Effort |
+|---------|-------------|--------|
+| Layer config | `architecture.yml` at project root defines layers + module patterns | Half day |
+| Schema + loader | New `architecture_layers`, `architecture_violations` tables; layer assignment during postload | 1 day |
+| Violation detection | Compute violations (upward imports) during postload | Half day |
+| API endpoints | `/api/v2/architecture/{layers,violations,summary}` | Half day |
+| Layer color mode | New `ArchitectureLayer` color mode in frontend | 1 day |
+| Violation overlay | Red edges, badges, status bar for violations | 1-2 days |
+| Module size warnings | LOC threshold badges on treemap | Half day |
+| Drift tracking | Violations over time via snapshot comparison | 1 day |
+
+**Total**: ~5-7 days. Steps 1-5 (~3 days) are minimum viable.
+
+### 3.3 Minard Release Tasks
+
+```
+Phase 1: Core Polish
+├── [ ] Ensure all 13 views work end-to-end on a fresh codebase
+├── [ ] Fix any known bugs in loader/API/frontend
+├── [ ] Clean up UI (light theme, Swiss design consistency)
+├── [ ] Verify git integration works with real repos
+
+Phase 2: Architectural Enforcement (5-7 days)
+├── [ ] architecture.yml config parsing in loader (Rust)
+├── [ ] Schema changes: architecture_layers, architecture_violations tables
+├── [ ] Layer assignment + violation computation in postload
+├── [ ] API endpoints: /api/v2/architecture/*
+├── [ ] ArchitectureLayer color mode in frontend
+├── [ ] Violation overlay (red edges, badges)
+├── [ ] Module size warning badges
+├── [ ] Drift tracking (snapshot comparison chart)
+├── [ ] Test: ingest ShapedSteer, verify 4 known violations detected
+
+Phase 3: Documentation & Deployment
+├── [ ] README / getting started guide
+├── [ ] Pre-built loader binary for macOS (and Linux?)
+├── [ ] Docker profile in polyglot-deploy
+├── [ ] Deploy at live.hylograph.net/code-explorer
+├── [ ] Screenshot/demo GIF for landing page
+```
+
+### 3.4 Relationship to ShapedSteer
+
+Minard with architectural enforcement is a **prerequisite** for the ShapedSteer intensive:
+
+```
+Ship Hylograph libs + Polyglot + Minard
+    ↓
+Write ShapedSteer architecture.yml
+    ↓
+Ingest ShapedSteer into Minard
+    ↓
+Begin ShapedSteer intensive with enforcement in place
+    ↓
+Reviewer agent checks Minard violations before approving merges
+```
+
+---
+
+## Part 4: Shared Infrastructure
 
 ### 3.1 MacMini Services
 
@@ -370,7 +457,7 @@ ingress:
 
 ---
 
-## Part 4: Open Questions
+## Part 5: Open Questions
 
 ### Decisions Made (2026-01-29)
 
@@ -426,7 +513,7 @@ ingress:
 
 ---
 
-## Part 5: Timeline
+## Part 6: Timeline
 
 ### Phase 1: Foundation (Week 1-2)
 - [ ] Finalize library consolidation decisions
@@ -440,17 +527,30 @@ ingress:
 - [ ] Deploy to hylograph.net
 - [ ] Test all demos work
 
-### Phase 3: Polyglot Release (Week 5-6)
+### Phase 3: Minard Release (Week 5-6)
+- [ ] Core polish: all views working, known bugs fixed, light theme
+- [ ] Architectural enforcement features (see Part 3, ~5-7 days)
+- [ ] Test: ingest ShapedSteer, verify known violations detected
+- [ ] Documentation: README, getting started, pre-built loader binary
+- [ ] Deploy at live.hylograph.net/code-explorer
+
+### Phase 4: Polyglot Release (Week 7-8)
 - [ ] Build and deploy polyglot.purescri.pt
 - [ ] Submit PR to purescript-domain
 - [ ] Coordinate with Nick Saunders
 - [ ] Submit Lua golden test PR
 
-### Phase 4: Polish & Announce (Week 7-8)
-- [ ] Final documentation review
+### Phase 5: Polish & Announce (Week 9-10)
+- [ ] Final documentation review across all three
 - [ ] Create announcement posts
 - [ ] Post to PureScript Discord
 - [ ] Post to Reddit/HN if desired
+
+### Phase 6: ShapedSteer Intensive Begins (Week 11+)
+- [ ] Mac Mini dev server setup (see ShapedSteer plan-for-a-plan)
+- [ ] Write architecture.yml, ingest into Minard
+- [ ] Dry run: first feature with full workflow
+- [ ] 8-week intensive begins
 
 ---
 
