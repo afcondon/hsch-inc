@@ -71,6 +71,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Beads Visualization Showcase | planned | `docs/kb/plans/beads-viz-showcase.md` | beads, visualization, force-graph, hats, showcase |
 | Code Explorer Evolution | active | `docs/kb/plans/code-explorer-evolution.md` | code-explorer, cli, visualization, halogen, developer-tools |
 | Type Explorer Plan | active | `docs/kb/plans/type-explorer-plan.md` | type-explorer, visualization, hylograph, minard, types |
+| Minard for Operations (provision/build/process) | design | `docs/kb/plans/minard-for-operations.md` | minard, warrant, levantine, bosun, quartermaster, nix, operations, cartography |
 
 ## Research (21 documents)
 
