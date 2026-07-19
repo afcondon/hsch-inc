@@ -72,6 +72,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Code Explorer Evolution | active | `docs/kb/plans/code-explorer-evolution.md` | code-explorer, cli, visualization, halogen, developer-tools |
 | Type Explorer Plan | active | `docs/kb/plans/type-explorer-plan.md` | type-explorer, visualization, hylograph, minard, types |
 | Minard for Operations (provision/build/process) | design | `docs/kb/plans/minard-for-operations.md` | minard, warrant, levantine, bosun, quartermaster, nix, operations, cartography |
+| PureScript build-dedup toolset (pantry) | design | `docs/kb/plans/purescript-nix-toolset.md` | nix, spago, purs, dedup, pantry, quartermaster, universe, seeding |
 
 ## Research (21 documents)
 
