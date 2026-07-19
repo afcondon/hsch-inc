@@ -225,6 +225,34 @@ Ordered by leverage; ★ = small and unblocking.
   when manifests land. Nyx stays someday — but note the cartography
   makes Nyx more valuable (Nix expressions as facts a PureScript
   toolchain can produce and reason about).
+- *Parking lot (AFC, 2026-07-19, explicitly not-now):* **the
+  great install sweep** — audit the machine's accumulated
+  imperative installs (homebrew, npm -g, pipx, cargo install,
+  manually-dropped binaries, launchagents) and migrate what can be
+  pinned into the flake. Serves the medium-term goal of making the
+  physical laptop disposable/replaceable: the flake + journals + git
+  remotes become the machine's identity, the hardware becomes a
+  cache. Note the Brunel tie-in: the sweep's *output* is
+  provision-intent facts, and the *un*-migrated remainder is exactly
+  the "observed but not intended" population the provision stratum
+  renders — Brunel can show the sweep's progress as a shrinking set
+  of unwarranted installs.
+
+**minard (the code stratum) — AFC, 2026-07-19**
+- **API-INDEX.md should be a query, not a system.** The api-index
+  generator re-derives ecosystem-wide code facts from scratch per
+  run and materializes a projection that silently goes stale between
+  `make api-index` runs — both diseases this doc names. Layering:
+  Minard's DB = the code stratum's total store (requires the ingest
+  to go ecosystem-wide — federated per-repo, same move as journals
+  and bosun-import); API-INDEX.md survives as a *warranted
+  materialized projection* (`minard query --projection api-index`,
+  freshness owned by warrant, staleness visible as an amber node)
+  because a greppable file is the right zero-service interface for
+  context-free agent sessions; relational questions ("who imports
+  X", embeddings recall) query the store directly. Code is then just
+  another stratum: observed world → fact store → projections that
+  cannot silently lie.
 
 **hylograph**
 - **Semantic-zoom ladder machinery as a library** — the thing Minard
