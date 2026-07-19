@@ -127,7 +127,11 @@ note the double application: fetch, then run).
   (`test-suite-erl/`) with its own `spago.yaml`; share the PS sources
   by relative glob or symlink to `../test-suite/src`. Check whether
   the pinned set's compiler version matches the installed purs
-  (0.15.x) before debugging anything else.
+  (0.15.x) before debugging anything else. The application-side mirror
+  of this — taking purerl source and running it *on JS* — is worked
+  through in `same-code-two-runtimes.md`: the package-set drift here
+  reappears there as a forced import reconciliation
+  (`Text.Parsing.Parser.*` → `Parsing.*`, `Math` → `Data.Number`).
 - **Build & run**: `spago build` emits `output/<Module>/<module>@ps.erl`
   (purerl is invoked per-module on corefn). Then:
   `erlc -o ebin output/*/*.erl` and

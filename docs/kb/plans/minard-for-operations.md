@@ -21,6 +21,16 @@ the views themselves will differ:
    considered. The whole fleet fits on one screen as marks.
 3. **Semantic zoom** keeps the picture coherent as the user drills
    into detail. The concepts transfer; the specific views need not.
+4. **Totality ⇒ coherence** (AFC, 2026-07-19, "previously unstated
+   rubric"): by designing systems that can show EVERYTHING, we get
+   coherence for free when we show slices or projections — every view
+   is a projection of one total model, so views cannot disagree. The
+   ambition this must survive: n versions of node/npm, m of
+   PureScript, o of Rust all coexisting-but-siloed in a Nix store;
+   version control; builds; processes *including servers inside the
+   BEAM and processes inside containers*; across potentially
+   thousands of machines. Coherence at that scale is not a nicety —
+   it is the product.
 
 The plan: (1) this design; (2) identify required functionality in the
 underlying systems — quartermaster, bosun, Nix/Nyx, warrant/JTMS;
@@ -192,7 +202,14 @@ Ordered by leverage; ★ = small and unblocking.
   `/state` has up/pid/probe/restarts but no wall-clock start.
 - **Nothing else, initially.** Poll-and-diff adapts `/state` to the
   bus; compose is imported, not queried. (A native event feed is a
-  later nicety; the BEAM-observer path stays deferred.)
+  later nicety.)
+- **Nested observers, later but load-bearing**: the process stratum
+  recurses — a BEAM node contains supervised processes (bosun's
+  deferred `BEAM-OBSERVER.md` anticipated exactly this), a container
+  contains a process tree. The observer abstraction must compose:
+  an observer can yield units that are themselves observable worlds.
+  This is the semantic-zoom ladder appearing in the *observation*
+  layer, which is reassuring rather than accidental.
 
 **quartermaster**
 - **`quartermaster provision` as a typed verb** (fold qm-nix.sh in,
@@ -257,44 +274,71 @@ Each spike answers a design question before phase 4 commits to it.
 Suggested order: 1, 2, 3, 4 (they compound), then 5 and 6 (view
 research, parallelizable with early phase 4).
 
-## 5. Phase 4 shape (sketch, pending spikes)
+## 5. Phase 4 shape — Brunel, by assembly (decided 2026-07-19)
 
-- **Architecture**: the Levantine split scaled up. Browser: Halogen +
-  HATS, warrant core in-page, one belief store spanning strata,
-  ladder + overlays + ghosts. Server: the observation bus (observers
-  as data; local fs + bosun poll + ssh probes), journal custody,
-  execution (build recipes; process control via bosun's /control —
-  the surface *asks* bosun, never spawns).
+**Name: Brunel** (GitHub clash fallback: Isambard).
+
+**Strategy (AFC): build Minard-for-Nix separately first, then
+assemble — or rewrite — Minard-for-Nix + Bosun's Chair + Levantine
+into the single webapp.** Three proven single-stratum surfaces, one
+assembly. This answers the Chair-subsumption question: the Chair is
+absorbed at assembly time, not before.
+
+- **Minard-for-Nix** (the new piece, buildable now): the provision
+  stratum's own cartography. The Nix store is already a
+  content-addressed Merkle DAG — the references graph, closures, GC
+  roots, profiles and their generations, flake inputs. The signature
+  picture is the SILO view AFC described: n versions of node, m of
+  purescript, o of rust coexisting without interference — visible as
+  disjoint closure cones sharing only what they truly share. Also the
+  replication picture: two machines' realized manifests as
+  overlapping marks (identical = the substrate working). hylograph-
+  graph territory; TidyDag or containment layouts over real
+  `nix path-info -r` / `nix why-depends` data.
+- **Architecture of the assembly**: the Levantine split scaled up.
+  Browser: Halogen + HATS, warrant core in-page, federated belief
+  stores spanning strata, ladder + overlays + ghosts. Server: the
+  observation bus (observers as data; local fs + bosun poll + ssh
+  probes + nix store reader), journal custody, execution (build
+  recipes; process control via bosun's /control — the surface *asks*
+  bosun, never spawns).
 - **Authority boundaries preserved**: bosun keeps process authority,
   quartermaster keeps provisioning authority, warrant keeps build
-  execution. The cartography *reads everything and commands through
-  the owners* — Minard's read-only ethos, with control gestures
-  delegated (and gated by belief premises: `restart requires
-  approved:by-human` is the same approval-gate primitive as W5).
-- **Levantine's fate**: remains the novice build-designer surface
-  (templates, sandbox, the teaching story); the ops cartography is
-  its expert sibling sharing the view layer via hylograph. Bosun's
-  Chair likely becomes a *view* of the cartography eventually — AFC's
-  call, deferred.
+  execution. Brunel *reads everything and commands through the
+  owners* — Minard's read-only ethos, with control gestures delegated
+  (and gated by belief premises: `restart requires approved:by-human`
+  is the same approval-gate primitive as W5).
+- **Levantine's fate**: its live/expert surface is assembled into
+  Brunel; the novice teaching surface (templates, sandbox, the
+  onboarding story) survives as the on-ramp — possibly as Brunel's
+  beginner mode, possibly standalone. Decide at assembly.
 
-## 6. Open questions (for AFC)
+### 5.1 ShapedSteer repositioning (AFC, 2026-07-19)
 
-1. **Name.** House style suggests a person: Minard was the
-   cartographer of flows. Candidates: **Vauban** (the great engineer
-   of fortifications and sieges — meticulous plans of complex
-   defended systems), **Telford** / **Brunel** (infrastructure),
-   **Beck** (the Tube map — the canonical semantic-zoom-adjacent
-   diagram), or stay thematic ("Bosun's Chart"?). No commitment made.
-2. **Repo home**: under ShapedSteer/ (beside bosun, quartermaster —
-   "Minard-for-ShapedSteer" argues for it) or top-level?
-3. **One journal or three?** One unified store spanning strata vs.
-   per-stratum journals with a federating reader. (Design leans:
-   per-domain journals + import/federation, matching ownership.)
-4. **Chair subsumption** timing — leave the Chair alone until the
-   cartography demonstrably covers it?
-5. **History scrubber** in v1 or after? (The journal makes it cheap
-   in principle; the observation bus makes world-history the actual
-   cost.)
+The earlier ShapedSteer framing — merging Spreadsheets, Notebooks and
+Build Systems in one workbench — is superseded. Where we've arrived:
+**shared infrastructure** (the JTMS as the belief calculus, Hylograph
+as the shared graphical language) under **two apps**: a
+Spreadsheet/Notebook surface (the remaining ShapedSteer workbench
+idea), and Brunel (build systems belong with process and
+provisioning). ShapedSteer's L2 Build-à-la-Carte layer and L4 DAG
+core remain the conceptual ancestors; warrant is the belief-bearing
+descendant.
+
+## 6. Questions — answered 2026-07-19 except (5)
+
+1. **Name: Brunel** (AFC). Fallback on a GitHub clash: **Isambard**.
+2. **Repo home**: under ShapedSteer/ or CodeExplorer/ — either
+   acceptable (AFC). Leaning ShapedSteer for sibling-hood with bosun
+   and quartermaster; decide at repo creation.
+3. **Journals: federated** (AFC confirmed) — per-domain journals of
+   facts/events with a federating reader, matching ownership.
+4. **Chair subsumption**: answered by the assembly strategy (§5) —
+   Minard-for-Nix first, then Brunel assembles/rewrites
+   Minard-for-Nix + Chair + Levantine.
+5. **History scrubber** in v1 or after? Still open. (The journal
+   makes it cheap in principle; the observation bus makes
+   world-history the actual cost.)
 
 ## 7. Cross-references
 

@@ -202,11 +202,15 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--paper-2); p
 .tile__badge--es { background: var(--c-es); }
 
 /* ---------------------------------------------------- CTA + footer */
-.section--cta { padding-top: 0; }
+.section--cta {
+  padding-top: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  gap: clamp(1.25rem, 3vw, 2rem); align-items: start;
+}
 .cta-card {
   background: var(--ink); color: var(--paper);
   border-radius: 12px; padding: clamp(2rem, 5vw, 3.5rem);
-  display: grid; gap: 1rem; max-width: 46rem;
+  display: grid; gap: 1rem;
 }
 .cta-card h2 { font-family: var(--display); font-size: 1.8rem; margin: 0; }
 .cta-card p { color: #cfcfcf; margin: 0; }

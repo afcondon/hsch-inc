@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Same code, two runtimes — Polyglot PureScript</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/">&larr; Polyglot PureScript</a>
+<h1 id="same-code-two-runtimes">Same code, two runtimes</h1>
+<p><a href="/resources/">Writing a backend</a> documents the promise
+from the <em>suite</em> side — how to make a backend pass the
+differential-conformance tests. This page documents it from the
+<em>application</em> side: what actually happens when you take a
+substantial program written for one runtime and run it, unchanged, on
+another. This is where "PureScript everywhere" meets the floor — and the
+seams are worth naming, because they are the same seams every
+cross-runtime sharing hits.</p>
+<h2 id="set-the-bar-correctly-first">Set the bar correctly first</h2>
+<p>It is worth being clear about what kind of promise this is, because
+the famous one — Java's "write once, run anywhere" — is a <em>much</em>
+tamer problem. The JVM ships the <em>same bytecode</em> to the <em>same
+runtime</em> (a JVM) on different hardware. The runtime is the constant;
+only the chip underneath changes.</p>
+<p>What happens here is categorically wilder: the <strong>same
+source</strong> compiled to <strong>genuinely different
+runtimes</strong> — V8's event loop, BEAM's process scheduler, Julia's
+JIT and GC, CPython's interpreter — and possibly different hardware on
+top of <em>that</em>. There is no shared runtime holding the line.
+Measured against that bar, the remarkable thing is not that a little
+leaks; it is how extraordinarily much travels untouched.</p>
+<blockquote>
+<p>Keeping it real. The promise mostly pays out — thousands of lines of
+non-trivial logic, written for one runtime, running
+byte-for-byte-equivalent on another, across runtimes that share nothing
+but a calling convention the compiler invents. It is <em>mostly</em>,
+not <em>entirely</em>, and the residue is small and predictable. Knowing
+the seams in advance turns a surprise into a checklist — and the
+checklist is short precisely because so much just works.</p>
+</blockquote>
+<h2 id="the-worked-example">The worked example</h2>
+<p>The example is real. <strong>Triggerfish</strong> (a JS/Halogen app)
+needed TidalCycles mini-notation: turn <code>"bd*3 ~ bd(3,8)"</code>
+into scheduled events. That parser + pattern engine already existed —
+written for <strong>BEAM/purerl</strong>, in purerl-tidal. So we
+vendored it (~3,900 lines across 12 modules) into a JS app and asked the
+promise to pay out.</p>
+<p>It largely did. Everything below is the part that <em>didn't</em>
+travel for free.</p>
+<h2 id="where-it-held-the-pure-core-travels-for-free">Where it held: the
+pure core travels for free</h2>
+<p>The entire closure — the combinator parser, the AST, the
+<code>Pattern = State -&gt; Array Event</code> query model over
+<code>Data.Rational</code> time, the evaluator, the chord and notation
+tables — is Prelude-family PureScript. It compiled against the JS
+registry and ran with <strong>zero logic changes</strong>.
+<code>queryArc (parse "bd*3") 0 1</code> returns onsets at exactly
+<code>0, 1/3, 2/3</code>; <code>bd(3,7)</code> gives a true septuplet
+euclid; <code>[bd sn] cp</code> nests correctly. Rational time means no
+float drift across the runtime boundary.</p>
+<p>This is the promise delivered: non-trivial logic, written for Erlang,
+running identically on V8. Everything below is the residue.</p>
+<h2 id="seam-1--ffi-is-the-boundary-and-it-does-not-cross">Seam 1 — FFI
+is the boundary, and it does not cross</h2>
+<p>The one <code>foreign import</code> in the whole closure was a
+<code>readFloat :: String -&gt; Number</code>, backed by an Erlang
+module calling <code>string:to_float</code>. On JS that foreign module
+simply does not exist; the code cannot load.</p>
+<p>The fix was <strong>not</strong> to write a JS shim. It was to delete
+the FFI and call <code>Data.Number.fromString</code> — a library
+function the <code>numbers</code> package already provides on every
+runtime. The seam moved from our code (one obligation per target
+runtime, forever) to the library's (already discharged by its
+maintainers).</p>
+<blockquote>
+<p><strong>Rule.</strong> Every <code>foreign import</code> in shared
+code is a portability debt with one line-item per runtime you target.
+Before writing one, check whether a Prelude-family library already
+exposes the operation — you inherit its per-runtime ports instead of
+owning yours. Reserve FFI for the genuine runtime edge (DOM, BEAM
+processes, OS) and keep it out of the shared core entirely, or behind a
+thin per-runtime module the shared core imports by name.</p>
+</blockquote>
+<p><code>readFloat</code> failed this test: it was a hand-rolled FFI for
+something <code>Data.Number.fromString</code> does portably. It was
+invisible on BEAM because the Erlang shim was right there. It surfaced
+the instant the code changed runtimes.</p>
+<h2
+id="seam-2--package-set-drift-same-source-two-package-universes">Seam 2
+— package-set drift: same source, two package universes</h2>
+<p>purerl-tidal is pinned to the purerl package set
+(<code>erl-0.15.3-20220629</code>). The JS app is on the registry set
+<code>73.3.0</code>. These are not the same library universe, and the
+BEAM set trails the JS registry by years. The vendored source would not
+compile until these were reconciled:</p>
+<table>
+<thead>
+<tr>
+<th>purerl set (what the source said)</th>
+<th>JS registry 73.3.0 (what it needs)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Text.Parsing.Parser</code></td>
+<td><code>Parsing</code> (renamed in <code>parsing</code> v9)</td>
+</tr>
+<tr>
+<td><code>Text.Parsing.Parser.Combinators</code></td>
+<td><code>Parsing.Combinators</code></td>
+</tr>
+<tr>
+<td><code>Text.Parsing.Parser.String</code></td>
+<td><code>Parsing.String</code></td>
+</tr>
+<tr>
+<td><code>Text.Parsing.Parser.Pos (Position)</code></td>
+<td><code>Parsing</code> (<code>Position</code> gained an
+<code>index</code> field)</td>
+</tr>
+<tr>
+<td><code>Text.Parsing.Parser.Token (alphaNum, digit, letter)</code></td>
+<td><code>Parsing.String.Basic</code> (the <code>Token</code> module was
+gutted)</td>
+</tr>
+<tr>
+<td><code>…String (skipSpaces)</code></td>
+<td><code>Parsing.String.Basic</code></td>
+</tr>
+<tr>
+<td><code>Math (cos, floor, pi, sin, sqrt)</code></td>
+<td><code>Data.Number</code> (<code>Math</code> removed from core)</td>
+</tr>
+</tbody>
+</table>
+<p>The reconciliation is mechanical — import-path renames, no logic —
+but it is <strong>mandatory</strong>, and there is no automatic
+translation layer. "Same code" required hand-editing the import block of
+five modules. None of this is a language failure; it is an
+ecosystem-versioning seam, and it is the seam most likely to
+<em>widen</em> over time, because the purerl set is community-maintained
+and lags the registry's churn.</p>
+<blockquote>
+<p><strong>Rule.</strong> Cross-runtime sharing assumes either (a)
+compatible package sets, or (b) a budget for import reconciliation that
+grows with the version gap. If you intend to share a module long-term,
+prefer the oldest-common API surface, or vendor with the expectation of
+periodic re-sync. (We vendored under the original namespace precisely so
+a future re-sync against the rig is a clean diff.)</p>
+</blockquote>
+<h2 id="seam-3--the-abstractions-own-holes">Seam 3 — the abstraction's
+own holes</h2>
+<p>Worth separating from the two above because it is <em>not</em> a
+runtime seam: even running identical source on both runtimes, the
+engine's own behaviour is a fixed point — and it has holes.
+Mini-notation elongation (<code>bd@3</code>, <code>bd _ _ sn</code>) is
+a silent no-op in this interpreter: the weights are ignored and the
+events come out equal-spaced (verified empirically). This would fail the
+same way on BEAM; it is not a portability failure.</p>
+<p>But it is the same <em>shape</em> of failure — promise vs. delivery.
+The surface language advertises a feature the implementation does not
+honour. Anyone relying on cross-runtime <em>parity</em> with the
+original Haskell Tidal will assume an elongation semantics that is
+present on neither runtime.</p>
+<blockquote>
+<p><strong>Rule.</strong> "Compiles and runs on both" is not "behaves
+identically on both," and neither is "behaves as the abstraction
+claims." These are three separate guarantees. Only the
+differential-conformance suite checks the second; only tests against the
+spec check the third. Cross-runtime confidence requires all three, not
+just a green compile.</p>
+</blockquote>
+<h2 id="the-structural-answer-isolate-what-varies">The structural
+answer: isolate what varies</h2>
+<p>The seams above all point the same way: a cross-runtime codebase is
+healthiest when <strong>the parts that vary by runtime are named,
+separated, and small</strong>, and the shared core is everything else.
+This is exactly the directory discipline the backend-suite work
+converged on — a layout that keeps <code>shared/</code> source apart
+from the per-runtime <code>native/</code> edges and the
+<code>divergences/</code> ledger, so the thing you vendor is the pure
+core and nothing else.</p>
+<p>The same instinct shows up in the deployment tooling: the polyglot
+deploy path isolates the one <em>build-from-source</em> service from the
+prebuilt images, because that is the part whose behaviour is
+runtime-specific. The lesson generalises past code into infrastructure —
+find the seam, draw a box around it, and keep the box as small as you
+can.</p>
+<h2
+id="checklist-for-code-meant-to-run-on-more-than-one-runtime">Checklist
+for code meant to run on more than one runtime</h2>
+<ol type="1">
+<li><strong>Zero FFI in the shared core.</strong> Push every
+<code>foreign import</code> to a library that already ports, or to a
+thin per-runtime edge module. An FFI in shared code is a debt counted
+per target.</li>
+<li><strong>Pin compatible package sets, or budget import
+reconciliation.</strong> The gap is mechanical to close but never closes
+itself, and it grows.</li>
+<li><strong>Differential-test behaviour, don't infer it from a green
+build.</strong> Same source + same compile ≠ same events. The
+conformance suite exists for exactly this; an app sharing code across
+runtimes wants the same discipline on its own hot paths.</li>
+</ol>
+<h2 id="see-also">See also</h2>
+<ul>
+<li><a href="/resources/">Writing a backend</a> — the suite-side view.
+"Ground rules (learned the hard way)" and the purerl package-set warning
+are the mirror of Seam 2 here.</li>
+<li><a href="/#backends">The backend family</a> — where each runtime
+sits, and the divergence ledger Seam 3 feeds.</li>
+</ul>
+  </main>
+</body>
+</html>

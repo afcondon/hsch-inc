@@ -152,8 +152,20 @@ BACKENDS = {
 where divergence *classes* (`bignum`, `utf8`) beat per-backend entries
 wherever they apply.
 
+## The other side of the seam: sharing application code
+
+The contract above is for backend *authors*. The mirror problem belongs to
+application authors: you have a substantial program written for one runtime and
+you want to run it, unchanged, on another. The promise mostly pays out — but
+the residue is predictable, and it is the same package-set and FFI seams seen
+from the other side. [Same code, two runtimes](/sharing-code/) walks a real
+case (vendoring a ~3,900-line BEAM parser into a JS app) and turns the surprises
+into a checklist.
+
 ## Prior-art shelf
 
+- **The application-side mirror** — [Same code, two runtimes](/sharing-code/),
+  where the promise leaks when you move a program across runtimes.
 - **The comparison** — [the backend family](/#backends), one page each, with
   the semantic divergence table.
 - **Reference implementation of the column-adding process** — Jurist's
