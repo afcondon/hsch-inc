@@ -10,10 +10,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 ---
 
-## Architecture (13 documents)
+## Architecture (14 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| The Substrate Vision (mark-to-market) | living | `docs/kb/architecture/substrate-vision.md` | vision, substrate, lingua-franca, typed-carriers, jointing, mark-to-market |
 | Minard Vision | active | `docs/kb/architecture/minard-vision.md` | minard, code-cartography, visualization, LLM, fog-of-war, type-explorer |
 | HATS Existential Design | active | `docs/kb/architecture/hats-existential-design.md` | HATS, existential-types, CPS, heterogeneous-composition, psd3-selection |
 | CE2 Architecture Overview | active | `docs/kb/architecture/ce2-architecture.md` | ce2, code-explorer, halogen, psd3, visualization, state-machine |
@@ -78,6 +79,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | PureScript REPL & Live Coding Research | active | `docs/kb/research/purescript-repl-research.md` | REPL, PSCi, playground, Bret-Victor, Try-PureScript, live-coding |
 | Typed Feedback Loops Synthesis | active | `docs/kb/research/typed-feedback-loops-synthesis.md` | playground, shaped-steer, DAG, reactive, feedback-loop, learning |
 | Liquid PureScript Feasibility | active | `docs/kb/research/liquid-purescript-feasibility.md` | refinement-types, Liquid-Haskell, SMT, Z3, verification, dependent-types |
+| Liquid PureScript Implementation Plan | active | `liquid-purescript/docs/PLAN.md` (repo at `afc-work/liquid-purescript`) | refinement-types, SMT, Z3, CoreFn, verification, plan |
 | CE2 Visualization Architecture Analysis | active | `docs/kb/research/ce2-visualization-architecture-analysis.md` | ce2, visualization, componentization, halogen, psd3 |
 | Lessons from marimo | active | `docs/kb/research/marimo-lessons.md` | notebook, reactivity, DAG, marimo, shaped-steer |
 | Taming the Stack: Lessons for PurePy | active | `docs/kb/research/taming-the-stack-lessons.md` | PurePy, stack-safety, trampolining, CPS, defunctionalization |
