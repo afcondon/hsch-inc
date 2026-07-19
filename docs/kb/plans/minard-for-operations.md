@@ -309,10 +309,36 @@ research, parallelizable with early phase 4).
    conventions (`proc:site:8199` as a display name is honest but
    graceless — friendly names for non-file strata need design).
 
+5. **Semantic-zoom ladder — works as a discrete two-level ladder.**
+   113-unit fixture (3 packages × 18 modules → objects → bundles →
+   site → deploy action). Overview = the SAME TidyDag over the
+   quotient-by-group: one mark per group, sized by member count,
+   colored by WORST member state — totality's slice discipline made
+   visible (touch one module of 37 and its package's mark goes amber;
+   the others stay green). Wheel-zoom crosses the ladder both ways
+   (k<0.55 down, k>1.6 up, hysteresis so the boundary doesn't flap);
+   buttons ("the big picture" / "all the pieces") do the same
+   discretely; clicking any group drills in. What the hylograph
+   ladder library needs: level = (quotient map, per-level renderer,
+   thresholds); the camera signal is one number (initial/current
+   viewBox width).
+6. **Ghost rendering — legible, with one density lesson.** Stale and
+   drifted nodes render as displaced faded solids (the artifact that
+   exists) beside dashed outlines in tree position (the artifact the
+   rules demand); missing nodes are ghost-only. At 113 units the
+   touched module's whole cone reads instantly — object, bundle,
+   site/app.txt all doubled. **Density finding: LABELS saturate long
+   before marks do** — 112 per-unit labels overlap into noise at the
+   leaf rows. The ladder library must make labels level- and
+   spacing-dependent (labels are the first thing LOD should shed;
+   marks the last). Ghost geometry itself stays legible at scale.
+
 Verification: warrant server-smoke 20 checks; smoke-spike-process.mjs
 17 checks (three strata in one tree, cross-strata why, down/red,
-restart/green); smoke-w4-live 21 checks incl. blindness; all earlier
-suites and smokes still green.
+restart/green); smoke-w4-live 21 checks incl. blindness;
+smoke-spike-zoom.mjs 16 checks (ladder, rollup, wheel thresholds,
+ghost cascade at scale); all earlier suites and smokes still green.
+Phase 3 is COMPLETE (all six spikes, 2026-07-19).
 
 ## 5. Phase 4 shape — Brunel, by assembly (decided 2026-07-19)
 
