@@ -274,6 +274,46 @@ Each spike answers a design question before phase 4 commits to it.
 Suggested order: 1, 2, 3, 4 (they compound), then 5 and 6 (view
 research, parallelizable with early phase 4).
 
+### Spike results (2026-07-19 — spikes 1–4 DONE, same day)
+
+1. **fs.watch push — works.** Recursive watch + 150ms debounce +
+   only-broadcast-on-difference: edits go amber with no gesture,
+   editor noise is silent. Two lessons: watchers must `unref()` (a
+   held event loop blocks graceful shutdown), and — the important
+   one — **process changes fire no fs events.** Each observation
+   domain needs its own event source (fs events for files, a poll
+   tick for processes); the observation bus must carry per-observer
+   cadence, not one global watcher.
+2. **Unobserved — page-level honesty works.** On WS close: canvas
+   grays ("beliefs about the past"), banner names the last
+   observation time, all verbs withdrawn. Server must actively close
+   client sockets at shutdown (registerChannel) or the browser never
+   learns. STILL NEEDED at engine level: per-path unobservability —
+   a remote host down while local files stay observable is a mixed
+   snapshot the page-level flag cannot express.
+3. **Process observer — ZERO engine changes, confirmed.** A process
+   is a path whose observed mtime is its START TIME (`lsof` →
+   `ps lstart`); StaleNewerDep then derives "running code older than
+   its artifacts" verbatim, and down = Missing. The stratum lands
+   exactly where it should: in the *vocabulary* (Levantine.Explain
+   grew a `Stratum` type — "running out of date … has changed since
+   it started … Restart it", "not running", "running, current",
+   "provided by the toolchain"). The engine never learned what a
+   process is.
+4. **Cross-strata edge — works, reads naturally.** One tree:
+   `proc:site:8199` ← `public/*` ← `src/*`, with `nix:python3` as a
+   toolchain leaf (resolved via `command -v` + stat — lands in
+   /nix/store on a Nix machine). The plain why crosses strata:
+   "public/index.html has changed since it started." Namespace
+   prefixes (`proc:`, `nix:`) carried the whole spike. Open: label
+   conventions (`proc:site:8199` as a display name is honest but
+   graceless — friendly names for non-file strata need design).
+
+Verification: warrant server-smoke 20 checks; smoke-spike-process.mjs
+17 checks (three strata in one tree, cross-strata why, down/red,
+restart/green); smoke-w4-live 21 checks incl. blindness; all earlier
+suites and smokes still green.
+
 ## 5. Phase 4 shape — Brunel, by assembly (decided 2026-07-19)
 
 **Name: Brunel** (GitHub clash fallback: Isambard).
@@ -295,6 +335,13 @@ absorbed at assembly time, not before.
   overlapping marks (identical = the substrate working). hylograph-
   graph territory; TidyDag or containment layouts over real
   `nix path-info -r` / `nix why-depends` data.
+  - **The Nyx REPL** (AFC, 2026-07-19): conceptually, a REPL whose
+    evaluations show as LIVE CHANGES on the store cartography —
+    evaluate an expression, watch the closure cone it demands appear
+    (ghosts for what would be realized, solid as realization lands).
+    Laziness, sharing, and closure growth — the genuinely
+    hard-to-grasp parts of Nix — become visible mechanics. Pairs
+    Nyx (Marginalia 259) with Minard-for-Nix as mutually motivating.
 - **Architecture of the assembly**: the Levantine split scaled up.
   Browser: Halogen + HATS, warrant core in-page, federated belief
   stores spanning strata, ladder + overlays + ghosts. Server: the
