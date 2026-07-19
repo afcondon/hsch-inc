@@ -414,6 +414,31 @@ absorbed at assembly time, not before.
   onboarding story) survives as the on-ramp — possibly as Brunel's
   beginner mode, possibly standalone. Decide at assembly.
 
+### 5.0 Minard-for-Nix v1 EXISTS (2026-07-19, session 4)
+
+`ShapedSteer/minard-for-nix` (Marginalia 261, commit 5b82765): Halogen
++ HATS webapp, two surfaces over ingested facts — the whole store
+(1,443 package families, GC-liveness palette) and the afc-work project
+map (129 projects × regenerable build state × flake status). Findings
+that feed the roadmap:
+
+- **`nix path-info --all --json` carries the entire store in ~0.3s** —
+  the provision observer is effectively free; the observation-bus
+  integration is trivial whenever we want it.
+- **Liveness is the day-one story**: 97% of the store (3.7 of 3.84 GB)
+  is unrooted because `nix develop` roots nothing — `nix store gc`
+  would delete every devShell toolchain. The overlay renders this;
+  nix-direnv/profile pins are the cure. (Provision-stratum staleness
+  found real actionable state on day one.)
+- **The dedup question answered**: 58,530 compiled-module instances
+  across 122 spago output dirs, 3,773 distinct names (`Data.Array`
+  ×117); ~90% upper bound (6.11/6.77 GB) — realizable via per-package
+  derivations (purs-nix style), NOT by wrapping whole `spago build`s.
+- **TidyDag needs cycle honesty** (phase-2, §3 hylograph): the family
+  quotient of the acyclic path DAG is cyclic; TidyDag silently drops
+  cycle-tainted subtrees (110 of 1,443 rendered first try). v1
+  works around it with a stage order computed on the path-level DAG.
+
 ### 5.1 ShapedSteer repositioning (AFC, 2026-07-19)
 
 The earlier ShapedSteer framing — merging Spreadsheets, Notebooks and
