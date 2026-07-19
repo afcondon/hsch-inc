@@ -1,6 +1,6 @@
 workspace:
   packageSet:
-    registry: 72.0.1
+    registry: 77.13.1
 
 package:
   name: hylograph-lib-shell
