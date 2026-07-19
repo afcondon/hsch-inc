@@ -1,5 +1,6 @@
 workspace:
-  # Solver mode - hylograph packages from registry
+  packageSet:
+    registry: 77.13.1
   extraPackages:
     # lib-shell is private, not published
     hylograph-lib-shell:

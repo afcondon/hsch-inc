@@ -1,10 +1,19 @@
 workspace:
-  # No packageSet - using solver mode to pull from live registry
+  packageSet:
+    registry: 77.13.1
   extraPackages:
-    # These are NOT yet published to registry (in sibling repo)
-    hylograph-tidal:
-      path: "../../../purescript-hylograph-showcases/psd3-tilted-radio/purescript-psd\
-        3-tidal"
+    # Site is written against the 0.1.x hylograph APIs; override the set's
+    # newer pins with the registry versions the declared ranges require.
+    hylograph-canvas: 0.1.0
+    hylograph-d3-kernel: 0.1.0
+    hylograph-layout: 0.1.0
+    hylograph-music: 0.1.0
+    hylograph-selection: 0.1.1
+    hylograph-simulation: 0.1.0
+    hylograph-simulation-core: 0.1.0
+    hylograph-simulation-halogen: 0.1.0
+    hylograph-wasm-kernel: 0.1.0
+    # These are NOT yet published to registry
     hylograph-showcase-shell:
       path: "../showcase-shell"
     html-parser-halogen:
@@ -55,7 +64,6 @@ package:
     - hylograph-simulation: ">=0.1.0 <0.2.0"
     - hylograph-simulation-core: ">=0.1.0 <0.2.0"
     - hylograph-simulation-halogen: ">=0.1.0 <0.2.0"
-    - hylograph-tidal: "*"
     - hylograph-wasm-kernel: ">=0.1.0 <0.2.0"
     - indexed-monad: ">=3.0.0 <4.0.0"
     - integers: ">=6.0.0 <7.0.0"
