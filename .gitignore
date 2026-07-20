@@ -40,3 +40,4 @@ docs/worklog/feed.xml
 # blog/public/bundle.js
 # site/website/public/bundle.js
 # site/lib-*/public/bundle.js
+.direnv/
