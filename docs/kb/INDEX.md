@@ -74,10 +74,11 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Minard for Operations (provision/build/process) | design | `docs/kb/plans/minard-for-operations.md` | minard, warrant, levantine, bosun, quartermaster, nix, operations, cartography |
 | PureScript build-dedup toolset (pantry) | design | `docs/kb/plans/purescript-nix-toolset.md` | nix, spago, purs, dedup, pantry, quartermaster, universe, seeding |
 
-## Research (21 documents)
+## Research (22 documents)
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Analytical Refactoring: JTMS + Z3 over Minard | parked | `docs/kb/research/analytical-refactoring-jtms-z3.md` | minard, jtms, z3, refactoring, change-impact, remodularization, build-time |
 | PureScript REPL & Live Coding Research | active | `docs/kb/research/purescript-repl-research.md` | REPL, PSCi, playground, Bret-Victor, Try-PureScript, live-coding |
 | Typed Feedback Loops Synthesis | active | `docs/kb/research/typed-feedback-loops-synthesis.md` | playground, shaped-steer, DAG, reactive, feedback-loop, learning |
 | Liquid PureScript Feasibility | active | `docs/kb/research/liquid-purescript-feasibility.md` | refinement-types, Liquid-Haskell, SMT, Z3, verification, dependent-types |
