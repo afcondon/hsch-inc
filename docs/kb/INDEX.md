@@ -37,6 +37,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Minard Architectural Enforcement | active | `docs/kb/plans/minard-architectural-enforcement.md` | minard, architecture, layers, violations, fitness-function, shaped-steer |
 | L-Systems Visualization | planned | `docs/kb/plans/l-systems-visualization.md` | l-systems, recursion-schemes, hylomorphism, apomorphism, generative |
 | Sugiyama Layered Graph Layout | planned | `docs/kb/plans/sugiyama-layered-graph.md` | graph-layout, sugiyama, dag, graphviz-alternative, algorithms |
+| Hylograph.Graph.JSON — ingestion contract | active | `docs/kb/plans/hylograph-graph-json.md` | hylograph, graph, json, codec, ingestion, onboarding, cross-claude |
 | CE2 Links, Hover, Navigation | active | `docs/kb/plans/ce2-links-hover-navigation.md` | ce2, code-explorer, visualization, navigation, pursuit, hover |
 | CE2 Scene Development | active | `docs/kb/plans/ce2-scene-development.md` | code-explorer, visualization, components, parameterization |
 | Array Safety Fixes | active | `docs/kb/plans/array-safety-fixes.md` | safety, bugs, psd3-simulation, psd3-selection |
@@ -78,6 +79,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 
 | Title | Status | Location | Tags |
 |-------|--------|----------|------|
+| Hylograph Public API Leaks | implemented | `docs/kb/research/hylograph-public-api-leaks.md` | hylograph, api-surface, anti-synergy, dead-code, technical-debt, package-sets |
 | Analytical Refactoring: JTMS + Z3 over Minard | parked | `docs/kb/research/analytical-refactoring-jtms-z3.md` | minard, jtms, z3, refactoring, change-impact, remodularization, build-time |
 | PureScript REPL & Live Coding Research | active | `docs/kb/research/purescript-repl-research.md` | REPL, PSCi, playground, Bret-Victor, Try-PureScript, live-coding |
 | Typed Feedback Loops Synthesis | active | `docs/kb/research/typed-feedback-loops-synthesis.md` | playground, shaped-steer, DAG, reactive, feedback-loop, learning |
