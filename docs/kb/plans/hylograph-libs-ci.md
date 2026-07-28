@@ -98,10 +98,18 @@ Roughly, in increasing order of cost:
    block present, LICENSE file present *and matching the declared license*,
    every dependency carrying a version range. All three have already been
    violated in this ecosystem.
-4. Warnings — worth surfacing, but note `hylograph-selection`'s demo
-   currently has nine pre-existing violations, so warnings-as-errors would
-   fail on day one. Either fix those first or start with warnings reported
-   and not enforced.
+4. Warnings — `hylograph-selection`'s demo had nine pre-existing
+   violations, since fixed (2026-07-28), so warnings-as-errors is now
+   viable from day one rather than something to phase in.
+
+**A caveat that changes what "green" means.** Those nine warnings had been
+errors — the demo sets `build.strict: true` — and nobody noticed, because
+**spago's incremental build does not re-report them**. `spago build` on a
+warm `output/` prints `Errors 0` and exits successfully; the failure only
+appears when the affected modules are actually recompiled. Any CI that
+caches `output/` between runs will inherit this and report success on code
+that does not compile from scratch. Either do not cache `output/`, or make
+the job a clean build.
 
 Eight packages ship JavaScript FFI (`selection` alone has 21 `.js` files),
 so the runner needs Node, not just the PureScript toolchain. `setup-node`
@@ -131,8 +139,12 @@ piecemeal.
 
 - [ ] Decide where the canonical reusable workflow lives
 - [ ] Write it: build, conditional test, publish-precondition checks
-- [ ] Fix the nine pre-existing warnings in `hylograph-selection/demo`, or
-      decide to start with warnings unenforced
+- [x] Fix the nine pre-existing warnings in `hylograph-selection/demo` —
+      done 2026-07-28. All nine were import hygiene in four chapter
+      modules, bar one genuine shadowing (`Chapter3.dataTree` rebound
+      `svgW`/`svgH` to different values than the top-level bindings other
+      trees in the file use). The demo now builds clean under
+      `build.strict: true`, so CI can enforce warnings from day one.
 - [ ] Add the caller workflow to each library — 18 repos, now that
       `hylograph-components` has one
 - [x] Resolve `hylograph-components` — repo created and pushed 2026-07-28;
