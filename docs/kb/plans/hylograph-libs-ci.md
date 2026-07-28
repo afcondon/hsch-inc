@@ -109,16 +109,23 @@ plus `purescript/setup-purescript` or the equivalent Nix devShell — this
 monorepo already uses `nix-direnv` in at least one package, which may be
 the more reproducible route.
 
-## Two things the survey turned up in passing
+## Two things the survey turned up in passing — both since resolved
 
-**`hylograph-components` is not a git repository.** It has a full
-`publish:` block naming `afcondon/purescript-hylograph-components`, but it
-is not under version control and is **not on the registry** — so the
-manifest describes a release that never happened. It cannot have CI until
-it has a repo. Worth deciding whether it is meant to be published at all.
+**`hylograph-components` was not a git repository.** It had a full
+`publish:` block naming `afcondon/purescript-hylograph-components` while
+being neither under version control nor on the registry — seventeen working
+modules existing in exactly one place, with a *public* repo
+(`hylograph-demos`) depending on them by relative path.
 
-**`hylograph-selection/.github/` now contains only a `.DS_Store`.** Harmless,
-but it should either gain a workflow or lose the directory.
+Fixed the same day: initialised, licensed, and pushed to
+<https://github.com/afcondon/purescript-hylograph-components>. Its
+`test:` block was also removed — it declared `main: Test.Main` with no
+`test/` directory, so `spago test` failed outright. Still unpublished to
+the registry, which is now a choice rather than an accident.
+
+**`hylograph-selection/.github/` held only a `.DS_Store`.** Directory
+removed; CI is deferred to the Brunel work below rather than added
+piecemeal.
 
 ## Status / Next Steps
 
@@ -126,10 +133,10 @@ but it should either gain a workflow or lose the directory.
 - [ ] Write it: build, conditional test, publish-precondition checks
 - [ ] Fix the nine pre-existing warnings in `hylograph-selection/demo`, or
       decide to start with warnings unenforced
-- [ ] Add the caller workflow to each library — 17 repos, since
-      `hylograph-components` has none
-- [ ] Resolve `hylograph-components`: create the repo and publish, or drop
-      the `publish:` block that claims it exists
+- [ ] Add the caller workflow to each library — 18 repos, now that
+      `hylograph-components` has one
+- [x] Resolve `hylograph-components` — repo created and pushed 2026-07-28;
+      registry publication still open, but no longer an inconsistency
 - [ ] Consider extending the same workflow to the sibling monorepos
       (`purescript-hylograph-showcases`, `purescript-hylograph-demos`),
       which have the same absence
