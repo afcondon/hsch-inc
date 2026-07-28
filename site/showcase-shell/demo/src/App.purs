@@ -11,7 +11,9 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Svg.Elements as SE
 import Halogen.Svg.Attributes as SA
-import Hylograph.Internal.Behavior.FFI (ZoomTransform, attachZoomWithCallback_)
+import Hylograph.Behavior (ZoomTransform)
+import Hylograph.Behavior as Behavior
+import Hylograph.Behavior.Types (ScaleExtent(..), defaultZoom)
 import Web.DOM.NonElementParentNode (getElementById)
 import Web.HTML (window)
 import Web.HTML.HTMLDocument as HTMLDocument
@@ -303,8 +305,7 @@ attachZoom = do
   case maybeSvg of
     Nothing -> pure unit
     Just svgElem -> do
-      let initialZoom = { k: 1.0, x: 0.0, y: 0.0 }
-      -- We can't easily callback to Halogen from here, so just attach zoom
-      -- The transform updates the .zoom-group element directly via D3
-      _ <- attachZoomWithCallback_ svgElem 0.1 10.0 ".zoom-group" initialZoom (\_ -> pure unit)
+      -- We can't easily callback to Halogen from here, so just attach zoom.
+      -- The transform updates the .zoom-group element directly via D3.
+      _ <- Behavior.attachZoom svgElem (defaultZoom (ScaleExtent 0.1 10.0) ".zoom-group")
       pure unit
