@@ -134,6 +134,22 @@ but it should either gain a workflow or lose the directory.
       (`purescript-hylograph-showcases`, `purescript-hylograph-demos`),
       which have the same absence
 
+## Where this should land: Brunel
+
+Deferred deliberately rather than done piecemeal — and the likely home is
+**Brunel** (`plans/minard-for-operations.md` §6b), not a standalone chore.
+
+Brunel already models the provision, build and process strata across the
+whole portfolio. "Does this repo have CI, when did it last pass, does its
+published version match HEAD, does its licence file match the declared
+licence" is the same *kind* of question as "is this service running", asked
+one stratum over. It wants to be a column in the cartography rather than a
+checklist beside it — a **release stratum** alongside the three that exist.
+
+That also solves the eighteen-copies problem structurally rather than by
+discipline: if the fact lives in the cartography, there is one place for it
+by construction.
+
 Related: `research/hylograph-public-api-leaks.md` for the defects that
 prompted this, and its postscript on detection tooling more generally —
 CI is the crudest and most reliable member of that family.

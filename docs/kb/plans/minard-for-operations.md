@@ -466,6 +466,79 @@ descendant.
    makes it cheap in principle; the observation bus makes
    world-history the actual cost.)
 
+## 6b. Two additions for Brunel — AFC, 2026-07-28
+
+Both surfaced while cleaning up the Hylograph libraries (see
+`kb/research/hylograph-public-api-leaks.md` and
+`kb/plans/hylograph-libs-ci.md`). Recording them here because both are
+portfolio-altitude concerns, which is Brunel's altitude rather than any one
+repo's.
+
+### CI belongs in the life-cycle cartography, not beside it
+
+A survey found **zero CI across all 18 Hylograph library packages**, 16 of
+them published to the registry. The instinct to fix that repo-by-repo is
+wrong for the same reason writing 18 near-identical workflow files is
+wrong: it produces 18 things that drift.
+
+CI is a *life-cycle* fact — does this artefact build, do its tests pass, is
+it releasable — and Brunel already models the build stratum (warrant) and
+the process stratum (bosun). "Does this repo have CI, when did it last
+pass, is its published version the one that builds" is the same kind of
+question as "is this service running", asked one stratum over. It should be
+a *column in the cartography*, not a separate chore list.
+
+Concretely: the provision/build/process strata gain a companion **release
+stratum** — repo has CI, CI is green, working tree clean, published version
+matches HEAD, licence file matches the declared licence. Everything in that
+list has already been violated in this ecosystem within the last month.
+
+### Repository dependencies are unidirectional, and that is the bug
+
+The sharper point, and the one worth taking furthest.
+
+`purescript-jtms` was renamed to `purescript-baskerville`.
+`purescript-hylograph-demos` — a public repository — referenced it by three
+`path:` dependencies and was never updated. It simply stopped building, and
+stayed broken silently for however long, because **nothing on the
+baskerville side records that anything points at it**.
+
+That is not an oversight, it is structural. Unix, the web and git all
+presume dependencies run one way: the importer names the imported, and the
+imported knows nothing. `import`, `<a href>`, `path:`, a git remote — all
+of them are outbound edges recorded only at the source. Renaming or moving
+the target is therefore *unobservable* from the target. You find out when
+someone tries to build.
+
+Brunel is unusually well placed to invert this, because it is already the
+thing that reads across the whole portfolio rather than one repo at a time.
+The reverse edge cannot exist inside any single repository — but it can
+exist in a cartography that sees them all. Specifically:
+
+- **Inbound-reference index**: for every repo, who points at it, and by
+  what mechanism (`path:`, registry range, git submodule, README link,
+  Docker build context, symlink).
+- **Rename/move as a first-class event**: when a repo's identity changes,
+  Brunel can enumerate what breaks *before* it breaks, which is the whole
+  value. Today that question has no answer at all.
+- **Dangling-reference detection**: a `path:` pointing at a directory that
+  does not exist is trivially checkable and would have caught this the day
+  it happened rather than months later.
+
+Note this generalises the two detectors already proposed in
+`research/hylograph-public-api-leaks.md` — duplicate structure, and
+repeated local workarounds. All three are the same shape: *facts that
+cannot be seen from inside one repository, and are obvious from above.*
+That is a decent one-line statement of what Brunel is for.
+
+Also worth flagging as a related hazard: `path:` dependencies pointing at
+directories that are **in no repository at all**. `hylograph-components`
+was in exactly that state until 2026-07-28 — seventeen working modules, no
+git, and a public repo depending on it by relative path. The
+inbound-reference index would surface that as "referenced by a public repo,
+not itself under version control", which is a much louder signal than
+anything a single repo can raise about itself.
+
 ## 7. Cross-references
 
 - Levantine design: `levantine/docs/DESIGN.md` (incl. parking lot:
