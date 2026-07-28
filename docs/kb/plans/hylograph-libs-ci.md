@@ -4,7 +4,7 @@ category: plan
 status: planned
 tags: [hylograph, ci, github-actions, testing, release-engineering, technical-debt]
 created: 2026-07-28
-summary: None of the 18 Hylograph library packages has any CI, and 16 of them are published to the PureScript registry. Surveys the current state and proposes a single reusable workflow rather than 18 copies of the same file.
+summary: None of the 18 Hylograph library packages has any CI, and 17 of them are published to the PureScript registry. Surveys the current state and proposes a single reusable workflow rather than 18 copies of the same file.
 ---
 
 # CI for the Hylograph libraries
@@ -20,12 +20,12 @@ That turned out to understate it. **No Hylograph library has ever had CI.**
 | | Count |
 |---|---|
 | Packages in `purescript-hylograph-libs` | 18 |
-| Published to the PureScript registry | 16 |
-| With a `test/` directory | 8 |
+| Published to the PureScript registry | 17 |
+| With a `test/` directory | 7 |
 | **With any CI workflow** | **0** |
 
-Not a regression to repair — an absence to fill. Sixteen published
-libraries, eight test suites that run only when somebody remembers to run
+Not a regression to repair — an absence to fill. Seventeen published
+libraries, seven test suites that run only when somebody remembers to run
 them locally, and nothing that would notice a break between one manual
 `spago test` and the next.
 
@@ -93,8 +93,12 @@ workflows by repo reference.
 Roughly, in increasing order of cost:
 
 1. `spago build` — the floor.
-2. `spago test` where a `test/` directory exists (8 of 18 today).
-3. **Publish preconditions**, for the 16 published packages: `publish:`
+2. `spago test` where a `test/` directory exists (7 of 18). Test for
+   *`.purs` files under* `test/`, not for the directory: `hylograph-optics`
+   had an empty `test/` (removed 2026-07-28) which inflated the original
+   count to 8 and would have made a directory-existence check run
+   `spago test` on a package with no `Test.Main`, failing the job.
+3. **Publish preconditions**, for the 17 published packages: `publish:`
    block present, LICENSE file present *and matching the declared license*,
    every dependency carrying a version range. All three have already been
    violated in this ecosystem.
@@ -128,8 +132,12 @@ modules existing in exactly one place, with a *public* repo
 Fixed the same day: initialised, licensed, and pushed to
 <https://github.com/afcondon/purescript-hylograph-components>. Its
 `test:` block was also removed — it declared `main: Test.Main` with no
-`test/` directory, so `spago test` failed outright. Still unpublished to
-the registry, which is now a choice rather than an accident.
+`test/` directory, so `spago test` failed outright. **Published to the
+registry as 0.1.0 on 2026-07-28**, which required declaring `aff`,
+`enums` and `tuples` (transitive via halogen, so `spago build` never
+minded) and correcting the licence: the LICENSE had been copied wholesale
+from `hylograph-selection`, ISC section and all, crediting d3-zoom for a
+module this package does not contain. Now plain MIT.
 
 **`hylograph-selection/.github/` held only a `.DS_Store`.** Directory
 removed; CI is deferred to the Brunel work below rather than added
@@ -147,11 +155,14 @@ piecemeal.
       `build.strict: true`, so CI can enforce warnings from day one.
 - [ ] Add the caller workflow to each library — 18 repos, now that
       `hylograph-components` has one
-- [x] Resolve `hylograph-components` — repo created and pushed 2026-07-28;
-      registry publication still open, but no longer an inconsistency
-- [ ] Consider extending the same workflow to the sibling monorepos
-      (`purescript-hylograph-showcases`, `purescript-hylograph-demos`),
-      which have the same absence
+- [x] Resolve `hylograph-components` — repo created and pushed, and
+      published to the registry as 0.1.0, both 2026-07-28
+- [ ] Consider extending the same workflow to `purescript-hylograph-demos`,
+      which has the same absence. **Not** `purescript-hylograph-showcases`:
+      it is largely superseded (simple demos now aggregated in
+      `hylograph-demos`, the interesting ones on the polyglot site,
+      `psd3-tilted-radio` obsoleted by the Atlantis work) and is not under
+      version control at all, so there is nowhere to put a workflow.
 
 ## Where this should land: Brunel
 
