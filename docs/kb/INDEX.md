@@ -37,6 +37,7 @@ This index catalogs all technical documentation across the PSD3 ecosystem.
 | Minard Architectural Enforcement | active | `docs/kb/plans/minard-architectural-enforcement.md` | minard, architecture, layers, violations, fitness-function, shaped-steer |
 | L-Systems Visualization | planned | `docs/kb/plans/l-systems-visualization.md` | l-systems, recursion-schemes, hylomorphism, apomorphism, generative |
 | Sugiyama Layered Graph Layout | planned | `docs/kb/plans/sugiyama-layered-graph.md` | graph-layout, sugiyama, dag, graphviz-alternative, algorithms |
+| CI for the Hylograph libraries | planned | `docs/kb/plans/hylograph-libs-ci.md` | hylograph, ci, github-actions, testing, release-engineering |
 | Hylograph.Graph.JSON — ingestion contract | active | `docs/kb/plans/hylograph-graph-json.md` | hylograph, graph, json, codec, ingestion, onboarding, cross-claude |
 | CE2 Links, Hover, Navigation | active | `docs/kb/plans/ce2-links-hover-navigation.md` | ce2, code-explorer, visualization, navigation, pursuit, hover |
 | CE2 Scene Development | active | `docs/kb/plans/ce2-scene-development.md` | code-explorer, visualization, components, parameterization |
