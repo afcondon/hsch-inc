@@ -31,7 +31,6 @@ __pycache__/
 *.pyc
 
 # Generated feeds
-docs/worklog/feed.xml
 
 # Claude Code
 .claude/

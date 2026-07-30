@@ -30,9 +30,6 @@ polyglot/purescript-polyglot-site/
 │   ├── showcase-shell/      # Reusable Halogen shell component
 │   ├── dashboard/           # Dev dashboard
 │   └── tests/               # Backend toolchain tests
-├── docs/
-│   ├── kb/                  # Knowledge base
-│   └── worklog/             # Session logs
 ├── scripts/                 # Utility scripts
 ├── tools/                   # Build tools
 └── spikes/                  # Experimental code
@@ -90,23 +87,17 @@ are unaffected.
 
 Docker orchestration is at the parent directory level (`afc-work/`) where it has visibility of all repos. This repo just builds static bundles.
 
-## Session Logging
+## Documentation lives elsewhere
 
-At the end of substantive sessions, update `docs/worklog/YYYY-MM-DD.md`:
+The knowledge base and worklogs used to be `docs/` in this repo. They
+were extracted with history to their own repo at **`afc-work/docs`** on
+2026-07-30 — they document the whole ecosystem, not this website, and
+this repo's rename to `-site` made that mismatch plain.
 
-1. **Accomplished**: What was completed
-2. **Explored But Not Pursued**: Paths investigated but set aside
-3. **Parking Lot**: Ideas surfaced but not addressed
-4. **Decisions Made**: Technical choices with rationale
-5. **Next Session Setup**: Context for resuming
+- Session logs: `afc-work/docs/worklog/YYYY-MM-DD.md`
+- Knowledge base: `afc-work/docs/kb/` (`INDEX.md`, `architecture/`,
+  `plans/`, `research/`, `reference/`, `howto/`)
 
-## Knowledge Base
-
-The `docs/kb/` directory contains technical documentation:
-
-- `INDEX.md` - Master index of all reports
-- `architecture/` - System design documents
-- `plans/` - Implementation roadmaps
-- `research/` - Analysis and investigations
-- `reference/` - Specifications and status docs
-- `howto/` - Practical guides
+At the end of substantive sessions, update the worklog for the day:
+**Accomplished**, **Explored But Not Pursued**, **Parking Lot**,
+**Decisions Made**, **Next Session Setup**.

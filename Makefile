@@ -29,7 +29,6 @@ BLOG := blog
 .PHONY: lib-site-shell lib-site-selection lib-site-simulation
 .PHONY: lib-site-layout lib-site-graph lib-site-music
 .PHONY: serve-website serve-blog check-tools
-.PHONY: worklog-feed serve-worklog
 
 # ============================================================================
 # TOP-LEVEL TARGETS
@@ -120,12 +119,6 @@ lib-site-music: lib-site-shell
 # WORKLOG FEED
 # ============================================================================
 
-worklog-feed:
-	@python3 scripts/worklog-feed.py
-
-serve-worklog:
-	@python3 scripts/worklog-feed.py --serve 8384
-
 # ============================================================================
 # UTILITY TARGETS
 # ============================================================================
@@ -171,8 +164,6 @@ help:
 	@echo "  make lib-site-music"
 	@echo ""
 	@echo "Worklog:"
-	@echo "  make worklog-feed   - Generate Atom feed from worklog"
-	@echo "  make serve-worklog  - Serve feed on :8384 for NetNewsWire"
 	@echo ""
 	@echo "Utility:"
 	@echo "  make check-tools    - Verify prerequisites"
