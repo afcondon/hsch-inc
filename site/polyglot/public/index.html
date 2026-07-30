@@ -121,14 +121,20 @@
       <span class="exhibit__pill exhibit__pill--live">Live</span>
       <span class="tile__badge tile__badge--purepy">Python</span>
       <h4>Grid Explorer</h4>
-      <p>AC power-flow on IEEE case14 (pandapower): N-1 contingency, cascading failures, resilience metrics — the power-line-faults demo.</p>
+      <p>AC power-flow on IEEE case30 (pandapower). The analysis is PureScript — the N-1 loop, the cascade, the graph search; pandapower solves. Four critical contingencies of 41, and a cascade that really spreads.</p>
+    </a>
+    <a class="exhibit" href="backends/jurist/" data-backend="jurist">
+      <span class="exhibit__pill exhibit__pill--live">Live</span>
+      <span class="tile__badge tile__badge--jurist">Julia</span>
+      <h4>One description, four denotations</h4>
+      <p>A row-typed system of equations crosses the seam <em>once</em>, then Julia solves it — ModelingToolkit derives the analytic Jacobian, a stiff solver holds a double pendulum's rods to 1e-8, and interval arithmetic <em>proves</em> a function's roots unique. The same description also runs on Node and the BEAM.</p>
     </a>
     <a class="exhibit" href="backends/jurist/" data-backend="jurist">
       <span class="exhibit__thumb"><img src="images/stability-atlas.jpg" alt="The Stability Atlas — Sun–Jupiter three-body orbit integration" loading="lazy"></span>
       <span class="exhibit__pill exhibit__pill--soon">Deploy pending</span>
       <span class="tile__badge tile__badge--jurist">Julia</span>
-      <h4>Stability Atlas</h4>
-      <p>Basins of attraction — a heat-map sweep and click-to-stream orrery, computed PS-on-Julia and streamed over a typed WebSocket. The distributed compute <em>is</em> the showcase.</p>
+      <h4>Stability Atlas · one wire contract</h4>
+      <p>A heat-map sweep and click-to-stream orrery, where browser and compute service share <em>one</em> codec definition — compiled to JavaScript at one end and Julia at the other. Schema drift is a compile error, not a production incident.</p>
     </a>
     <a class="exhibit" href="backends/purerl/" data-backend="purerl">
       <span class="exhibit__pill exhibit__pill--video">Video</span>
