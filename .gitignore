@@ -33,7 +33,14 @@ __pycache__/
 # Generated feeds
 
 # Claude Code
-.claude/
+# Agent config: skills and commands are shared project knowledge and are
+# tracked; everything else under .claude/ is local (settings.local.json
+# carries per-machine permission grants).
+.claude/*
+!.claude/skills/
+!.claude/commands/
+.claude/skills/.DS_Store
+.claude/commands/.DS_Store
 
 # Bundles are built artifacts (optional - uncomment to ignore)
 # blog/public/bundle.js
