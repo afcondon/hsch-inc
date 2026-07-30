@@ -3,7 +3,7 @@ module Hylographic.Main where
 import Prelude
 
 import Data.Const (Const)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Web.DOM.ParentNode (QuerySelector(..))
@@ -20,13 +20,11 @@ import Hylographic.Types (Route(..), ArticleMetadata)
 import Hylographic.RoutingDSL (routing, routeToPath)
 import Hylographic.Blog.ArticleViewer as ArticleViewer
 import Hylographic.Blog.ForceIndex as ForceIndex
-import Hylographic.Viz.LSystemPlant as LSystemPlant
 import Routing.Hash (matches, setHash)
 
 -- | Application state
 type State =
   { currentRoute :: Route
-  , plantGeneration :: Int  -- Increments on route change to regenerate plant
   }
 
 -- | Application actions
@@ -40,7 +38,6 @@ data Action
 type Slots =
   ( articleViewer :: H.Slot (Const Void) Void Unit
   , forceIndex :: H.Slot (Const Void) ForceIndex.Output Unit
-  , lsystemPlant :: H.Slot (Const Void) Void Int
   )
 
 _articleViewer :: Proxy "articleViewer"
@@ -48,9 +45,6 @@ _articleViewer = Proxy
 
 _forceIndex :: Proxy "forceIndex"
 _forceIndex = Proxy
-
-_lsystemPlant :: Proxy "lsystemPlant"
-_lsystemPlant = Proxy
 
 -- | Sample articles for the force index (will be loaded from API later)
 sampleArticles :: Array ArticleMetadata
@@ -61,7 +55,7 @@ sampleArticles =
 -- | Main application component
 component :: forall q i. H.Component q i Void Aff
 component = H.mkComponent
-  { initialState: \_ -> { currentRoute: Home, plantGeneration: 0 }
+  { initialState: \_ -> { currentRoute: Home }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -73,9 +67,7 @@ render :: State -> H.ComponentHTML Action Slots Aff
 render state =
   HH.div
     [ HP.classes [ HH.ClassName "hylographic" ] ]
-    [ -- Fixed background plant (keyed by generation to regenerate on route change)
-      HH.slot_ _lsystemPlant state.plantGeneration LSystemPlant.component unit
-    , renderHeader
+    [ renderHeader
     , HH.main
         [ HP.classes [ HH.ClassName "hylographic__main" ] ]
         [ renderPage state.currentRoute ]
@@ -124,11 +116,8 @@ handleAction = case _ of
   Navigate route ->
     H.liftEffect $ setHash (routeToPath route)
 
-  RouteChanged maybeRoute -> do
-    state <- H.get
-    case maybeRoute of
-      Just route -> H.modify_ _ { currentRoute = route, plantGeneration = state.plantGeneration + 1 }
-      Nothing -> H.modify_ _ { currentRoute = NotFound, plantGeneration = state.plantGeneration + 1 }
+  RouteChanged maybeRoute ->
+    H.modify_ _ { currentRoute = fromMaybe NotFound maybeRoute }
 
   ForceIndexOutput output -> case output of
     ForceIndex.NavigateTo slug ->

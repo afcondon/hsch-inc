@@ -13,7 +13,6 @@ import Halogen.Svg.Elements as SE
 import Halogen.Svg.Attributes as SA
 
 import Hylographic.Viz.MetaHATS as MetaHATS
-import Hylographic.Viz.LSystemPlant as LSystemPlant
 
 -- | Registry of available visualization components
 -- | Each component takes no input and produces no output
@@ -25,7 +24,6 @@ lookupViz name = case name of
   "ForceDemo" -> Just forceDemo
   "HelloViz" -> Just helloViz
   "MetaHATS" -> Just MetaHATS.component
-  "LSystemPlant" -> Just LSystemPlant.component
   _ -> Nothing
 
 -- | List of available visualization names (for documentation)
@@ -34,7 +32,6 @@ availableVizNames =
   [ "HelloViz"
   , "ForceDemo"
   , "MetaHATS"
-  , "LSystemPlant"
   ]
 
 -- =============================================================================
