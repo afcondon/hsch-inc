@@ -3,13 +3,13 @@ workspace:
     registry: 77.13.1
   extraPackages:
     hylograph-graph:
-      path: "../../../purescript-hylograph-libs/purescript-hylograph-graph"
+      path: "../../../../purescript-hylograph-libs/purescript-hylograph-graph"
     hylograph-layout:
-      path: "../../../purescript-hylograph-libs/purescript-hylograph-layout"
+      path: "../../../../purescript-hylograph-libs/purescript-hylograph-layout"
     hylograph-transitions:
-      path: "../../../purescript-hylograph-libs/purescript-hylograph-transitions"
+      path: "../../../../purescript-hylograph-libs/purescript-hylograph-transitions"
     hylograph-selection:
-      path: "../../../purescript-hylograph-libs/purescript-hylograph-selection"
+      path: "../../../../purescript-hylograph-libs/purescript-hylograph-selection"
 
 package:
   name: hylograph-showcase-shell

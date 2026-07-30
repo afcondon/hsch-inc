@@ -4,7 +4,7 @@ workspace:
   extraPackages:
     # Private showcase for L-System visualization (in sibling repo)
     hylograph-prim-zoo-mosh:
-      path: "../../purescript-hylograph-showcases/psd3-prim-zoo-mosh"
+      path: "../../../purescript-hylograph-showcases/psd3-prim-zoo-mosh"
     # Git dependency - not in registry
     html-parser-halogen:
       git: https://github.com/afcondon/purescript-html-parser-halogen.git

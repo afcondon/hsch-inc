@@ -4,11 +4,11 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## What This Repo Is
 
-**purescript-polyglot** contains the main website and visualization blog for the Hylograph ecosystem. It's part of a multi-repo structure:
+**purescript-polyglot-site** (was `purescript-polyglot`; moved under `polyglot/` 2026-07-30) contains the main website and visualization blog for the Hylograph ecosystem. It's part of a multi-repo structure:
 
 | Repository | Purpose |
 |------------|---------|
-| **purescript-polyglot** (this repo) | Website + Blog |
+| **polyglot/purescript-polyglot-site** (this repo) | Website + Blog |
 | `purescript-hylograph-libs` | Core visualization libraries |
 | `purescript-hylograph-showcases` | Showcase applications |
 | `CodeExplorer` | Minard code cartography app |
@@ -19,7 +19,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 ## Repository Structure
 
 ```
-purescript-polyglot/
+polyglot/purescript-polyglot-site/
 ├── blog/                    # Hylographic - visualization blog
 │   ├── src/                 # PureScript source
 │   ├── public/              # Static assets + bundle
@@ -71,14 +71,20 @@ The blog and website depend on packages in sibling repos via relative paths in `
 ```yaml
 # blog/spago.yaml references:
 hylograph-prim-zoo-mosh:
-  path: "../../purescript-hylograph-showcases/psd3-prim-zoo-mosh"
+  path: "../../../purescript-hylograph-showcases/psd3-prim-zoo-mosh"
 
-# site/website/spago.yaml references:
-hylograph-tidal:
-  path: "../../../purescript-hylograph-showcases/psd3-tilted-radio/purescript-psd3-tidal"
+# site/showcase-shell/spago.yaml references:
+hylograph-graph:
+  path: "../../../../purescript-hylograph-libs/purescript-hylograph-graph"
 ```
 
 These cross-repo references require the sibling repos to be checked out at the expected locations.
+
+**Mind the depth.** Since this repo moved to `polyglot/purescript-polyglot-site/`
+on 2026-07-30 it sits two levels below the workspace root, so sibling
+references need `../../../` from `blog/` and `../../../../` from
+`site/<pkg>/`. Intra-repo references (`../lib-shell`, `../showcase-shell`)
+are unaffected.
 
 ## Deployment
 
