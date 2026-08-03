@@ -4,7 +4,7 @@ workspace:
 
 package:
   name: hylograph-lib-shell
-  description: Shared shell component for PSD3 library documentation sites
+  description: Shared shell component for Hylograph library documentation sites
   dependencies:
     - prelude
     - halogen

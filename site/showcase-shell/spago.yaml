@@ -13,7 +13,7 @@ workspace:
 
 package:
   name: hylograph-showcase-shell
-  description: Reusable Halogen shell for PSD3 showcase applications
+  description: Reusable Halogen shell for Hylograph showcase applications
   publish:
     version: 0.1.0
     license: MIT

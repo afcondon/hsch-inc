@@ -15,7 +15,7 @@ workspace:
 
 package:
   name: hylographic
-  description: A visualization-first blog platform for PSD3 library documentation
+  description: A visualization-first blog platform for Hylograph library documentation
   bundle:
     module: Hylographic.Main
     outfile: public/bundle.js

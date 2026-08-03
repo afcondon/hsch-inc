@@ -25,7 +25,7 @@ workspace:
 
 package:
   name: demo-website
-  description: PSD3 documentation and examples website
+  description: Hylograph documentation and examples website
   bundle:
     module: Hylograph.Main
     outfile: public/bundle.js
