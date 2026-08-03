@@ -13,12 +13,12 @@
       "notes": "Rust WASM + PureScript force simulation"
     },
     {
-      "id": "hypo-punter-landing",
+      "id": "polyglot-pythia-showcases-landing",
       "name": "Hypo-Punter Landing",
       "port": 8091,
       "type": "static",
       "command": "python3 -m http.server {port}",
-      "cwd": "../../showcases/hypo-punter/landing/public",
+      "cwd": "../../showcases/polyglot-pythia-showcases/landing/public",
       "buildTarget": "landing",
       "autoStart": false,
       "notes": "Unified landing page for Python-backed demos"
@@ -29,7 +29,7 @@
       "port": 8087,
       "type": "static",
       "command": "python3 -m http.server {port}",
-      "cwd": "../../showcases/hypo-punter/ee-website/public",
+      "cwd": "../../showcases/polyglot-pythia-showcases/ee-website/public",
       "buildTarget": "ee-website",
       "autoStart": false,
       "notes": "Halogen + D3 SPLOM/UMAP visualization"
@@ -40,7 +40,7 @@
       "port": 5081,
       "type": "python",
       "command": "python3 -c \"import sys; sys.path.insert(0, 'output-py'); from main import main; main()()\"",
-      "cwd": "../../showcases/hypo-punter/ee-server",
+      "cwd": "../../showcases/polyglot-pythia-showcases/ee-server",
       "buildTarget": "ee-server",
       "autoStart": false,
       "notes": "PureScript-Python + Flask + UMAP. Serves API on this port."
@@ -51,7 +51,7 @@
       "port": 8088,
       "type": "static",
       "command": "python3 -m http.server {port}",
-      "cwd": "../../showcases/hypo-punter/ge-website/public",
+      "cwd": "../../showcases/polyglot-pythia-showcases/ge-website/public",
       "buildTarget": "ge-website",
       "autoStart": false,
       "notes": "Halogen + PSD3 power grid visualization"
@@ -62,7 +62,7 @@
       "port": 5082,
       "type": "python",
       "command": "python3 -c \"import sys; sys.path.insert(0, 'output-py'); from main import main; main()()\"",
-      "cwd": "../../showcases/hypo-punter/ge-server",
+      "cwd": "../../showcases/polyglot-pythia-showcases/ge-server",
       "buildTarget": "ge-server",
       "autoStart": false,
       "notes": "PureScript-Python + Flask + pandapower"

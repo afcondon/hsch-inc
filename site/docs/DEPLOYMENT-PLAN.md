@@ -36,8 +36,8 @@ This document outlines the steps to containerize and deploy the full demo suite 
 |---------|-------|------------|-----------------|------|
 | scuppered-ligature | `*` (gateway) | PureScript/Lua/OpenResty | `site/scuppered-ligature` | 80 |
 | tilted-radio | `/tidal/*` | Erlang/OTP | `showcase apps/tilted-radio` | 8083 |
-| hypo-punter-ee | `/embed/*` | Python | `showcase apps/psd3-embedding-explorer` | 5081 |
-| hypo-punter-ge | `/grid/*` | Python | `showcase apps/psd3-embedding-explorer` | 5082 |
+| polyglot-pythia-showcases-ee | `/embed/*` | Python | `showcase apps/psd3-embedding-explorer` | 5081 |
+| polyglot-pythia-showcases-ge | `/grid/*` | Python | `showcase apps/psd3-embedding-explorer` | 5082 |
 | arid-keystone | `/sankey/*` | Static JS | `showcase apps/sankey-editor` | 8089 |
 | corrode-expel-api | `/code/api/*` | Node.js | `showcase apps/code-explorer` | 3000 |
 | corrode-expel-ui | `/code/*` | Static JS | `showcase apps/code-explorer` | 8082 |

@@ -48,7 +48,7 @@ All repos are under `/Users/afc/work/afc-work/PSD3-Repos/`:
 
 **Showcases** (in `showcases/`):
 - corrode-expel (Code Explorer)
-- hypo-punter (Embedding Explorer + Grid Explorer)
+- polyglot-pythia-showcases (Embedding Explorer + Grid Explorer)
 - psd3-arid-keystone (Sankey Editor)
 - psd3-tilted-radio (Tidal Editor)
 - wasm-force-demo
