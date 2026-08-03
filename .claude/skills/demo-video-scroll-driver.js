@@ -103,6 +103,53 @@ window.DEMO = (() => {
   const maxScroll = () =>
     Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
 
+  // ---- the second verb: focus ---------------------------------------------
+  //
+  // Scrolling is the wrong verb for a page that fits one screen, and several
+  // of these do (patterns is exactly 1.00 screens — zero travel). On those,
+  // the thing you actually want is to POINT: keep the frame still and wash out
+  // everything except the part being talked about.
+  //
+  // Implemented as one fixed div sized to the target's rect, with an enormous
+  // box-shadow spread in the PAPER colour. That washes the surround toward
+  // blank rather than darkening it — on a light Swiss page a dark scrim reads
+  // as a modal dialog, which is the wrong grammar entirely. No knowledge of
+  // the page's structure is needed, so it works on any of them.
+  const WASH = 'rgba(251, 251, 249, .84)';   // --paper at 84%
+  const RING = 'rgba(180, 52, 31, .55)';     // --accent, restrained
+
+  let lens = null;
+  const ensureLens = () => {
+    if (lens) return lens;
+    lens = document.createElement('div');
+    lens.setAttribute('data-demo-lens', '');
+    lens.style.cssText = [
+      'position:fixed', 'pointer-events:none', 'z-index:2147483647',
+      'border-radius:4px', `border:2px solid ${RING}`,
+      `box-shadow:0 0 0 9999px ${WASH}`, 'opacity:0',
+      'transition:opacity 420ms ease, top 420ms ease, left 420ms ease,' +
+      ' width 420ms ease, height 420ms ease',
+    ].join(';');
+    document.body.appendChild(lens);
+    return lens;
+  };
+
+  const focusOn = (at, pad = 14) => {
+    const el = resolve(at);
+    if (!el) { console.warn(`[DEMO] focus target ${describe(at)} not found`); return false; }
+    const r = el.getBoundingClientRect();
+    const l = ensureLens();
+    Object.assign(l.style, {
+      top:    `${r.top - pad}px`,
+      left:   `${r.left - pad}px`,
+      width:  `${r.width + pad * 2}px`,
+      height: `${r.height + pad * 2}px`,
+      opacity: '1',
+    });
+    return true;
+  };
+  const focusClear = () => { if (lens) lens.style.opacity = '0'; };
+
   // Resolve any of the three `at` forms to an element, or null for fractions.
   const resolve = at => {
     if (typeof at === 'number') return null;
@@ -135,14 +182,20 @@ window.DEMO = (() => {
 
   const play = async () => {
     window.scrollTo({ top: 0, behavior: 'auto' });
+    focusClear();
     await sleep(T.settle);
     for (let i = 0; i < BEATS.length; i++) {
       const b = BEATS[i];
-      console.log(`[DEMO] B${i + 1} → ${describe(b.at)}`);
-      await goto(b.at, b.align);
+      console.log(`[DEMO] B${i + 1} → ${b.at !== undefined ? describe(b.at) : 'hold'}` +
+                  `${b.focus ? ' · focus ' + describe(b.focus) : ''}`);
+      // Scroll first, then point: the lens is positioned in viewport
+      // coordinates, so moving the page under it would leave it stranded.
+      if (b.at !== undefined) await goto(b.at, b.align);
       await sleep(T.afterScroll);
+      if (b.focus) focusOn(b.focus, b.pad); else focusClear();
       await sleep(b.hold);
     }
+    focusClear();
     console.log('[DEMO] done');
   };
 
@@ -159,11 +212,18 @@ window.DEMO = (() => {
       console.error('[DEMO] page does not scroll — every beat would be a no-op.');
     }
     BEATS.forEach((b, i) => {
-      const d = describe(b.at);
-      if (typeof b.at === 'number') { console.log(`B${i + 1}  ${d} — always resolves`); return; }
-      const el = resolve(b.at);
-      if (!el) { ok = false; console.error(`B${i + 1}  ${d} — NOT FOUND`); }
-      else console.log(`B${i + 1}  ${d} — ok: "${(el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 60)}"`);
+      if (b.at === undefined) console.log(`B${i + 1}  (no scroll — holds the frame)`);
+      else if (typeof b.at === 'number') console.log(`B${i + 1}  ${describe(b.at)} — always resolves`);
+      else {
+        const el = resolve(b.at);
+        if (!el) { ok = false; console.error(`B${i + 1}  ${describe(b.at)} — NOT FOUND`); }
+        else console.log(`B${i + 1}  ${describe(b.at)} — ok: "${(el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 58)}"`);
+      }
+      if (b.focus) {
+        const fel = resolve(b.focus);
+        if (!fel) { ok = false; console.error(`B${i + 1}  focus ${describe(b.focus)} — NOT FOUND`); }
+        else console.log(`B${i + 1}  focus ${describe(b.focus)} — ok: "${(fel.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 46)}"`);
+      }
     });
     // Two beats that resolve to the same scroll position are two VO segments
     // over one unchanging shot — the viewer sees a freeze. Usually it means
@@ -171,13 +231,22 @@ window.DEMO = (() => {
     // height, so the last beats clamp to the bottom and collapse together.
     // Fix by merging the beats, or by recording at a smaller viewport.
     const tops = BEATS.map(b => {
+      if (b.at === undefined) return null;                 // focus-only beat
       const t = topFor(b.at, b.align);
       return t === null ? null : Math.round(Math.max(0, Math.min(maxScroll(), t)));
     });
+    // Two beats within a third of a viewport are the same shot in practice,
+    // not just when the pixel matches exactly: 43px apart over 29 seconds of
+    // narration still reads as a frozen frame. A beat that only changes the
+    // FOCUS is exempt — that is a visible change without a scroll.
+    const near = Math.round(window.innerHeight / 3);
     tops.forEach((t, i) => {
-      if (t !== null && i > 0 && t === tops[i - 1]) {
-        console.warn(`[DEMO] B${i} and B${i + 1} both land at ${t}px — same shot, ` +
-                     `no visible change. Merge them or record at a shorter viewport.`);
+      if (t === null || i === 0 || tops[i - 1] === null) return;
+      const d = Math.abs(t - tops[i - 1]);
+      if (d < near && !BEATS[i].focus) {
+        console.warn(`[DEMO] B${i} and B${i + 1} land ${d}px apart (< ${near}) — ` +
+                     `effectively one shot. Merge them, give B${i + 1} a focus:, ` +
+                     `or move it further down the page.`);
       }
     });
     console.log('targets:', tops.map((t, i) => `B${i + 1}:${t}`).join('  '),
@@ -191,6 +260,9 @@ window.DEMO = (() => {
 
   return {
     play, check, BEATS, T,
+    // Exposed so you can frame a shot by hand while writing the beat sheet:
+    //   DEMO.focus({sel:'.item', n:2})  …  DEMO.focusClear()
+    focus: focusOn, focusClear,
     get speed() { return speed; },
     set speed(v) { speed = v; },
   };
