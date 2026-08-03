@@ -130,6 +130,67 @@ page under `content/backends/`, where the full embed lives.
 
 ---
 
+## Mode B — a static page, no service
+
+Most of the Julia block is a terminal and a static page: no server, no app
+state, nothing to host. Mode B is that case, and it is much cheaper than
+Mode A — worth reaching for whenever the exhibit's output is a *page*
+rather than a *program*.
+
+Use `demo-video-scroll-driver.js` instead of the capture driver. Same
+interface — paste, `DEMO.check()`, press `0` — but the only verb is "put
+this on screen and hold." Steps 1, 2, 5 and 6 above are unchanged; step 3
+becomes filling in `BEATS[]`, and step 4 gains a pre-flight.
+
+**Serve it, don't open it.** `file://` works only for a page that never
+calls `fetch`, and Chrome's automation refuses `file://` URLs outright.
+One line from the tree root, and every page is reachable:
+
+```bash
+cd purescript-backends/purescript-julia/examples
+python3 -m http.server 4180 --bind 127.0.0.1
+```
+
+**Make the page self-contained first.** Four of these pages loaded KaTeX
+from a CDN. If that request is slow or fails mid-take the math silently
+renders as raw LaTeX source — a broken-looking shot that never raises an
+error. KaTeX is now vendored per-page under `vendor/katex/` (js + css +
+woff2, ~590 K); do the same for anything else a page reaches for. A page
+that needs the network is a page whose recording depends on the network.
+
+**Run `DEMO.check()` before every take.** It is a pre-flight, and each
+thing it reports was a real failure first:
+
+- *a selector that does not resolve* — a silent no-op mid-take. It prints
+  each beat's actual heading text, so you can see you aimed at the right
+  section rather than merely a valid one.
+- *a hidden tab* — see below.
+- *two beats landing on the same pixel* — two VO segments over one
+  unchanging shot. Usually the page is shorter than the beat sheet assumes
+  at this viewport, so the tail beats clamp to the bottom and collapse.
+  Merge them, or record at a shorter viewport.
+- *the total run time*, so you know whether the beat sheet fits the read.
+
+### Two browser behaviours that will cost you a take
+
+Both were measured on 2026-08-03 while writing this, and both fail
+**silently** — no error, no warning, nothing in the console.
+
+**`behavior: 'smooth'` does not work here.** In the capture context both
+`el.scrollIntoView({behavior:'smooth'})` and
+`window.scrollTo({top, behavior:'smooth'})` are no-ops — the page stays at
+`scrollY` 0 — while the identical calls with `behavior:'auto'` land exactly
+on target. The driver therefore animates scrolling itself. That is better
+anyway: `'smooth'` runs for however long Chrome decides, whereas VO-first
+timing needs a duration *you chose*. `T.scrollMs` is now honoured exactly.
+
+**`requestAnimationFrame` does not fire in a hidden tab** — zero callbacks
+in 600 ms, measured. A rAF-driven glide does not slow down, it *hangs
+forever*, so a driver started before the tab is frontmost — or covered by
+the recorder's own window — yields a frozen take with no diagnostic. The
+driver steps from a timer instead, which throttles in the background but
+always finishes. `check()` warns when the tab is not visible.
+
 ## Gotchas
 
 **Guard every loop.** Stepping "until the readout says E102" must also
