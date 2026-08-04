@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>polyglot purescript — manifesto titles</title>
+<!--
+  ============================================================================
+  POLYGLOT PURESCRIPT — OPENING TITLES  ("a manifesto in a flowchart")
+  Video 0 of 13. Saul Bass register, watercolour reveal, paper ground.
+
+  A WIDE STAGE: 7680x1080 (four 16:9 screens side by side) seen through a
+  fixed 1920x1080 frame. The CAMERA translates east along the argument and
+  finally pulls back until the whole path fits one frame — that pulled-back
+  poster is the thumbnail. Camera moves are CSS transform transitions on
+  #stage (translate+scale, origin 0 0) — never scrollTo, never rAF, so a
+  hidden tab degrades instead of hanging.
+
+  All watercolour geometry is generated ONCE per play() from a fixed seed
+  (SEED = 1969); animation only ever touches opacity / transform /
+  stroke-dashoffset via CSS transitions and keyframes.
+
+  TWO CUTS in this one file:
+    manifesto  (~86 s)  auto-plays; key 0 replays        — narrated over
+    sting      (~9.5 s) key 9, or manifesto.html?sting   — silent, tops
+                        every episode; same seed, palette and generator.
+
+  NINE NODES: 1 the wish (illuminated twice — it is also the path),
+  2 the wall, 3 the bypass, 4 the gate opens, 5 gate two, 6 gate three,
+  7 the resolution (BOTH gates converge on this one answer),
+  8 the conclusion, 9 the coda.
+
+  SCENE TIMELINE — manifesto (phase -> start, seconds; camera stops A-D)
+  ----------------------------------------------------------------------------
+   0.0   COLD OPEN    camera at A (view 0-1920). Whole stage ghosted; the
+                      gates live on screen 3, unseen until the camera comes.
+   2.0   1 THE WISH   blue wash blooms; sentence sharpens in place
+   8.3   TRAVEL       pigment runs east along the path toward the wall
+  11.0   2 THE WALL   wash POOLS and darkens against the slab at the right
+                      edge of frame (masked-edge rim pooling); wall goes
+                      full ink. Thirty years. Hold it.   <- emotional centre
+  19.2   CAMERA -> B  (between sentences; wall now at frame left)
+  21.5   3 THE BYPASS a trickle squeezes through the gap under the wall,
+                      along a sub-path BELOW the main line; one-way arrow
+  28.0   4 GATE OPENS pool surges, the chunk is knocked out, pooled pigment
+                      FLOODS east through the breach          <- the beat
+  31.8   FLOOD-BACK   the pigment also turns WEST; the camera returns to A
+                      following it through the open wall
+  34.2   RE-LIGHT     the wish re-solidifies — same node, second
+                      illumination, one new clause: "so write each piece
+                      where it belongs." The argument is home, wall open.
+  39.5   CAMERA -> C  the victory lap east through the breach (long move);
+                      the path races ahead of the camera
+  42.2   THE FAN      five runtime strands split off; tokens label them
+  44.5   5 GATE TWO   dark flat cracks; ochre bloom; cream knockout text
+  52.0   6 GATE THREE second dark flat; "renting the one who writes it"
+  59.0   7 RESOLUTION both gates' arrows CONVERGE on one blue node:
+                      "one typed layer over the top — and it's yours"
+  66.0   CAMERA -> D  (between sentences)
+  68.0   8 CONCLUSION giant wordmark snaps to ink; ochre full stop punches
+  76.5   9 CODA       "…CETERIS PARIBUS." — beat — "HERE'S THE BILL."
+  81.5   PULL-BACK    camera retreats until all four screens fit: a wide
+                      hairline-framed band across the cream. THE POSTER.
+                      Only the big marks survive: wish-mass, wall, breach,
+                      gates, wordmark. ?still lands here.
+  86.0   END          hold the poster.
+  ----------------------------------------------------------------------------
+  RETIME: edit the numbers in T{} inside buildManifesto() (ms). Camera moves
+  are timeline entries like everything else — cam(x, y, scale, dur) — and
+  their start times live in the same T{}. Nothing else carries phase timing.
+  The sting timeline is ST{} in buildSting().
+
+  SPEED: window.SPEED (or ?speed=4) divides all timeline delays AND camera
+  durations. CSS micro-durations (0.2-1.4 s blooms/slams) do NOT scale — at
+  4x things overlap a little; fine for rehearsal only.
+  ?still settles on the pulled-back poster in ~3 s, for thumbnail export.
+  NOTE headless capture: mid-sequence screenshots via --virtual-time-budget
+  under-report in-flight CSS transitions (flats read pale). Real playback is
+  unaffected; end states are correct. Verified against live Chrome.
+
+  HEADROOM: the AMBIENT array (below buildManifesto) is a separate layer of
+  near-subliminal language marks. Add entries there — they merge into the
+  timeline without touching T{}. Reserved quiet zones on the wide stage:
+  screen 1 lower-left (x 150-800, y 650-950) and the corridor between the
+  bypass and the fan (x 2700-3900, y 620-950).
+
+  PALETTE (60s stock; deliberately NOT the Kibitzer red or the house
+  vermilion — this show owns its own pair):
+    paper  #f2ede2   cream, warmer/dirtier than the house #fbfbf9
+    ink    #211d16   warm black — type, hairlines, the wall, the gates
+    blue   #254a6f   prussian — THE pigment; the wish, the washes, the answer
+    ochre  #b3831c   mustard — the price; gate blooms, the full stop, the bill
+  ============================================================================
+-->
+<style>
+  :root {
+    --paper:#f2ede2; --ink:#211d16; --blue:#254a6f; --ochre:#b3831c;
+    --ghost:.14;          /* how faint the not-yet-spoken graph sits */
+  }
+  html, body { margin:0; height:100%; background:#1c1a15; overflow:hidden; }
+  body { font-family:"Helvetica Neue", Helvetica, Arial, system-ui, sans-serif; }
+
+  #frame {
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    background:var(--paper); overflow:hidden;
+    transform:translate(-50%,-50%);
+  }
+
+  /* ---------- the wide stage and its layers ---------- */
+  #world { position:absolute; inset:0; opacity:0; transition:opacity 1.2s ease; }
+  #frame.up #world { opacity:1; }
+  /* Camera = transform on #stage, set inline by cam(). Origin 0 0 so
+     translate+scale compose predictably and interpolate smoothly. */
+  #stage { position:absolute; left:0; top:0; width:7680px; height:1080px;
+           transform-origin:0 0; will-change:transform; }
+  #washSvg    { position:absolute; inset:0; z-index:100; }
+  #graphSvg   { position:absolute; inset:0; z-index:200; }
+  #typeLayer  { position:absolute; inset:0; z-index:300; pointer-events:none; }
+  #stingLayer { position:absolute; inset:0; display:none; }
+  #frame.stingMode #world      { display:none; }
+  #frame.stingMode #stingLayer { display:block; }
+
+  .condense { display:inline-block; transform:scaleX(.84); transform-origin:center; }
+  .oL .condense { transform-origin:left; }
+  .oR .condense { transform-origin:right; }
+
+  /* ---------- shared kinetic type (inherited from Kibitzer) ---------- */
+  @keyframes kslam  { from { opacity:0; transform:translateY(60px); }
+                      to   { opacity:1; transform:none; } }
+  @keyframes punchE { 0%   { opacity:0; transform:scale(1.35); }
+                      60%  { opacity:1; transform:scale(.95); }
+                      100% { opacity:1; transform:scale(1); } }
+  @keyframes crack  { 0%   { transform:scale(1); }
+                      38%  { transform:scale(1.05) rotate(.5deg); }
+                      100% { transform:scale(1); } }
+
+  /* ---------- watercolour washes ----------
+     Each wash is <g class="wash" transform="translate(cx,cy)"> holding an
+     inner <g class="wi"> of N deformed-polygon <path>s in LOCAL coords.
+     Reveal = .on: paths fade to a tiny fill-opacity with a per-path
+     transition-delay stagger (pigment accumulating) while the inner group
+     eases from --t0 (default scale .55) to scale(1) — the bloom.
+     SOFT THING MOVES; the hard graph never does. Geometry is generated
+     once per play() and never regenerated.                                 */
+  .wash path { fill-opacity:0; transition:fill-opacity .7s ease; }
+  .wash.on path { fill-opacity:var(--lo, .045); }
+  .wash.surge path { fill-opacity:calc(var(--lo, .045) * 1.45); }
+  .wash .wi { transform:var(--t0, scale(.55));
+              transition:transform 1.4s cubic-bezier(.16,.8,.3,1); }
+  .wash.on .wi { transform:scale(1); }
+
+  /* ---------- hard graph ---------- */
+  .gline { fill:none; stroke:var(--ink); opacity:.16; }
+  .lline { fill:none; stroke:var(--ink); }
+  .lline.draw { stroke-dashoffset:0;
+                transition:stroke-dashoffset var(--dur,900ms) cubic-bezier(.45,.05,.25,1); }
+  .garr  { fill:var(--ink); opacity:.16; }
+  .af    { fill:var(--ink); opacity:0; transition:opacity .3s ease; }
+  .af.on { opacity:1; }
+
+  .flat  { fill:var(--ink); opacity:.2; transition:opacity .7s ease; }
+  .flat.lit { opacity:1; }
+  .gate  { fill:var(--ink); }                    /* full ink from frame one */
+  .gate.crack { animation:crack .38s cubic-bezier(.2,1,.3,1) both;
+                transform-box:fill-box; transform-origin:center; }
+  /* 7 the resolution: a blue flat that floods solid at its beat */
+  #res   { fill:var(--blue); fill-opacity:.09; stroke:rgba(33,29,22,.4);
+           stroke-width:2; transition:fill-opacity .8s ease; }
+  #res.lit { fill-opacity:1; }
+
+  /* the wall opening: the CHUNK moves (it is the broken thing); the
+     standing pieces only recoil. A keyframe animation, not a delayed
+     transition — delayed transitions stall under headless virtual time. */
+  @keyframes knock { 0%   { transform:none; opacity:1; }
+                     65%  { opacity:1; }
+                     100% { transform:translate(170px,80px) rotate(24deg);
+                            opacity:0; } }
+  #chunk { transform-box:fill-box; transform-origin:center; }
+  #chunk.out { animation:knock .9s cubic-bezier(.35,.6,.45,1) both; }
+  #wallT, #wallB { transition:transform .4s cubic-bezier(.2,1,.3,1),
+                              opacity .7s ease; }
+  #wallT.recoil { transform:translateY(-9px); }
+  #wallB.recoil { transform:translateY(9px); }
+
+  /* ---------- node text (faintly present from frame one) ---------- */
+  .nb { position:absolute; opacity:var(--ghost); transition:opacity .8s ease; }
+  .nb.lit { opacity:1; }
+  .tag  { font-size:21px; font-weight:800; letter-spacing:.34em;
+          color:rgba(33,29,22,.62); margin-bottom:9px; white-space:nowrap; }
+  .tag .ix { color:var(--ochre); }
+  .sent { font-size:31px; font-weight:800; line-height:1.3;
+          letter-spacing:.05em; color:var(--ink); }
+  .note { font-size:17px; font-weight:700; letter-spacing:.3em;
+          color:rgba(33,29,22,.55); margin-top:10px; }
+  /* the wish's second illumination: the phase-5 clause, hidden until the
+     pigment returns west (near-invisible before: .14 x .14) */
+  .so { opacity:.14; margin-top:12px; font-size:22px; font-weight:800;
+        letter-spacing:.08em; color:var(--blue); }
+  .so.in { opacity:1; animation:kslam .3s cubic-bezier(.16,1,.3,1) both; }
+
+  /* gates and the resolution: text INVISIBLE until its moment, then slams
+     in cream on the flat (Bass knockout type) */
+  .gt { position:absolute; opacity:0; color:var(--paper); text-align:center;
+        pointer-events:none; }
+  .gt .tag { color:rgba(242,237,226,.66); }
+  .gt .tag .ix { color:var(--ochre); }
+  .gt .sent { color:var(--paper); font-size:25px; line-height:1.42; }
+  .gt.show { animation:kslam .3s cubic-bezier(.16,1,.3,1) both; }
+
+  /* ---------- runtime tokens on the strands ---------- */
+  .tok { position:absolute; width:96px; margin-left:-48px; text-align:center;
+         font-size:14.5px; font-weight:800; letter-spacing:.2em;
+         color:rgba(33,29,22,.85); background:var(--paper); padding:3px 0;
+         opacity:0; transform:translateY(8px);
+         transition:opacity .35s ease, transform .35s cubic-bezier(.2,1,.3,1); }
+  .tok.on { opacity:1; transform:none; }
+
+  /* ---------- 8 the conclusion (screen 4; sized to survive the poster) -- */
+  #titleBlock { position:absolute; left:5720px; top:212px; width:1880px;
+                text-align:right; }
+  #titleTag { margin-bottom:14px; }
+  #titleTag .tag { font-size:22px; margin-bottom:0; }
+  .tl { font-size:240px; font-weight:900; line-height:1.04;
+        letter-spacing:.005em; color:var(--ink); opacity:.09; }
+  .tl.lit { opacity:1; transition:opacity .18s ease; }   /* snap, not fade */
+  #tdot { color:var(--ochre); opacity:0; display:inline-block; }
+  #tdot.in { animation:punchE .34s cubic-bezier(.2,1,.3,1) both; }
+
+  /* ---------- 9 coda ---------- */
+  #coda { left:5960px; top:912px; }
+  #coda .sent { font-size:27px; letter-spacing:.3em; }
+  #bill { color:var(--ochre); opacity:0; display:inline-block; }
+  #bill.in { animation:punchE .3s cubic-bezier(.2,1,.3,1) both; }
+
+  /* ---------- ambient headroom layer ---------- */
+  .amb { position:absolute; color:var(--ink); opacity:0; font-weight:700;
+         transition:opacity 2.5s ease; }
+  .amb.on { opacity:.07; }
+
+  /* ---------- sting (frame-space, untouched by the camera) ---------- */
+  #stingSvg { position:absolute; inset:0; }
+  #stType { position:absolute; inset:0; text-align:center; }
+  .stl { font-size:168px; font-weight:900; line-height:1.02;
+         letter-spacing:.005em; color:var(--ink); opacity:0;
+         position:absolute; left:0; right:0; }
+  .stl.show { animation:kslam .34s cubic-bezier(.16,1,.3,1) both; }
+  #stl1 { top:300px; }  #stl2 { top:473px; }
+  #sdot { color:var(--ochre); opacity:0; display:inline-block; }
+  #sdot.in { animation:punchE .34s cubic-bezier(.2,1,.3,1) both; }
+  #stRule { position:absolute; left:50%; top:702px; width:340px;
+            margin-left:-170px; height:5px; background:var(--ink);
+            transform:scaleX(0); transition:transform .4s cubic-bezier(.2,1,.3,1); }
+  #stRule.show { transform:scaleX(1); }
+  #stMotto { position:absolute; left:0; right:0; top:736px; text-align:center;
+             font-size:25px; font-weight:800; letter-spacing:.5em;
+             color:rgba(33,29,22,.75); opacity:0; transform:translateY(14px);
+             transition:opacity .5s ease, transform .5s cubic-bezier(.2,1,.3,1); }
+  #stMotto.show { opacity:1; transform:none; }
+
+  /* ---------- UI (hidden while playing so it never lands on camera) ------ */
+  #ui { position:fixed; right:16px; bottom:12px; z-index:1000; display:flex;
+        gap:8px; opacity:1; transition:opacity .4s ease; }
+  body.playing #ui { opacity:0; pointer-events:none; }
+  #ui button { background:transparent; border:1px solid rgba(242,237,226,.35);
+        color:rgba(242,237,226,.65); letter-spacing:.2em; cursor:pointer;
+        font:600 12px/1 "Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+        padding:8px 14px; border-radius:3px; }
+  #ui button:hover { color:var(--paper); border-color:rgba(242,237,226,.75); }
+</style>
+</head>
+<body>
+
+<div id="frame">
+  <div id="world">
+    <div id="stage">
+
+      <!-- washes: generated into #washG by build(), all from SEED -->
+      <svg id="washSvg" viewBox="0 0 7680 1080" width="7680" height="1080">
+        <defs>
+          <!-- the mask that makes the pigment POOL: the pool blob's layers
+               spill past x=1601 (the wall face) and are clipped hard, so
+               the stack piles up and darkens at the masked edge — exactly
+               how real pigment banks against tape. -->
+          <clipPath id="clipWall"><rect x="0" y="0" width="1601" height="1080"/></clipPath>
+        </defs>
+        <g id="washG"></g>
+      </svg>
+
+      <!-- hard graph: hairlines + cut-paper flats -->
+      <svg id="graphSvg" viewBox="0 0 7680 1080" width="7680" height="1080">
+        <g id="lineG"></g>
+        <g id="flatsG">
+          <!-- the band frame: at the poster pull-back this hairline is what
+               delineates the whole strip on the cream field -->
+          <rect id="board" x="40" y="40" width="7600" height="1000"
+                fill="none" stroke="rgba(33,29,22,.3)" stroke-width="4"/>
+          <!-- 1 the wish: start token (screen 1) -->
+          <rect id="wishNode" class="flat" x="-15" y="-15" width="30" height="30"
+                transform="translate(240,520) rotate(45)"/>
+          <!-- 2 the wall: one slab in three pieces (right edge of screen 1);
+               the middle piece is the chunk knocked out at gate 1 -->
+          <rect id="wallT" class="flat" x="1600" y="200" width="60" height="290"/>
+          <rect id="chunk" class="flat" x="1600" y="490" width="60" height="66"/>
+          <rect id="wallB" class="flat" x="1600" y="556" width="60" height="284"/>
+          <!-- 5 & 6: the gates (screen 3). FULL INK from frame one, mute,
+               and unseen until the camera arrives. -->
+          <polygon id="gate2" class="gate"
+            points="4688,332 4830,292 4990,308 5150,286 5208,392 5150,498 4980,486 4830,506 4700,462 4716,398"/>
+          <polygon id="gate3" class="gate"
+            points="4728,660 4854,612 5010,626 5148,614 5212,700 5150,782 5000,768 4862,798 4732,752"/>
+          <!-- 7 the resolution: ONE answer both gates converge on -->
+          <rect id="res" x="5300" y="548" width="420" height="144"/>
+        </g>
+        <g id="arrowG"></g>
+      </svg>
+
+      <!-- type: HTML, absolutely positioned on the stage -->
+      <div id="typeLayer">
+
+        <!-- 1 THE WISH — illuminated twice; it is also the path -->
+        <div class="nb oL" id="nb1" style="left:150px; top:300px; width:620px;">
+          <div class="tag"><span class="condense"><span class="ix">1</span> · THE WISH</span></div>
+          <div class="sent"><span class="condense">WRITE EACH COMPUTATION IN THE LANGUAGE BEST SUITED TO IT</span></div>
+          <div class="so" id="soLine"><span class="condense">— SO WRITE EACH PIECE WHERE IT BELONGS —</span></div>
+        </div>
+
+        <!-- 2 THE WALL -->
+        <div class="nb oL" id="nb2" style="left:1050px; top:600px; width:460px;">
+          <div class="tag" style="font-size:26px;"><span class="condense"><span class="ix">2</span> · THE WALL</span></div>
+          <div class="sent"><span class="condense">TOOLING UP COSTS MORE THAN THE ELEGANCE IS WORTH</span></div>
+          <div class="note"><span class="condense">— THIRTY YEARS AT THIS WALL —</span></div>
+        </div>
+
+        <!-- 3 THE BYPASS — the sub-path below the main line -->
+        <div class="nb oL" id="nb3" style="left:1980px; top:800px; width:900px;">
+          <div class="tag"><span class="condense"><span class="ix">3</span> · THE BYPASS</span></div>
+          <div class="sent" style="font-size:23px; white-space:nowrap;"><span class="condense">PYTHON WRAPS C. ONE DIRECTION — NO TYPES ACROSS.</span></div>
+        </div>
+
+        <!-- 4 THE GATE OPENS -->
+        <div class="nb oL" id="nb4" style="left:2320px; top:340px; width:440px;">
+          <div class="tag"><span class="condense"><span class="ix">4</span> · THE GATE OPENS</span></div>
+          <div class="sent"><span class="condense">NIX. CLAUDE.<br>THE COST COLLAPSES.</span></div>
+        </div>
+
+        <!-- 5 GATE TWO: cream knockout, invisible until its beat -->
+        <div class="gt" id="nb5" style="left:4700px; top:322px; width:480px;">
+          <div class="tag"><span class="condense"><span class="ix">5</span> · GATE TWO</span></div>
+          <div class="sent"><span class="condense">THE BOUNDARIES MULTIPLY —<br>AND THE BOUNDARIES ARE<br>WHERE THE TYPES AREN'T.</span></div>
+        </div>
+
+        <!-- 6 GATE THREE -->
+        <div class="gt" id="nb6" style="left:4760px; top:640px; width:420px;">
+          <div class="tag"><span class="condense"><span class="ix">6</span> · GATE THREE</span></div>
+          <div class="sent"><span class="condense">AND YOU ARE RENTING<br>THE ONE WHO WRITES IT.</span></div>
+        </div>
+
+        <!-- 7 THE RESOLUTION: cream knockout on the blue flat -->
+        <div class="gt" id="nb7" style="left:5300px; top:568px; width:420px;">
+          <div class="tag" style="font-size:19px; margin-bottom:6px;"><span class="condense"><span class="ix">7</span> · THE RESOLUTION</span></div>
+          <div class="sent" style="font-size:24px;"><span class="condense">ONE TYPED LAYER OVER<br>THE TOP — AND IT'S YOURS.</span></div>
+        </div>
+
+        <!-- runtime tokens riding the strands -->
+        <div class="tok" id="tok0" style="left:4560px; top:350px;">JS</div>
+        <div class="tok" id="tok1" style="left:4560px; top:404px;">JULIA</div>
+        <div class="tok" id="tok2" style="left:4560px; top:456px;">PYTHON</div>
+        <div class="tok" id="tok3" style="left:4560px; top:617px;">GO</div>
+        <div class="tok" id="tok4" style="left:4560px; top:672px;">ERLANG</div>
+
+        <!-- 8 THE CONCLUSION — sized so it still reads in the poster -->
+        <div id="titleBlock" class="oR">
+          <div class="nb oR" id="titleTag" style="position:static;">
+            <div class="tag"><span class="condense"><span class="ix">8</span> · THE CONCLUSION</span></div>
+          </div>
+          <div class="tl" id="tl1"><span class="condense">POLYGLOT</span></div>
+          <div class="tl" id="tl2"><span class="condense">PURESCRIPT<span id="tdot">.</span></span></div>
+        </div>
+
+        <!-- 9 CODA -->
+        <div class="nb oL" id="coda">
+          <div class="sent"><span class="condense">…CETERIS PARIBUS.&nbsp;&nbsp;<span id="bill">HERE'S THE BILL.</span></span></div>
+        </div>
+
+        <!-- ambient headroom: near-subliminal language marks in the quiet
+             zones. Add more here + entries in AMBIENT[] — no retiming. -->
+        <div class="amb" id="amb1" style="left:300px;  top:700px; font-size:86px;">λ</div>
+        <div class="amb" id="amb2" style="left:2720px; top:740px; font-size:44px;">::</div>
+        <div class="amb" id="amb3" style="left:3400px; top:680px; font-size:58px;">→</div>
+        <div class="amb" id="amb4" style="left:4230px; top:840px; font-size:52px;">∀</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= THE STING ==================================
+       Frame-space, untouched by the camera. Same seed, same generator,
+       same palette as the manifesto's title bloom. Do not change. -->
+  <div id="stingLayer">
+    <svg id="stingSvg" viewBox="0 0 1920 1080"><g id="stingWashG"></g></svg>
+    <div id="stType">
+      <div class="stl" id="stl1"><span class="condense">POLYGLOT</span></div>
+      <div class="stl" id="stl2"><span class="condense">PURESCRIPT<span id="sdot">.</span></span></div>
+      <div id="stRule"></div>
+      <div id="stMotto">WRITE EACH PIECE WHERE IT BELONGS</div>
+    </div>
+  </div>
+</div>
+
+<div id="ui">
+  <button id="btnM">MANIFESTO</button>
+  <button id="btnS">STING</button>
+</div>
+
+<script>
+/* =========================================================================
+   Deterministic watercolour — JS port of Onion.Watercolour (Tyler Hobbs
+   polygon-deform-and-stack). A base 12-gon is recursively subdivided: each
+   edge midpoint is displaced along the edge normal by gaussian * scale *
+   edgeLength, displacement decaying 0.75x per depth level. Stack ~20 such
+   variants at fill-opacity ~0.045: soft edges and natural rim pooling.
+   Seeded (mulberry32 — pure integer ops, identical on every run and every
+   machine), generated ONCE per play(), never per frame.
+   ========================================================================= */
+const SEED = 1969;                    /* Bass era. Change = different pigment */
+const BLUE = '#254a6f', OCHRE = '#b3831c';
+
+function mulberry32(a) {
+  a = a >>> 0;
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+/* Onion.Prng.gaussian: mean 0, ~[-.5,.5], via 3-sample central limit */
+const gauss = r => (r() + r() + r()) / 3 - .5;
+
+/* base polygon: a 12-gon on an ellipse with radial jitter; local coords.
+   clampLo/clampHi pin the base against a mask line (the wall face). */
+function basePoly(rng, rx, ry, bx, by, clampLo, clampHi) {
+  const pts = [];
+  for (let i = 0; i < 12; i++) {
+    const a = i * Math.PI / 6, j = .88 + rng() * .24;
+    let x = bx + Math.cos(a) * rx * j;
+    const y = by + Math.sin(a) * ry * j;
+    if (clampLo !== undefined) x = Math.max(x, clampLo);
+    if (clampHi !== undefined) x = Math.min(x, clampHi);
+    pts.push({ x, y });
+  }
+  return pts;
+}
+/* one subdivision pass — Onion.Watercolour.subdivideAndDisplace, verbatim */
+function subdivide(scale, rng, poly) {
+  const out = [], n = poly.length;
+  for (let i = 0; i < n; i++) {
+    const p1 = poly[i], p2 = poly[(i + 1) % n];
+    const dx = p2.x - p1.x, dy = p2.y - p1.y, len = Math.hypot(dx, dy);
+    const px = len > 0 ? -dy / len : 0, py = len > 0 ? dx / len : 0;
+    const d = gauss(rng) * scale * len;
+    out.push(p1, { x: (p1.x + p2.x) / 2 + px * d, y: (p1.y + p2.y) / 2 + py * d });
+  }
+  return out;
+}
+/* deformN with the 0.75^depth decay */
+function deformN(depth, disp, rng, poly) {
+  let p = poly;
+  for (let d = 0; d < depth; d++) p = subdivide(disp * Math.pow(.75, d), rng, p);
+  return p;
+}
+
+/* =========================================================================
+   Wash definitions (STAGE coords). Seed offsets are fixed per blob so
+   reordering this table never changes anyone's pigment.
+   - w_pool is THE POOLING BEAT: base clamped to spill past the wall face,
+     whole group clipped at x=1601 (clipWall); the stack banks up dark
+     against the masked edge.
+   - w_flood erupts EAST from the breach: --t0 is a scaleX squash whose
+     origin (local 0,0) sits at the breach.
+   - w_fb1..3 + w_wish2 are the FLOOD-BACK: the same pigment turning west,
+     re-walking the path and re-solidifying the wish (second illumination).
+   ========================================================================= */
+const WASHES = [
+  /* screen 1: the wish, the travel, the pool */
+  { id:'w_wish',   seed:11, x:330,  y:505, rx:140, ry:95,  n:12, c:BLUE, dep:5 },
+  { id:'w_tr1',    seed:12, x:620,  y:520, rx:70,  ry:45,  n:12, c:BLUE, dep:4 },
+  { id:'w_tr2',    seed:13, x:900,  y:514, rx:64,  ry:44,  n:12, c:BLUE, dep:4 },
+  { id:'w_tr3',    seed:14, x:1180, y:522, rx:60,  ry:42,  n:12, c:BLUE, dep:4 },
+  { id:'w_tr4',    seed:25, x:1400, y:516, rx:55,  ry:40,  n:12, c:BLUE, dep:4 },
+  { id:'w_pool',   seed:15, x:1548, y:590, rx:115, ry:185, n:26, c:BLUE, dep:5,
+    clampHi:66, clip:'clipWall', lo:.05 },
+  /* screen 2: the bypass trickle, the flood */
+  { id:'w_tk1',    seed:16, x:1512, y:700, rx:30,  ry:36,  n:10, c:BLUE, dep:4 },
+  { id:'w_tk2',    seed:17, x:1548, y:898, rx:45,  ry:16,  n:10, c:BLUE, dep:4 },
+  { id:'w_tkm',    seed:18, x:1630, y:897, rx:30,  ry:10,  n:10, c:BLUE, dep:4 },
+  { id:'w_tk3',    seed:19, x:1760, y:899, rx:40,  ry:14,  n:10, c:BLUE, dep:4 },
+  { id:'w_flood',  seed:20, x:1665, y:520, rx:220, ry:66,  n:22, c:BLUE, dep:5,
+    bx:180, clampLo:8, t0:'scaleX(.07) scaleY(.6)' },
+  /* the flood-back: pigment turning west, deepening the path home */
+  { id:'w_fb1',    seed:26, x:1350, y:516, rx:60,  ry:40,  n:10, c:BLUE, dep:4 },
+  { id:'w_fb2',    seed:27, x:1000, y:522, rx:64,  ry:42,  n:10, c:BLUE, dep:4 },
+  { id:'w_fb3',    seed:28, x:640,  y:514, rx:60,  ry:40,  n:10, c:BLUE, dep:4 },
+  { id:'w_wish2',  seed:29, x:330,  y:505, rx:175, ry:112, n:14, c:BLUE, dep:5 },
+  /* the victory-lap corridor: pigment keeps walking (also gives the
+     pulled-back poster its middle rhythm) */
+  { id:'w_lap1',   seed:31, x:3200, y:518, rx:55,  ry:38,  n:10, c:BLUE, dep:4 },
+  { id:'w_lap2',   seed:32, x:3600, y:522, rx:50,  ry:36,  n:10, c:BLUE, dep:4 },
+  /* screen 3: the fan, the gates, the one answer */
+  { id:'w_fan',    seed:21, x:4020, y:520, rx:85,  ry:52,  n:12, c:BLUE, dep:4 },
+  { id:'w_gate2',  seed:22, x:4935, y:395, rx:290, ry:140, n:16, c:OCHRE, dep:5, lo:.05 },
+  { id:'w_gate3',  seed:23, x:4965, y:705, rx:265, ry:120, n:16, c:OCHRE, dep:5, lo:.05 },
+  { id:'w_res',    seed:24, x:5510, y:620, rx:290, ry:115, n:16, c:BLUE, dep:5 },
+  /* screen 4: the conclusion */
+  { id:'w_title',  seed:30, x:6800, y:570, rx:700, ry:320, n:26, c:BLUE, dep:5 },
+];
+/* the sting's bloom: SAME seed offset and generator as w_title — the same
+   material, recentred for the solo card (frame coords, not stage) */
+const STING_WASH =
+  { id:'w_sting',  seed:30, x:960,  y:470, rx:430, ry:175, n:24, c:BLUE, dep:5 };
+
+/* =========================================================================
+   Hard graph: line segments (ghost + live pair each) and arrows.
+   pts in draw direction (STAGE coords); dur = dashoffset transition time.
+   ========================================================================= */
+const SEGS = [
+  { id:'row1a',  pts:[[266,520],[1592,520]],             w:4,   dur:1600 },
+  { id:'flood',  pts:[[1668,520],[2900,520]],            w:4,   dur:1100 },
+  { id:'lap',    pts:[[2900,520],[4000,520]],            w:4,   dur:2400 },
+  { id:'byp',    pts:[[1500,520],[1500,900],[2596,900]], w:2.5, dur:1300 },
+  { id:'bypend', pts:[[2600,888],[2600,912]],            w:2.5, dur:200  },
+  /* the fan: five strands into the two gates */
+  { id:'st0',    pts:[[4000,520],[4676,330]],            w:3,   dur:600  },
+  { id:'st1',    pts:[[4000,520],[4676,395]],            w:3,   dur:600  },
+  { id:'st2',    pts:[[4000,520],[4676,460]],            w:3,   dur:600  },
+  { id:'st3',    pts:[[4000,520],[4716,660]],            w:3,   dur:600  },
+  { id:'st4',    pts:[[4000,520],[4716,730]],            w:3,   dur:600  },
+  /* both gates converge on the ONE resolution */
+  { id:'cv2',    pts:[[5205,435],[5290,550]],            w:4,   dur:500  },
+  { id:'cv3',    pts:[[5225,735],[5290,690]],            w:4,   dur:500  },
+  { id:'resx',   pts:[[5725,620],[5990,620]],            w:4,   dur:900  },
+];
+const ARROWS = [
+  { id:'aWall',  x:1596, y:520, a:0   },   /* the argument hits the wall  */
+  { id:'aByp',   x:2100, y:900, a:0   },   /* one direction only          */
+  { id:'aCv2',   x:5296, y:558, a:53  },   /* gate two -> the answer      */
+  { id:'aCv3',   x:5296, y:686, a:-35 },   /* gate three -> the SAME one  */
+  { id:'aTitle', x:6002, y:620, a:0   },   /* arrival                     */
+];
+
+/* =========================================================================
+   Build (fresh DOM per play — replay restores the template; every
+   generator is seeded, so the pigment is IDENTICAL take after take)
+   ========================================================================= */
+const NS = 'http://www.w3.org/2000/svg';
+const frame = document.getElementById('frame');
+const TEMPLATE = frame.innerHTML;
+const $ = s => frame.querySelector(s);
+let timers = [];
+
+function svgEl(tag, parent) {
+  const e = document.createElementNS(NS, tag);
+  parent.appendChild(e); return e;
+}
+
+function buildWash(d, parent) {
+  const rng = mulberry32(SEED + d.seed * 7919);
+  const base = basePoly(rng, d.rx, d.ry, d.bx || 0, d.by || 0, d.clampLo, d.clampHi);
+  let host = parent;
+  if (d.clip) { host = svgEl('g', parent); host.setAttribute('clip-path', `url(#${d.clip})`); }
+  const g = svgEl('g', host);
+  g.setAttribute('class', 'wash'); g.id = d.id;
+  g.setAttribute('transform', `translate(${d.x},${d.y})`);
+  const wi = svgEl('g', g); wi.setAttribute('class', 'wi');
+  if (d.t0) wi.style.setProperty('--t0', d.t0);
+  for (let i = 0; i < d.n; i++) {
+    const poly = deformN(d.dep || 5, .15, rng, base);
+    const p = svgEl('path', wi);
+    p.setAttribute('d', 'M' + poly.map(q => q.x.toFixed(1) + ' ' + q.y.toFixed(1)).join('L') + 'Z');
+    p.setAttribute('fill', d.c);
+    if (d.lo) p.style.setProperty('--lo', d.lo);
+    p.style.transitionDelay = (i * 55) + 'ms';   /* pigment accumulates */
+  }
+}
+
+function arrowPts(x, y, a) {
+  const r = a * Math.PI / 180;
+  const R = (px, py) => (x + px * Math.cos(r) - py * Math.sin(r)).toFixed(1) + ','
+                      + (y + px * Math.sin(r) + py * Math.cos(r)).toFixed(1);
+  return [R(0, 0), R(-17, -7.5), R(-17, 7.5)].join(' ');
+}
+
+function build() {
+  const washG = $('#washG'), lineG = $('#lineG'), arrowG = $('#arrowG');
+
+  WASHES.forEach(d => buildWash(d, washG));
+  buildWash(STING_WASH, $('#stingWashG'));
+
+  SEGS.forEach(s => {
+    const pts = s.pts.map(p => p.join(',')).join(' ');
+    const gh = svgEl('polyline', lineG);
+    gh.setAttribute('points', pts); gh.setAttribute('class', 'gline');
+    gh.setAttribute('stroke-width', s.w);
+    const lv = svgEl('polyline', lineG);
+    lv.setAttribute('points', pts); lv.setAttribute('class', 'lline');
+    lv.setAttribute('stroke-width', s.w); lv.id = 'L_' + s.id;
+    const L = lv.getTotalLength();
+    lv.setAttribute('stroke-dasharray', L);
+    lv.setAttribute('stroke-dashoffset', L);
+    lv.style.setProperty('--dur', s.dur + 'ms');
+  });
+
+  ARROWS.forEach(a => {
+    const pts = arrowPts(a.x, a.y, a.a);
+    const gh = svgEl('polygon', arrowG);
+    gh.setAttribute('points', pts); gh.setAttribute('class', 'garr');
+    const lv = svgEl('polygon', arrowG);
+    lv.setAttribute('points', pts); lv.setAttribute('class', 'af');
+    lv.id = 'A_' + a.id;
+  });
+
+  /* explicit start pose so the first camera transition interpolates */
+  $('#stage').style.transform = 'translate(0px, 0px) scale(1)';
+}
+
+/* =========================================================================
+   THE CAMERA — a transform transition on #stage. cam(x, y, s, dur):
+   view shows stage x .. x+1920. Durations divide by SPEED. No rAF; a CSS
+   transition either runs or (hidden tab) snaps to its end state.
+   Camera stops: A=0, B=1450, C=3840, D=5760; POSTER = translate(0,405)
+   scale(.25) — all four screens as a hairline-framed band mid-frame.
+   ========================================================================= */
+function cam(x, y, s, dur) {
+  const st = $('#stage');
+  st.style.transition = `transform ${dur / window.SPEED}ms cubic-bezier(.55,.05,.25,1)`;
+  st.style.transform = `translate(${-x}px, ${y}px) scale(${s})`;
+}
+
+/* =========================================================================
+   THE MANIFESTO TIMELINE — retime by editing T{} and nothing else.
+   Every phase key is one narrated sentence or one camera move; intra-phase
+   offsets are relative (T.x + n) so a phase moves as one unit.
+   ========================================================================= */
+function buildManifesto() {
+  const T = {
+    cold:        0,
+    wish:     2000,
+    travel:   8300,
+    wall:    11000,     /* the emotional centre — hold it                  */
+    camB:    19200,     /* camera -> B, between sentences                  */
+    bypass:  21500,
+    gate1:   28000,     /* the wall opens; flood EAST                      */
+    fback:   31800,     /* pigment turns WEST; camera follows it home      */
+    relight: 34200,     /* the wish re-solidifies — second illumination    */
+    camC:    39500,     /* the victory lap east through the breach         */
+    fan:     42200,     /* five strands; connective, before gate two       */
+    gate2:   44500,
+    gate3:   52000,
+    resolve: 59000,     /* both arrows converge on the one answer          */
+    camD:    66000,
+    title:   68000,
+    coda:    76500,
+    pull:    81500,     /* the retreat to the poster                       */
+    end:     86000,
+  };
+
+  const TL = [];
+  const at   = (t, fn) => TL.push({ at: t, do: fn });
+  const on   = sel => () => $(sel).classList.add('on');
+  const lit  = sel => () => $(sel).classList.add('lit');
+  const draw = sel => () => $(sel).classList.add('draw');
+  const show = sel => () => $(sel).classList.add('show');
+
+  /* 0.0 — cold open at stop A */
+  at(T.cold + 300, () => frame.classList.add('up'));
+
+  /* 2.0 — 1 THE WISH (first illumination) */
+  at(T.wish,        on('#w_wish'));
+  at(T.wish + 300,  lit('#wishNode'));
+  at(T.wish + 500,  lit('#nb1'));
+
+  /* 8.3 — travel: pigment runs east toward the wall at frame right */
+  at(T.travel,        draw('#L_row1a'));
+  at(T.travel + 200,  on('#w_tr1'));
+  at(T.travel + 650,  on('#w_tr2'));
+  at(T.travel + 1100, on('#w_tr3'));
+  at(T.travel + 1400, on('#w_tr4'));
+  at(T.travel + 1600, on('#A_aWall'));
+
+  /* 11.0 — 2 THE WALL: the wash pools against the masked edge */
+  at(T.wall,        on('#w_pool'));
+  at(T.wall + 450,  () => ['#wallT', '#chunk', '#wallB']
+                            .forEach(s => $(s).classList.add('lit')));
+  at(T.wall + 750,  lit('#nb2'));
+
+  /* 19.2 — camera -> B (wall moves to frame left) */
+  at(T.camB, () => cam(1450, 0, 1, 1900));
+
+  /* 21.5 — 3 THE BYPASS: the sub-path below the line */
+  at(T.bypass,         draw('#L_byp'));
+  at(T.bypass + 300,   on('#w_tk1'));
+  at(T.bypass + 700,   lit('#nb3'));
+  at(T.bypass + 750,   on('#w_tk2'));
+  at(T.bypass + 1050,  on('#w_tkm'));
+  at(T.bypass + 1350,  on('#w_tk3'));
+  at(T.bypass + 1450,  on('#A_aByp'));
+  at(T.bypass + 1600,  draw('#L_bypend'));
+
+  /* 28.0 — 4 THE GATE OPENS: surge, breach, flood east. No narration
+     needed for the breach itself — the picture carries it. */
+  at(T.gate1,         () => $('#w_pool').classList.add('surge'));
+  at(T.gate1 + 350,   () => { $('#chunk').classList.add('out');
+                              $('#wallT').classList.add('recoil');
+                              $('#wallB').classList.add('recoil'); });
+  at(T.gate1 + 600,   on('#w_flood'));
+  at(T.gate1 + 800,   lit('#nb4'));
+  at(T.gate1 + 1600,  draw('#L_flood'));
+
+  /* 31.8 — FLOOD-BACK: the pigment turns west; the camera goes home with
+     it, through the now-open wall. */
+  at(T.fback,        on('#w_fb1'));
+  at(T.fback + 350,  on('#w_fb2'));
+  at(T.fback + 500,  () => cam(0, 0, 1, 1800));
+  at(T.fback + 700,  on('#w_fb3'));
+
+  /* 34.2 — RE-LIGHT: the same node, second illumination, one new clause.
+     The argument is back where it began and the obstacle is open. */
+  at(T.relight,        on('#w_wish2'));
+  at(T.relight + 600,  () => $('#soLine').classList.add('in'));
+
+  /* 39.5 — camera -> C: the victory lap. The path races ahead. */
+  at(T.camC,        () => cam(3840, 0, 1, 2800));
+  at(T.camC + 400,  draw('#L_lap'));
+  at(T.camC + 1100, on('#w_lap1'));
+  at(T.camC + 1700, on('#w_lap2'));
+
+  /* 42.2 — the fan: five runtimes split off (connective tissue) */
+  at(T.fan, on('#w_fan'));
+  for (let i = 0; i < 5; i++) {
+    at(T.fan + 200 + i * 130, draw('#L_st' + i));
+    at(T.fan + 1100 + i * 90, on('#tok' + i));
+  }
+
+  /* 44.5 — 5 GATE TWO: the first shock */
+  at(T.gate2,        () => $('#gate2').classList.add('crack'));
+  at(T.gate2,        on('#w_gate2'));
+  at(T.gate2 + 300,  show('#nb5'));
+
+  /* 52.0 — 6 GATE THREE: the second shock */
+  at(T.gate3,        () => $('#gate3').classList.add('crack'));
+  at(T.gate3,        on('#w_gate3'));
+  at(T.gate3 + 300,  show('#nb6'));
+
+  /* 59.0 — 7 THE RESOLUTION: two problems, ONE answer. The two arrows
+     visibly converge before the node floods blue. */
+  at(T.resolve,         draw('#L_cv2'));
+  at(T.resolve + 350,   draw('#L_cv3'));
+  at(T.resolve + 700,   on('#A_aCv2'));
+  at(T.resolve + 800,   on('#A_aCv3'));
+  at(T.resolve + 950,   on('#w_res'));
+  at(T.resolve + 1000,  lit('#res'));
+  at(T.resolve + 1350,  show('#nb7'));
+  at(T.resolve + 2400,  draw('#L_resx'));
+  at(T.resolve + 3300,  on('#A_aTitle'));
+
+  /* 66.0 — camera -> D */
+  at(T.camD, () => cam(5760, 0, 1, 2000));
+
+  /* 68.0 — 8 THE CONCLUSION */
+  at(T.title,         on('#w_title'));
+  at(T.title + 900,   lit('#titleTag'));
+  at(T.title + 1000,  lit('#tl1'));       /* snap to ink — no movement */
+  at(T.title + 1200,  lit('#tl2'));
+  at(T.title + 1750,  () => $('#tdot').classList.add('in'));  /* the stop */
+
+  /* 76.5 — 9 CODA */
+  at(T.coda,         lit('#coda'));
+  at(T.coda + 2100,  () => $('#bill').classList.add('in'));
+
+  /* 81.5 — PULL-BACK to the poster: the whole path as one wide band.
+     This frame is the thumbnail; ?still lands here. */
+  at(T.pull, () => cam(0, 405, 0.25, 2800));
+
+  at(T.end, () => console.log('[MANIFESTO] done — hold the poster, stop recording'));
+
+  /* ---- HEADROOM: ambient layer merges here; add entries to AMBIENT[]
+          (id of an .amb mark + absolute ms). Retiming T{} does not touch
+          these, and these never touch T{}. -------------------------------- */
+  AMBIENT.forEach(a => at(a.at, on('#' + a.id)));
+
+  return TL;
+}
+
+/* ambient language marks — ink at 7%, surfacing during the long holds.
+   amb1 sits on screen 1 (the wall hold); amb2/amb3 in the corridor the
+   victory lap crosses; amb4 under the fan. Extend freely. */
+const AMBIENT = [
+  { at: 15500, id: 'amb1' },   /* λ  — during the long look at the wall  */
+  { at: 25500, id: 'amb2' },   /* :: — while the bypass trickles         */
+  { at: 40500, id: 'amb3' },   /* -> — under the victory lap             */
+  { at: 55000, id: 'amb4' },   /* ∀  — while gate three sinks in         */
+];
+
+/* =========================================================================
+   THE STING (~9.5 s, silent) — same seed, palette and generator as the
+   manifesto's title bloom. Retime in ST{} only. Unchanged by design.
+   ========================================================================= */
+function buildSting() {
+  const ST = {
+    wash:   300,    /* pigment blooms into the paper       */
+    l1:    1600,    /* POLYGLOT slams                      */
+    l2:    1780,    /* PURESCRIPT slams                    */
+    dot:   2550,    /* ochre full stop punches             */
+    rule:  3300,    /* hairline rule                       */
+    motto: 3550,    /* series motto rises                  */
+    end:   9500,    /* hold to here, cut                   */
+  };
+  const TL = [];
+  const at = (t, fn) => TL.push({ at: t, do: fn });
+  at(ST.wash,  () => $('#w_sting').classList.add('on'));
+  at(ST.l1,    () => $('#stl1').classList.add('show'));
+  at(ST.l2,    () => $('#stl2').classList.add('show'));
+  at(ST.dot,   () => $('#sdot').classList.add('in'));
+  at(ST.rule,  () => $('#stRule').classList.add('show'));
+  at(ST.motto, () => $('#stMotto').classList.add('show'));
+  at(ST.end,   () => console.log('[STING] done — stop recording'));
+  return TL;
+}
+
+/* =========================================================================
+   Runner — Kibitzer pattern: rebuild from TEMPLATE, fire sorted timeouts.
+   ========================================================================= */
+const q = new URLSearchParams(location.search);
+window.SPEED = +q.get('speed') || 1;
+if (q.has('still')) window.SPEED = 400;   /* settle on the poster in ~3 s */
+
+function play(mode) {
+  timers.forEach(clearTimeout); timers = [];
+  frame.innerHTML = TEMPLATE;
+  frame.classList.remove('up');
+  frame.classList.toggle('stingMode', mode === 'sting');
+  document.body.classList.add('playing');
+  build();
+  const TL = (mode === 'sting' ? buildSting() : buildManifesto())
+    .sort((a, b) => a.at - b.at);
+  TL.forEach(s => timers.push(setTimeout(s.do, s.at / window.SPEED)));
+  if (mode === 'sting') frame.classList.add('up');
+}
+
+function fit() {
+  const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+  frame.style.transform = `translate(-50%,-50%) scale(${k})`;
+}
+addEventListener('resize', fit); fit();
+
+document.getElementById('btnM').addEventListener('click', () => play('manifesto'));
+document.getElementById('btnS').addEventListener('click', () => play('sting'));
+addEventListener('keydown', e => {
+  if (e.key === '0') { e.preventDefault(); play('manifesto'); }
+  if (e.key === '9') { e.preventDefault(); play('sting'); }
+});
+addEventListener('mousemove', () => document.body.classList.remove('playing'));
+
+console.log('TITLES ready — 0 = manifesto, 9 = sting. ?sting ?speed=4 ?still');
+setTimeout(() => play(q.has('sting') ? 'sting' : 'manifesto'), 250);
+</script>
+</body>
+</html>
