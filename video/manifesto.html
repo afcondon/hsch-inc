@@ -24,6 +24,15 @@
     sting      (~9.5 s) key 9, or manifesto.html?sting   — silent, tops
                         every episode; same seed, palette and generator.
 
+  PLUS A MEASURING MODE — ?cue (key c). You advance each beat with SPACE
+  while narrating, and the page records when you pressed. The retime then
+  falls OUT of the take instead of being recovered from the audio: it
+  prints a paste-ready T{} plus a JSON cue log to join against a Whisper
+  transcript on startMs. See the CUE MODE block below for the timebase and
+  the flush rule. THE WINDOW MUST BE FOCUSED — an unfocused tab clamps
+  setTimeout to ~1 s and quantises the very numbers being measured; the
+  mode samples document.hasFocus() and refuses to pretend otherwise.
+
   NINE NODES: 1 the wish (illuminated twice — it is also the path),
   2 the wall, 3 the bypass, 4 the gate opens, 5 gate two, 6 gate three,
   7 the resolution (BOTH gates converge on this one answer),
@@ -64,7 +73,8 @@
                       gates, wordmark. ?still lands here.
   86.0   END          hold the poster.
   ----------------------------------------------------------------------------
-  RETIME: edit the numbers in T{} inside buildManifesto() (ms). Camera moves
+  RETIME: edit the numbers in T{} (now module-level, just above
+  buildManifesto — a cued take reads the same object it rewrites). Camera moves
   are timeline entries like everything else — cam(x, y, scale, dur) — and
   their start times live in the same T{}. Nothing else carries phase timing.
   The sting timeline is ST{} in buildSting().
@@ -266,6 +276,28 @@
         font:600 12px/1 "Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
         padding:8px 14px; border-radius:3px; }
   #ui button:hover { color:var(--paper); border-color:rgba(242,237,226,.75); }
+
+  /* ---------- CUE HUD (?cue) — a teleprompter, never in the capture ------
+     Deliberately NOT hidden by body.playing: in a cued take you are reading
+     from it. It is outside #frame, so a frame-only capture never sees it. */
+  #hud { position:fixed; left:0; right:0; bottom:0; z-index:1001;
+        background:rgba(10,10,10,.88); color:rgba(242,237,226,.9);
+        font:14px/1.5 "Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+        padding:14px 20px 16px; border-top:1px solid rgba(242,237,226,.2); }
+  #hud[hidden] { display:none; }
+  #hudNow  { font-size:19px; display:flex; gap:14px; align-items:baseline; }
+  #hudN    { color:var(--ochre,#c8871f); letter-spacing:.16em; font-weight:700;
+        font-size:13px; white-space:nowrap; }
+  #hudNext { margin-top:6px; color:rgba(242,237,226,.42); font-size:13px;
+        letter-spacing:.04em; }
+  #hudClock{ margin-top:6px; color:rgba(242,237,226,.32); font-size:12px;
+        font-variant-numeric:tabular-nums; letter-spacing:.06em; }
+  #hud.unsized #hudN { color:#e0533a; }
+  #hudReport { margin:12px 0 0; max-height:38vh; overflow:auto; user-select:text;
+        font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;
+        color:rgba(242,237,226,.8); background:rgba(0,0,0,.35);
+        padding:12px 14px; border-radius:3px; white-space:pre; }
+  #hudReport[hidden] { display:none; }
 </style>
 </head>
 <body>
@@ -409,6 +441,16 @@
 <div id="ui">
   <button id="btnM">MANIFESTO</button>
   <button id="btnS">STING</button>
+  <button id="btnC">CUE</button>
+</div>
+
+<!-- Cue-mode HUD. Lives OUTSIDE #frame, so play()'s innerHTML reset can't
+     touch it and it never appears in a capture of the frame. -->
+<div id="hud" hidden>
+  <div id="hudNow"><b id="hudN">—</b><span id="hudSay">press SPACE on your first word</span></div>
+  <div id="hudNext">next · <span id="hudNextSay"></span></div>
+  <div id="hudClock"><span id="hudBeat">0:00.0</span> in beat · <span id="hudTot">0:00.0</span> total</div>
+  <pre id="hudReport" hidden></pre>
 </div>
 
 <script>
@@ -640,8 +682,7 @@ function cam(x, y, s, dur) {
    Every phase key is one narrated sentence or one camera move; intra-phase
    offsets are relative (T.x + n) so a phase moves as one unit.
    ========================================================================= */
-function buildManifesto() {
-  const T = {
+const T = {
     cold:        0,
     wish:     2000,
     travel:   8300,
@@ -661,8 +702,9 @@ function buildManifesto() {
     coda:    76500,
     pull:    81500,     /* the retreat to the poster                       */
     end:     86000,
-  };
+};
 
+function buildManifesto() {
   const TL = [];
   const at   = (t, fn) => TL.push({ at: t, do: fn });
   const on   = sel => () => $(sel).classList.add('on');
@@ -827,6 +869,237 @@ function buildSting() {
 }
 
 /* =========================================================================
+   CUE MODE  (?cue, key c)  — the take drives the animation, not the reverse.
+   -------------------------------------------------------------------------
+   You advance each beat with SPACE while narrating. The page records when
+   you pressed, so the measurement is an OUTPUT of the take rather than
+   something recovered from the audio afterwards. At the end it prints a
+   paste-ready T{} plus a JSON cue log to join against a Whisper transcript.
+
+   TIMEBASE: the take starts on your FIRST press, so cue 1 == t0 for both
+   the log and the recording. Align the transcript by subtracting its first
+   speech onset and the two clocks share an origin.
+
+   Each cue OWNS every timeline entry from its own start until the next
+   cue's start — so motion-led phases (travel, camB, fback, camC, fan,
+   camD, pull) keep their built-in offsets and simply ride the beat that
+   owns them. Nothing in buildManifesto() changes.
+
+   Cue early and the owning beat's unfired entries are FLUSHED (fired at
+   once) rather than queued. That is deliberate: a flush means the picture
+   is slower than the sentence, and the report counts them per beat so the
+   overrun shows up as data instead of hiding behind a backlog.
+
+   TWO CUES HAVE NO ANIMATION YET, by design:
+     negspace — "and we already call the alternative a mistake"
+     likewhat — the three cases. UNSIZED: it has never had screen time,
+                and its duration is the single most valuable number here.
+   Their nominal `at` values only partition the existing timeline; the take
+   replaces them. Note likewhat provisionally owns camC + fan, which puts
+   the three motivations over the runtime fan — a hypothesis this take
+   tests, and a candidate fix for the fan's 2 s of unnarrated motion.
+   ========================================================================= */
+const CUES = [
+  { key:'wish',     at:2000,  say:'You already do this. You write SQL.' },
+  { key:'negspace', at:8300,  say:'And we already call the alternative a mistake — the ORM emitting unfixable SQL, constraint satisfaction hand-rolled in Java, monads in a language that cannot express them.', unsized:true },
+  { key:'wall',     at:11000, say:'And you stop right there. Thirty years of yes-I-know-but-you-cannot.  ← HOLD IT' },
+  { key:'bypass',   at:21500, say:'Python wraps C. Real, huge, thirty years old — but one direction only, and no types across it.' },
+  { key:'gate1',    at:28000, say:'That cost is now a one-time hit, and it is not yours. (the cost, not the tool)' },
+  { key:'relight',  at:34200, say:'So do it EVERYWHERE.' },
+  { key:'likewhat', at:39500, say:'…like what?  impossible · ruinous to write · ruinous to run   — LEAN ON THE MIDDLE', unsized:true },
+  { key:'gate2',    at:44500, say:'The boundaries multiply — and the boundaries are where the types are not.' },
+  { key:'gate3',    at:52000, say:'And you are RENTING the one who writes it.   (safety, never velocity)' },
+  { key:'resolve',  at:59000, say:'One typed layer over the top — and it is yours. Two problems, ONE answer.' },
+  { key:'title',    at:68000, say:'POLYGLOT PURESCRIPT' },
+  { key:'coda',     at:76500, say:'…ceteris paribus. Here is the bill.' },
+];
+
+/* phases carried by whichever cue owns their window — reported, not cued */
+const CARRIED = ['cold','travel','camB','fback','camC','fan','camD','pull','end'];
+
+let CUE = null;   /* live cue-take state; also left in place for inspection */
+
+/* NB: $ is frame-scoped (frame.querySelector). The HUD lives OUTSIDE
+   #frame on purpose, so it needs a document-scoped lookup — $ would
+   silently return null for every one of these. */
+const $d = s => document.querySelector(s);
+window.CUE = () => CUE;          /* inspectable from the console */
+
+const hud = $d('#hud');
+const fmt = ms => {
+  const s = Math.max(0, ms) / 1000;
+  return `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
+};
+
+function playCued() {
+  timers.forEach(clearTimeout); timers = [];
+  frame.innerHTML = TEMPLATE;
+  frame.classList.remove('up', 'stingMode');
+  document.body.classList.add('playing');
+  build();
+
+  const TL = buildManifesto().sort((a, b) => a.at - b.at);
+
+  /* partition: owner = the last cue whose start is <= entry.at (-1 = pre-roll) */
+  const seg = CUES.map(() => []);
+  const pre = [];
+  TL.forEach(e => {
+    let i = -1;
+    for (let k = 0; k < CUES.length; k++) if (e.at >= CUES[k].at) i = k;
+    (i < 0 ? pre : seg[i]).push({ ...e, off: i < 0 ? e.at : e.at - CUES[i].at });
+  });
+
+  /* pre-roll (the cold open) is HELD until the first press — arming the
+     take must not start it, or the fade begins while you are still
+     clearing your throat. */
+  CUE = { i: -1, t0: 0, marks: [], flushed: CUES.map(() => 0),
+          fired: Object.create(null), seg, pre, pending: [], blurs: 0 };
+
+  hud.hidden = false;
+  $d('#hudReport').hidden = true;
+  paintHud();
+  console.log('[CUE] armed — press SPACE on your first word. SPACE advances; the take ends after the last beat.');
+}
+
+/* fire one entry, and remember when it REALLY happened — that actual fire
+   time is what the report emits for carried phases, so a flushed beat
+   reports the truth rather than an arithmetic assumption. */
+function runEntry(e) {
+  e.do();
+  if (CUE && CUE.t0 && !(e.at in CUE.fired)) {
+    CUE.fired[e.at] = performance.now() - CUE.t0;
+  }
+}
+
+function cueAdvance() {
+  if (!CUE) return;
+  const now = performance.now();
+
+  if (CUE.i < 0) {                       /* first press: start the clock */
+    CUE.t0 = now;
+    CUE.pre.forEach(e => timers.push(setTimeout(() => runEntry(e), e.off / window.SPEED)));
+  } else {                               /* flush the outgoing beat */
+    CUE.pending.forEach(h => clearTimeout(h.id));
+    CUE.pending.filter(h => !h.done).forEach(h => { CUE.flushed[CUE.i]++; runEntry(h.e); });
+  }
+  CUE.pending = [];
+
+  CUE.i++;
+  if (CUE.i >= CUES.length) return;      /* past the last cue: report below */
+
+  CUE.marks[CUE.i] = now - CUE.t0;
+
+  CUE.seg[CUE.i].forEach(e => {
+    const h = { e, done: false };
+    h.id = setTimeout(() => { h.done = true; runEntry(e); }, e.off / window.SPEED);
+    timers.push(h.id);
+    CUE.pending.push(h);
+  });
+
+  paintHud();
+
+  if (CUE.i === CUES.length - 1) {       /* coda is last; report when it ends */
+    const tail = Math.max(0, ...CUE.seg[CUE.i].map(e => e.off)) + 400;
+    timers.push(setTimeout(cueReport, tail / window.SPEED));
+  }
+}
+
+function paintHud() {
+  const c = CUES[CUE.i], n = CUES[CUE.i + 1];
+  hud.classList.toggle('unsized', !!(c && c.unsized));
+  $d('#hudN').textContent   = c ? `${CUE.i + 1}/${CUES.length} ${c.key.toUpperCase()}${c.unsized ? ' ✱' : ''}` : '—';
+  $d('#hudSay').textContent = c ? c.say : 'press SPACE on your first word';
+  $d('#hudNextSay').textContent = n ? `${n.key} · ${n.say}` : (c ? '(last beat — hold the poster)' : CUES[0].say);
+}
+
+/* The cued take's origin is your FIRST WORD, but the auto-play cut needs a
+   breath of ghosted stage before anyone speaks. LEAD reinstates exactly the
+   pre-roll the original timeline had, so the emitted T{} is directly
+   playable rather than starting the first sentence at t=0.
+   (In a cued take itself the cold open fades up under your opening words —
+   a rehearsal artifact, not a property of the cut being measured.) */
+const LEAD = T.wish;   /* 2000 ms */
+
+function cueReport() {
+  const marks = CUE.marks, out = {};
+
+  /* cued phases: exactly when you pressed */
+  CUES.forEach((c, i) => { if (!c.unsized) out[c.key] = Math.round(marks[i]) + LEAD; });
+
+  /* carried phases: when their anchor entry really fired */
+  out.cold = 0;
+  CARRIED.forEach(k => {
+    if (k === 'end' || k === 'cold') return;
+    const t = CUE.fired[T[k]];
+    if (t != null) out[k] = Math.round(t) + LEAD;
+  });
+  out.end = Math.round(marks[marks.length - 1] + 9500) + LEAD;   /* poster hold */
+
+  const dur = i => Math.round((i + 1 < marks.length ? marks[i + 1] : out.end) - marks[i]);
+
+  const width = Math.max(...Object.keys(out).map(k => k.length));
+  const block = ['  const T = {'].concat(
+    Object.entries(out)
+      .sort((a, b) => a[1] - b[1])
+      .map(([k, v]) => `    ${(k + ':').padEnd(width + 1)} ${String(v).padStart(6)},`),
+    '  };').join('\n');
+
+  const log = CUES.map((c, i) => ({
+    beat: i + 1, key: c.key, startMs: Math.round(marks[i]), durMs: dur(i),
+    flushed: CUE.flushed[i], unsized: !!c.unsized,
+  }));
+
+  const overruns = log.filter(b => b.flushed > 0);
+  const text = [
+    '── RETIMED T{} ── paste over the block in buildManifesto() ──────────────',
+    block,
+    '',
+    '── CUE LOG ── join against a Whisper transcript on startMs ─────────────',
+    '   (timebase: beat 1 == t0. Subtract the transcript\'s first speech',
+    '    onset and the two clocks share an origin.)',
+    JSON.stringify(log, null, 1),
+    '',
+    '── NOTES ───────────────────────────────────────────────────────────────',
+    ...log.filter(b => b.unsized).map(b =>
+      `   ✱ ${b.key}: ${(b.durMs / 1000).toFixed(1)}s — NO ANIMATION YET. Build to this.`),
+    ...(overruns.length
+      ? overruns.map(b => `   ! ${b.key}: ${b.flushed} entr${b.flushed === 1 ? 'y' : 'ies'} flushed — the picture is slower than the sentence.`)
+      : ['   no flushes — every beat\'s motion finished inside its narration.']),
+    ...(CUE.blurs > 3
+      ? ['', `   ⚠ THE TAB WAS UNFOCUSED FOR ~${(CUE.blurs / 10).toFixed(1)}s OF THIS TAKE.`,
+             '     An unfocused tab clamps timers to ~1 s, so these durations are',
+             '     quantised and the flush counts mean nothing. Take it again with',
+             '     the window focused — start the recorder FIRST, then click here.']
+      : []),
+    `   total ${fmt(out.end)}`,
+  ].join('\n');
+
+  $d('#hudReport').textContent = text;
+  $d('#hudReport').hidden = false;
+  window.RETIME = { T: out, log, text };
+  console.log(text);
+  console.log('[CUE] also on window.RETIME');
+}
+
+/* live clock in the HUD — and the focus watchdog.
+
+   An unfocused tab has its setTimeout clamped to ~1 s granularity, which
+   silently quantises every duration this mode exists to measure. Spacebar
+   needs focus anyway, so it is self-enforcing in practice — but reaching
+   for a DAW mid-take would corrupt the numbers with no other symptom.
+
+   SAMPLE the focus state rather than listening for 'blur': a take begun in
+   an already-unfocused tab never fires blur at all, and would throttle
+   with a clean bill of health. Measured, not assumed. */
+setInterval(() => {
+  if (!CUE || !CUE.t0 || CUE.i < 0 || CUE.i >= CUES.length) return;
+  if (!document.hasFocus()) CUE.blurs++;
+  const t = performance.now() - CUE.t0;
+  $d('#hudBeat').textContent = fmt(t - CUE.marks[CUE.i]);
+  $d('#hudTot').textContent  = fmt(t);
+}, 100);
+
+/* =========================================================================
    Runner — Kibitzer pattern: rebuild from TEMPLATE, fire sorted timeouts.
    ========================================================================= */
 const q = new URLSearchParams(location.search);
@@ -852,16 +1125,25 @@ function fit() {
 }
 addEventListener('resize', fit); fit();
 
-document.getElementById('btnM').addEventListener('click', () => play('manifesto'));
-document.getElementById('btnS').addEventListener('click', () => play('sting'));
+document.getElementById('btnM').addEventListener('click', () => { hud.hidden = true; CUE = null; play('manifesto'); });
+document.getElementById('btnS').addEventListener('click', () => { hud.hidden = true; CUE = null; play('sting'); });
+document.getElementById('btnC').addEventListener('click', playCued);
 addEventListener('keydown', e => {
-  if (e.key === '0') { e.preventDefault(); play('manifesto'); }
-  if (e.key === '9') { e.preventDefault(); play('sting'); }
+  if (e.key === '0') { e.preventDefault(); hud.hidden = true; CUE = null; play('manifesto'); }
+  if (e.key === '9') { e.preventDefault(); hud.hidden = true; CUE = null; play('sting'); }
+  if (e.key === 'c') { e.preventDefault(); playCued(); }
+  /* SPACE only means "advance" while a cue take is armed, and goes dead
+     on the last beat — the coda runs to its own end and a stray press
+     must not flush the poster pull-back or disturb the report. */
+  if (e.code === 'Space' && CUE && CUE.i < CUES.length - 1) { e.preventDefault(); cueAdvance(); }
 });
 addEventListener('mousemove', () => document.body.classList.remove('playing'));
 
-console.log('TITLES ready — 0 = manifesto, 9 = sting. ?sting ?speed=4 ?still');
-setTimeout(() => play(q.has('sting') ? 'sting' : 'manifesto'), 250);
+console.log('TITLES ready — 0 = manifesto, 9 = sting, c = CUE TAKE (space advances). ?cue ?sting ?speed=4 ?still');
+setTimeout(() => {
+  if (q.has('cue')) playCued();
+  else play(q.has('sting') ? 'sting' : 'manifesto');
+}, 250);
 </script>
 </body>
 </html>

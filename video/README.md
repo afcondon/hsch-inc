@@ -7,6 +7,7 @@ network requests of any kind. Two cuts inside it:
 |---|---|---|---|
 | **manifesto** | ~86 s | open the file (auto-plays); key **0** replays | the argument, narrated over |
 | **sting** | ~9.5 s | key **9**, or open `manifesto.html?sting` | silent; tops all thirteen videos |
+| **cue take** | as long as you talk | key **c**, or `manifesto.html?cue` | measuring mode — see below |
 
 ## How it is built
 
@@ -27,12 +28,60 @@ No `requestAnimationFrame` anywhere and no `scrollTo` — all motion is CSS
 transitions/keyframes fired by `setTimeout`, so a hidden tab degrades to
 end-states instead of hanging, and `behavior:'smooth'` never enters into it.
 
+## Cue mode — the take drives the animation
+
+`?cue` (or key **c**) turns the file into a measuring instrument. You advance
+each beat with **SPACE** while narrating; the page records when you pressed.
+The retime is then an *output* of the take rather than something recovered
+from the audio afterwards.
+
+When the last beat ends it prints — to the console, to `window.RETIME`, and
+into the HUD as selectable text — two things:
+
+1. a **paste-ready `T{}`**, ready to replace the block in this file;
+2. a **JSON cue log** (`{beat, key, startMs, durMs, flushed, unsized}`) to
+   join against a Whisper transcript, so each beat carries the sentences
+   actually spoken inside it, not just a duration.
+
+**Timebase.** The take starts on your **first press**, so beat 1 is `t0` for
+both clocks. Subtract the transcript's first speech onset and the two share
+an origin. The emitted `T{}` adds `LEAD` (= the original 2 s pre-roll) back
+on, so the cold open survives — otherwise the first sentence would land at
+`t = 0`.
+
+**The flush rule.** Cue early and the outgoing beat's unfired entries fire
+*at once* rather than queueing, so the picture stays in the right state. Each
+flush is counted per beat and reported: a flush means the motion is slower
+than the sentence over it, which is exactly the sort of thing worth knowing.
+
+**Two beats are deliberately unsized** — `negspace` and `likewhat` have no
+animation at all yet, and their measured durations are the most valuable
+numbers the take produces. They are flagged `✱` in the report. Note that
+`likewhat` provisionally owns `camC` + `fan`, putting the three motivations
+over the runtime fan — a hypothesis the take tests, and a candidate fix for
+the fan's ~2 s of unnarrated motion.
+
+> ⚠️ **The window must be focused.** An unfocused tab clamps `setTimeout` to
+> ~1 s, which quantises the very durations being measured. Spacebar needs
+> focus anyway so it is mostly self-enforcing, but *start the recorder first,
+> then click into the browser*. The mode samples `document.hasFocus()` during
+> the take and prints a warning rather than emitting quiet garbage — a `blur`
+> listener would not do, since a take begun in an already-unfocused tab never
+> fires one.
+
+Editing `CUES[]` is how you change the beat list; nothing in
+`buildManifesto()` needs to know about cue mode. Each cue owns every timeline
+entry from its own start to the next cue's, so motion-led phases (`travel`,
+`camB`, `fback`, `camC`, `fan`, `camD`, `pull`) keep their built-in offsets
+and ride the beat that owns them.
+
 ## Retiming (this will happen, against the recorded voiceover)
 
-Everything is in **`T{}` inside `buildManifesto()`** — one number per
-narrated sentence or camera move, in milliseconds. Intra-phase offsets are
-written `T.x + n`, so moving a phase key moves the whole phase. The sting is
-`ST{}` in `buildSting()`. Nothing else in the file carries phase timing.
+Everything is in **`T{}`** — module-level, just above `buildManifesto()`, so
+a cued take reads the same object it rewrites. One number per narrated
+sentence or camera move, in milliseconds. Intra-phase offsets are written
+`T.x + n`, so moving a phase key moves the whole phase. The sting is `ST{}`
+in `buildSting()`. Nothing else in the file carries phase timing.
 
 - `window.SPEED` (or `?speed=4`) divides all timeline delays **and** camera
   durations for rehearsal. CSS micro-durations (0.2–1.4 s blooms and slams)
