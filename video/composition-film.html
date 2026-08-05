@@ -850,6 +850,26 @@ const DEMO = {
 window.DEMO = DEMO;
 window.addEventListener('keydown', e=>{ if (e.key==='0') DEMO.play(); });
 
+/* SERVE IT, DON'T OPEN IT.
+   Over file:// Chrome gives every file an opaque origin, so wash-bundle.js is
+   refused and every wash silently fails to paint — the film runs, the camera
+   moves, and the marks are simply not there. That reads as "the film is
+   broken" rather than "this needs a server", so say so on the page: a console
+   warning is invisible to someone who just double-clicked the file. */
+if (location.protocol === 'file:' || !WASH()) {
+  const why = location.protocol === 'file:'
+    ? 'Opened from the filesystem. Chrome refuses the wash bundle over file://'
+    : 'wash-bundle.js did not load';
+  const bar = document.createElement('div');
+  bar.style.cssText = 'position:fixed;inset:0 0 auto 0;z-index:9999;padding:18px 24px;'
+    + 'background:#211d16;color:#f2ede2;font:600 14px/1.6 Helvetica Neue,Helvetica,Arial,sans-serif';
+  bar.innerHTML = why + ' — <b>no washes will paint.</b><br>'
+    + '<span style="font:400 13px/1.7 ui-monospace,SF Mono,Menlo,monospace;opacity:.85">'
+    + 'cd video &amp;&amp; python3 -m http.server 4184 --bind 127.0.0.1<br>'
+    + 'then open http://127.0.0.1:4184/composition-film.html</span>';
+  document.body.appendChild(bar);
+}
+
 applyCamera(0);
 console.log('[film] ready — DEMO.check() for pre-flight, 0 to roll.');
 </script>
