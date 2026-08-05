@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>polyglot purescript — video 0 · composition film</title>
+<!--
+  ============================================================================
+  POLYGLOT PURESCRIPT — VIDEO 0 · THE FILM (pass 3 of the three-pass workflow)
+  ============================================================================
+  The runnable, deterministic animation of the round-4 composition. The
+  layout is composition-study.html, taken as given: same stage, same copy,
+  same coordinates, same colour law. This file adds the camera and the
+  timeline — and swaps the study's inline wash() for the REAL hylograph-onion,
+  bundled from video/wash/ into video/wash-bundle.js. Every wash is an
+  ordered stack of deformed variants rendered as a keyed HATS join; the
+  reveal is the join's staggered ENTER phase, so a wash paints itself layer
+  by layer instead of fading up as one shape.
+
+  BUILD    cd video/wash && spago bundle        (emits ../wash-bundle.js)
+  SERVE    cd video && python3 -m http.server 4184 --bind 127.0.0.1
+  RUN      open http://127.0.0.1:4184/composition-film.html
+           DEMO.check()   pre-flight: per-beat table, total vs 10:03.75,
+                          tab-visibility warning, wash-container audit
+           press 0        start the take (console closed)
+           DEMO.play() / DEMO.stop() / DEMO.reset()
+           DEMO.speed = 2 rehearse at double rate (half the wall time)
+           DEMO.seek(ms)  deterministic fast-forward (verification only)
+  URL      ?guides=1      show the study's station rulers + duration labels
+                          (review instrumentation — OFF for the take)
+
+  TIMING   Every duration in the piece lives in the T table below, seeded
+           from docs/kb/plans/takes/video-0-FINAL-beats.json (15 beats,
+           603 750 ms = 10:03.75). Retiming after the master take is
+           recorded = editing T. Nothing else in this file carries a
+           timing constant.
+
+  CAMERA   Thirteen stops (study header, round 4):
+             pass 1: A 0 (1+2) · B 1682 (3+4) · C 3096 (5) · D 4359 (6) · E 5760 (7)
+             pass 2: F 5760 (8+9) · G 3251 (10) · H 1460 (11) · I 0 (12)
+             pass 3: J 0 (13) · K 2434 (14) · L 4560 (15a) · M 5760 (15b)
+           One constant rate for every leg (T.rate). Travel happens at the
+           HEAD of the incoming beat; copy fades in whole once the camera
+           rests. Both turns are pure vertical drops on an event: E->F rides
+           the cascade (which paints DURING the drop), I->J rides the strand
+           bundle. Fade pairs per the study: 1->2 (A), 3->4 (B), 8->9 (F) —
+           furniture permanent, only copy swaps. M is not a held stop: the
+           pull-back begins as the wordmark lands, retreats to the whole
+           surface (fills 75% of frame height), then dissolves to the poster.
+
+  TICKING  One setInterval drives everything — camera, fades, and the wash
+           bundle's transition ticks. NEVER requestAnimationFrame: rAF fires
+           zero callbacks in a hidden or covered tab, so a rAF glide hangs
+           forever exactly when the recorder's window covers the tab. And
+           scroll/transform is animated by hand: behavior:'smooth' is a
+           silent no-op in the capture context.
+  ============================================================================
+-->
+<style>
+  :root {
+    --paper:#f2ede2; --ink:#211d16; --blue:#254a6f; --ochre:#b3831c;
+    --js:#c05b2a; --beam:#872e3c; --julia:#6f568f; --go:#2e6f6a; --py:#4f6d2e;
+  }
+  html, body { margin:0; background:#15130f;
+    font-family:"Helvetica Neue", Helvetica, Arial, system-ui, sans-serif; }
+
+  /* ---------- the fixed 1920x1080 camera frame ---------- */
+  #frame { position:relative; width:1920px; height:1080px; overflow:hidden;
+    background:var(--paper); color:var(--ink); }
+  #world { position:absolute; left:0; top:0; width:7680px; height:3240px;
+    transform-origin:0 0; }
+  #poster { position:absolute; inset:0; width:1920px; height:1080px;
+    background:var(--paper); opacity:0; }
+
+  /* ---------- stage typography (verbatim from the study) ---------- */
+  .blk { position:absolute; }
+  .cx  { transform:scaleX(.86); transform-origin:0 0; }
+  .cxr { transform:scaleX(.86); transform-origin:100% 0; }
+  .tagrow { white-space:nowrap; margin-bottom:12px; }
+  .tag { display:inline; font-size:24px; font-weight:800; letter-spacing:.22em;
+    color:rgba(33,29,22,.62); }
+  .dur { display:none; font-size:18px; font-weight:600; letter-spacing:.12em;
+    color:rgba(33,29,22,.4); margin-left:18px;
+    font-variant-numeric:tabular-nums; }
+  body.guides .dur { display:inline; }
+  .sent { font-size:37px; font-weight:800; line-height:1.32;
+    letter-spacing:.045em; color:var(--ink); margin-bottom:10px; }
+  .sent.blue { color:var(--blue); }
+  .big { font-size:47px; font-weight:900; line-height:1.22;
+    letter-spacing:.03em; color:var(--ink); margin-bottom:10px; }
+  .big.blue { color:var(--blue); }
+  .quote { font-size:29px; font-weight:500; font-style:italic; line-height:1.4;
+    color:rgba(33,29,22,.82); letter-spacing:.01em; margin-bottom:10px; }
+  .note { font-size:21px; font-weight:700; letter-spacing:.22em;
+    color:rgba(33,29,22,.55); line-height:1.5; }
+  .small { font-size:22px; font-weight:600; line-height:1.5;
+    color:rgba(33,29,22,.66); letter-spacing:.02em; }
+
+  .slab { position:absolute; background:var(--ochre); color:var(--paper);
+    display:flex; align-items:center; padding:0 26px;
+    font-size:26px; font-weight:800; letter-spacing:.14em; }
+  .placard { position:absolute; background:var(--ink); color:var(--paper);
+    padding:30px 36px; transform:rotate(-2deg); transform-origin:50% 50%; }
+  .placard .tag { color:rgba(242,237,226,.6); }
+  .placard .sent { color:var(--paper); font-size:39px; }
+  .placard .quote { color:rgba(242,237,226,.85); }
+  .placard .note { color:rgba(242,237,226,.62); }
+  .ghost { position:absolute; background:rgba(33,29,22,.09);
+    padding:26px 36px; transform:rotate(-2deg); }
+  .ghost .sent { color:rgba(33,29,22,.4); font-size:34px; margin:0; }
+  .ghost .tag { color:rgba(33,29,22,.35); font-size:22px; }
+  .box { position:absolute; border:4px solid var(--ink); padding:20px 26px; }
+  .box .h { font-size:31px; font-weight:900; letter-spacing:.12em;
+    margin-bottom:8px; }
+  .box .small { color:rgba(33,29,22,.78); }
+  .bar { position:absolute; background:var(--blue); color:var(--paper);
+    padding:20px 30px; }
+  .bar .tag { color:rgba(242,237,226,.6); font-size:22px; }
+  .bar .sent { color:var(--paper); font-size:30px; line-height:1.4;
+    margin:6px 0 0; }
+  .chip { position:absolute; width:200px; height:64px; display:flex;
+    align-items:center; justify-content:center; font-size:23px;
+    font-weight:900; letter-spacing:.16em; color:var(--paper); }
+  .chip.ring { background:transparent !important; border:5px solid; }
+  .fanlab { position:absolute; font-size:23px; font-weight:900;
+    letter-spacing:.2em; }
+  .amb { position:absolute; color:var(--ink); opacity:.07; font-weight:700; }
+
+  .wordmark { position:absolute; font-weight:900; color:var(--ink);
+    letter-spacing:.005em; line-height:1.02; white-space:nowrap; }
+  .wordmark .stop { color:var(--ochre); }
+
+  svg.lay { position:absolute; inset:0; }
+
+  /* every revealable element starts dark; the timeline owns opacity */
+  [data-beat], [data-b15] { opacity:0; }
+</style>
+</head>
+<body>
+<div id="frame">
+  <div id="world">
+    <svg class="lay" id="washWide" viewBox="0 0 7680 3240" width="7680" height="3240">
+      <defs>
+        <clipPath id="clipWallW"><rect x="0" y="0" width="4880" height="1080"/></clipPath>
+      </defs>
+      <!-- one container per beat that owns washes; PolyglotWash renders into
+           these (selector "#washB<n>"). 80 = the cascade, painted at the
+           east turn; order here is z-order and follows the study's table. -->
+      <g id="washB1"></g><g id="washB2"></g><g id="washB3"></g><g id="washB4"></g>
+      <g id="washB5"></g><g id="washB6"></g><g id="washB7"></g><g id="washB80"></g>
+      <g id="washB8"></g><g id="washB10"></g><g id="washB11"></g><g id="washB12"></g>
+      <g id="washB13"></g><g id="washB14"></g><g id="washB15"></g>
+    </svg>
+    <svg class="lay" id="graphWide" viewBox="0 0 7680 3240" width="7680" height="3240">
+      <g id="lineGW"></g><g id="flatGW"></g><g id="arrGW"></g>
+    </svg>
+
+    <!-- ===================== PASS 1 · beats 1-7 ===================== -->
+
+    <!-- 1 (shares FRAME A with 2; resolves first, then fades) -->
+    <div class="blk cx" data-beat="1" style="left:120px; top:190px; width:640px;">
+      <div class="tagrow"><span class="tag">1 · AN ARGUMENT FOR POLYGLOT PROGRAMMING</span><span class="dur">20.9 s</span></div>
+      <div class="sent">EACH PART OF A SYSTEM IN A LANGUAGE THAT SUITS IT.</div>
+      <div class="sent blue">ONE TYPED LAYER OVER THE TOP, SO IT HOLDS TOGETHER.</div>
+    </div>
+    <div class="blk cx" data-beat="1" style="left:140px; top:706px; width:660px;">
+      <div class="note">A SERIES — I'LL SHOW IT WORKING.</div>
+    </div>
+
+    <!-- 2 (shares FRAME A with 1; fades in as 1's copy fades out) -->
+    <div class="blk cx" data-beat="2" style="left:1010px; top:210px; width:560px;">
+      <div class="tagrow"><span class="tag">2 · HOW DO WE CHOOSE A LANGUAGE?</span><span class="dur">19.9 s</span></div>
+      <div class="sent">MOSTLY, WE DON'T. GENERAL-PURPOSE LANGUAGES FOR GENERAL-PURPOSE WORK.</div>
+    </div>
+    <div class="blk cx" data-beat="2" style="left:1080px; top:600px; width:520px;">
+      <div class="small">BUT THERE ARE PLACES WE DO CHOOSE — AND DON'T NOTICE.</div>
+    </div>
+
+    <!-- 3 (shares FRAME B with 4) -->
+    <div class="blk cx" data-beat="3" style="left:1950px; top:680px; width:600px;">
+      <div class="tagrow"><span class="tag">3 · YOU ALREADY DO IT. YOU WRITE SQL.</span><span class="dur">16.1 s</span></div>
+      <div class="quote">"I write Java — and then I write the queries in SQL."</div>
+      <div class="sent" style="font-size:31px;">NOBODY CALLS THAT POLYGLOT.</div>
+    </div>
+
+    <!-- 4 (shares FRAME B with 3; fades in after 3 resolves) -->
+    <div class="blk cx" data-beat="4" style="left:2620px; top:190px; width:700px;">
+      <div class="tagrow"><span class="tag">4 · AND YOU KNOW WHEN YOU'VE GOT IT WRONG</span><span class="dur">23.8 s</span></div>
+      <div class="sent" style="font-size:32px;">A SAT SOLVER, POORLY, IN WHATEVER YOU HAD TO HAND.</div>
+      <div class="sent" style="font-size:32px;">A COMPILER IN THE WRONG LANGUAGE — FAST TO WRITE, AND NOBODY CAN MAINTAIN IT.</div>
+      <div class="note">— OR EVEN BEEN GUILTY OF IT OURSELVES —</div>
+    </div>
+
+    <!-- 5 (ochre enters here, and only here) -->
+    <div class="blk cx" data-beat="5" style="left:3640px; top:600px; width:860px;">
+      <div class="tagrow"><span class="tag">5 · IT COSTS YOU TWICE</span><span class="dur">33.3 s</span></div>
+    </div>
+    <div class="slab" data-beat="5" style="left:3640px; top:672px; width:290px; height:74px;">YOURS</div>
+    <div class="blk cx" data-beat="5" style="left:3990px; top:678px; width:520px;">
+      <div class="small">THE LEARNING CURVE — AND IT DISPLACES WHAT YOU KNEW. NET ZERO AT BEST.</div>
+    </div>
+    <div class="slab" data-beat="5" style="left:3640px; top:790px; width:290px; height:74px;">THE PROJECT'S</div>
+    <div class="blk cx" data-beat="5" style="left:3990px; top:796px; width:520px;">
+      <div class="small">TOOLING, DEPLOYMENT, MAINTENANCE, VERSION BUMPS.</div>
+    </div>
+
+    <!-- 6 (east of the wall, low register) -->
+    <div class="blk cx" data-beat="6" style="left:5280px; top:590px; width:900px;">
+      <div class="tagrow"><span class="tag">6 · WE'VE ALWAYS DONE IT — ONE DIRECTION, ONE PROCESS</span><span class="dur">50.9 s</span></div>
+      <div class="sent" style="font-size:30px;">UNIX PIPES · SHELL · PERL · TWENTY YEARS OF PYTHON WRAPPED AROUND FAST C.</div>
+      <div class="quote" style="font-size:26px;">"You're not thinking 'pandoc is written in Haskell' — you're thinking 'here's a shell script that prints this document'."</div>
+      <div class="sent" style="font-size:30px;">BUT IF THE LANGUAGES I WANT LIVE ON DIFFERENT RUNTIMES — I'M IN A MULTI-PROCESS WORLD.</div>
+    </div>
+    <div class="blk cx" data-beat="6" style="left:4340px; top:955px; width:800px;">
+      <div class="note">ONE DIRECTION · ONE PROCESS · NO TYPES ACROSS</div>
+    </div>
+
+    <!-- 7 (the breach — the loudest event on the surface) -->
+    <div class="blk cx" data-beat="7" style="left:6100px; top:110px; width:1420px;">
+      <div class="tagrow"><span class="tag">7 · AND NOW BOTH HALVES OF THE COST HAVE GONE</span><span class="dur">61.2 s</span></div>
+      <div class="big">WHATEVER YOU THINK OF AI WRITING CODE — IT IS VERY GOOD AT WRITING CODE.</div>
+      <div class="quote">"Spec it. Write it in Rust. I don't write Rust — I get a daemon, it's fast, it passes the suite."</div>
+      <div class="sent" style="font-size:33px;">AND THE OTHER HALF WAS SOLVED A DECADE AGO: CONTAINERS, OR NIX.</div>
+      <div class="quote">"It works on my machine." — GREAT. WE'LL SHIP YOUR MACHINE.</div>
+    </div>
+    <div class="slab" data-beat="7" style="left:7350px; top:200px; width:250px; height:56px; opacity:.45; font-size:21px;">YOURS</div>
+    <div class="blk cx" data-beat="7" style="left:7350px; top:266px; width:300px;"><div class="note" style="font-size:18px;">ABSORBED</div></div>
+    <div class="slab" data-beat="7" style="left:7350px; top:330px; width:250px; height:56px; opacity:.45; font-size:21px;">THE PROJECT'S</div>
+    <div class="blk cx" data-beat="7" style="left:7350px; top:396px; width:300px;"><div class="note" style="font-size:18px;">SOLVED A DECADE AGO</div></div>
+
+    <!-- ===================== PASS 2 · beats 8-12 ===================== -->
+
+    <!-- 8 (shares FRAME F with 9; resolves first — east half of the frame) -->
+    <div class="blk cxr" data-beat="8" style="left:6600px; top:1180px; width:800px; text-align:right;">
+      <div class="tagrow"><span class="tag">8 · A DIFFERENT COST STRUCTURE</span><span class="dur">26.4 s</span></div>
+      <div class="sent" style="font-size:30px;">THE ONE-TIME LIFT: ABSORBED. REPRODUCING, DEPLOYING: NO LONGER ARDUOUS.</div>
+      <div class="sent blue" style="font-size:30px;">SO MOVE THE PROBLEM TO A REPRESENTATION WHERE IT'S EASIER TO SOLVE.</div>
+    </div>
+    <div class="blk cxr" data-beat="8" style="left:6620px; top:1892px; width:800px; text-align:right;">
+      <div class="note" style="font-size:18px; letter-spacing:.18em;">SAME PROBLEM — MOVED TO THE REPRESENTATION THAT SUITS IT</div>
+    </div>
+
+    <!-- 9 · THE OBJECTION — the placard fades UP as 8's copy fades down -->
+    <div class="placard" data-beat="9" style="left:5770px; top:1230px; width:630px;">
+      <div class="tagrow"><span class="tag">9 · THE OBJECTION</span><span class="dur" style="color:rgba(242,237,226,.4);">19.8 s</span></div>
+      <div class="sent cx" style="width:116%;">"BUT IT'S ALL JUST ASSEMBLY LANGUAGE NOW"</div>
+      <div class="quote cx" style="width:116%; font-size:25px;">"The agent writes the code — who cares what language?"</div>
+      <div class="note cx" style="width:116%;">A SOLID ARGUMENT. ANSWERED AT 15 ↓</div>
+    </div>
+    <div class="blk cxr" data-beat="9" style="left:6180px; top:1790px; width:640px; text-align:right;">
+      <div class="small">I STARTED IN ASSEMBLY — AND I HAVEN'T LOOKED AT IT IN 35 YEARS.</div>
+    </div>
+
+    <!-- 10 · both LIKE-WHAT boxes; the misfit glyph is in the SVG layer -->
+    <div class="blk cxr" data-beat="10" style="left:4260px; top:1170px; width:700px; text-align:right;">
+      <div class="tagrow"><span class="tag">10 · …LIKE WHAT?</span><span class="dur">52.6 s</span></div>
+    </div>
+    <div class="box" data-beat="10" style="left:4180px; top:1300px; width:640px;">
+      <div class="h cx">RUINOUS TO WRITE</div>
+      <div class="small cx" style="width:116%;">SYMBOLIC DIFFERENTIATION IN JAVASCRIPT. A COMPILER IN C++ RATHER THAN HASKELL.</div>
+    </div>
+    <div class="box" data-beat="10" style="left:3400px; top:1760px; width:600px;">
+      <div class="h cx">RUINOUS TO RUN</div>
+      <div class="small cx" style="width:116%;">NUMPY WOULD SIMPLY NOT WORK WRITTEN IN PYTHON.</div>
+    </div>
+    <div class="blk cxr" data-beat="10" style="left:4120px; top:1516px; width:700px; text-align:right;">
+      <div class="note" style="font-size:18px; letter-spacing:.18em;">SAME PROBLEM — HELD IN THE REPRESENTATION THAT DOES NOT SUIT IT</div>
+    </div>
+
+    <!-- 11 · the boundaries multiply; the FAN (colour enters) -->
+    <div class="blk cxr" data-beat="11" style="left:1560px; top:1155px; width:1340px; text-align:right;">
+      <div class="tagrow"><span class="tag">11 · THEN THE BOUNDARIES MULTIPLY</span><span class="dur">48.4 s</span></div>
+      <div class="sent" style="font-size:31px;">MORE LANGUAGES, MORE BOUNDARIES — INESCAPABLE. CODECS THAT CANNOT GET OUT OF STEP; LOGIC THAT MEANS THE SAME THING ON EVERY RUNTIME — OR VERY SUBTLE, VERY UNAPPEALING BUGS.</div>
+      <div class="big blue" style="font-size:41px;">ONE CONSISTENT LANGUAGE, <u>INSIDE</u> THE RUNTIME OF EVERY PROCESS — A CONTROL SURFACE.</div>
+    </div>
+    <div class="fanlab" data-beat="11" style="left:2680px; top:1686px; color:var(--py);">PYTHON</div>
+    <div class="fanlab" data-beat="11" style="left:2680px; top:1766px; color:var(--go);">GO</div>
+    <div class="fanlab" data-beat="11" style="left:2680px; top:1846px; color:var(--julia);">JULIA</div>
+    <div class="fanlab" data-beat="11" style="left:2680px; top:1926px; color:var(--beam);">BEAM</div>
+    <div class="fanlab" data-beat="11" style="left:2680px; top:2006px; color:var(--js);">JAVASCRIPT</div>
+
+    <!-- 12 · the typed bar, literally over the top of the strands -->
+    <div class="blk cx" data-beat="12" style="left:530px; top:1495px; width:1300px;">
+      <div class="note">— ONE TYPED LAYER, OVER THE TOP. LITERALLY —</div>
+    </div>
+    <div class="bar" data-beat="12" style="left:520px; top:1548px; width:1000px;">
+      <div class="tagrow" style="margin-bottom:2px;"><span class="tag" style="font-size:22px; color:rgba(242,237,226,.6);">12 · WHAT I WANT. YOURS MAY DIFFER.</span><span class="dur" style="color:rgba(242,237,226,.4);">22.5 s</span></div>
+      <div class="sent cx" style="width:116%;">STRONG ALGEBRAIC DATA TYPES · REAL CONTAINERS — MAPS, SETS, NON-EMPTY · SYMMETRIC CODECS · PARSE, DON'T VALIDATE</div>
+    </div>
+
+    <!-- ===================== PASS 3 · beats 13-15 ===================== -->
+
+    <!-- 13 · the chips: same five hues, now sorted -->
+    <div class="blk cx" data-beat="13" style="left:830px; top:2230px; width:900px;">
+      <div class="tagrow"><span class="tag">13 · SO WHICH NICE LANGUAGES ARE MULTI-RUNTIME?</span><span class="dur">59.3 s</span></div>
+      <div class="sent" style="font-size:33px;">NOT MANY. <span style="color:var(--blue);">PURESCRIPT IS ONE — AND IT WAS DESIGNED THAT WAY.</span></div>
+    </div>
+    <div class="chip" data-beat="13" style="left:560px; top:2451px; background:var(--js);">JAVASCRIPT</div>
+    <div class="chip" data-beat="13" style="left:560px; top:2546px; background:var(--beam);">THE BEAM</div>
+    <div class="chip ring" data-beat="13" style="left:560px; top:2641px; border-color:var(--julia); color:var(--julia);">JULIA</div>
+    <div class="chip ring" data-beat="13" style="left:560px; top:2736px; border-color:var(--go); color:var(--go);">GO</div>
+    <div class="chip ring" data-beat="13" style="left:560px; top:2831px; border-color:var(--py); color:var(--py);">PYTHON</div>
+    <div class="blk cx" data-beat="13" style="left:850px; top:2500px; width:1050px;">
+      <div class="small">IN PRODUCTION — FOR YEARS. NODE, THE BROWSER, THE BEAM.</div>
+    </div>
+    <div class="blk cx" data-beat="13" style="left:850px; top:2700px; width:1050px;">
+      <div class="sent" style="font-size:31px;">THIS SERIES.</div>
+      <div class="small">JULIA, GO AND PYTHON — EACH IN ITS OWN EPISODE.</div>
+    </div>
+    <div class="blk cx" data-beat="13" style="left:840px; top:2985px; width:760px;">
+      <div class="note" style="font-size:19px; letter-spacing:.14em;">NOT EVERY RUNTIME SUITS IT — RUST WANTS NO GARBAGE COLLECTOR, SO THE SHIM GETS BIG.</div>
+    </div>
+
+    <!-- 14 · the evidence; the unit chart is in the SVG layer -->
+    <div class="blk cx" data-beat="14" style="left:2500px; top:2230px; width:1000px;">
+      <div class="tagrow"><span class="tag">14 · IT SUITS AN AGENT — WHICH SURPRISED ME</span><span class="dur">59.0 s</span></div>
+      <div class="quote" style="font-size:27px;">I expected the training data to favour Python and JavaScript.</div>
+      <div class="sent" style="font-size:32px;">IT DIDN'T WORK OUT THAT WAY.</div>
+      <div class="small">TEN YEARS OF PURESCRIPT — TEN MONTHS WITH CLAUDE:</div>
+      <div class="big blue" style="font-size:64px; margin-top:6px;">≈ 500,000 LINES</div>
+      <div class="sent" style="font-size:28px;">ACROSS DOZENS OF PROJECTS.</div>
+    </div>
+    <div class="blk cxr" data-beat="14" style="left:3460px; top:2330px; width:620px; text-align:right;">
+      <div class="small">STRONG COMPILE-TIME GUARANTEES — AND THE MODEL EATS THE LOOP. FEWER TESTS, FASTER CYCLE.</div>
+    </div>
+    <div class="blk cxr" data-beat="14" style="left:3624px; top:2845px; width:500px; text-align:right;">
+      <div class="note" style="font-size:17px; letter-spacing:.18em;">ONE MARK · ONE PROJECT</div>
+    </div>
+
+    <!-- 15 · the answer; six sub-reveals in place (data-b15 index), the
+         wordmark landing at frame M. The ghost is the beat-9 callback. -->
+    <div class="ghost" data-b15="0" style="left:5554px; top:2200px; width:620px;">
+      <div class="tag cx">THE OBJECTION — HELD SINCE 9</div>
+      <div class="sent cx" style="width:116%;">"BUT IT'S ALL JUST ASSEMBLY LANGUAGE NOW"</div>
+    </div>
+    <div class="blk cx" data-b15="0" style="left:4620px; top:2255px; width:700px;">
+      <div class="tagrow"><span class="tag">15 · AN AGENT IS NOT A COMPILER</span><span class="dur">89.7 s</span></div>
+    </div>
+    <div class="blk cxr" data-b15="1" style="left:4250px; top:2422px; width:1500px; text-align:right;">
+      <div class="sent" style="font-size:29px;">NOW — THAT ASSEMBLY ARGUMENT. <span style="color:rgba(33,29,22,.5);">↑</span></div>
+    </div>
+    <div class="blk cx" style="left:4620px; top:2478px; width:1980px;">
+      <div class="big" data-b15="2" style="font-size:44px;">I HAVE NEVER ONCE PATCHED MY COMPILED OUTPUT.</div>
+      <div class="sent" data-b15="3" style="font-size:29px;">A COMPILER IS DETERMINISTIC · ALWAYS THERE · FREE. AN AGENT IS NONE OF THE THREE.</div>
+      <div class="quote" data-b15="4" style="font-size:27px;">200,000 lines of C++, in production — and the agent's gone. Now what?</div>
+      <div class="sent" data-b15="5" style="font-size:29px;">I WANT TO READ THE CODE — IN A WAY I NEVER WANTED TO READ ASSEMBLY. 50,000 LINES OF PURESCRIPT: I REFACTOR IT MYSELF.</div>
+    </div>
+    <div class="blk cxr" data-b15="6" style="left:5940px; top:2968px; width:1520px; text-align:right;">
+      <div class="sent blue" style="font-size:38px;">"WHEN IT COMPILES, IT JUST WORKS."</div>
+    </div>
+    <div class="wordmark cxr" data-b15="7" style="left:5620px; top:3030px; width:1840px; text-align:right; font-size:118px;">POLYGLOT PURESCRIPT<span class="stop">.</span></div>
+    <div class="blk cxr" data-b15="8" style="left:5960px; top:3158px; width:1500px; text-align:right;">
+      <div class="note" style="font-size:19px;">TRY IT YOURSELF — A SERIES IN THIRTEEN PARTS</div>
+    </div>
+
+    <!-- ambient language marks, quiet zones only -->
+    <div class="amb" style="left:150px; top:820px; font-size:100px;">λ</div>
+    <div class="amb" style="left:3800px; top:1990px; font-size:56px;">::</div>
+    <div class="amb" style="left:2150px; top:3040px; font-size:64px;">∀</div>
+    <div class="amb" style="left:4380px; top:3020px; font-size:60px;">→</div>
+  </div>
+
+  <!-- ================= THE POSTER (dissolve target) ================= -->
+  <div id="poster">
+    <svg class="lay" id="washPoster" viewBox="0 0 1920 1080" width="1920" height="1080">
+      <defs>
+        <clipPath id="clipWallP"><rect x="0" y="0" width="520" height="1080"/></clipPath>
+      </defs>
+      <g id="washB16"></g>
+    </svg>
+    <svg class="lay" id="graphPoster" viewBox="0 0 1920 1080" width="1920" height="1080">
+      <g id="lineGP"></g><g id="flatGP"></g><g id="arrGP"></g>
+    </svg>
+    <div class="fanlab" style="left:1616px; top:96px;  color:var(--js); font-size:20px;">JS</div>
+    <div class="fanlab" style="left:1560px; top:191px; color:var(--beam); font-size:20px;">BEAM</div>
+    <div class="fanlab" style="left:1556px; top:286px; color:var(--julia); font-size:20px;">JULIA</div>
+    <div class="fanlab" style="left:1596px; top:381px; color:var(--go); font-size:20px;">GO</div>
+    <div class="fanlab" style="left:1520px; top:476px; color:var(--py); font-size:20px;">PYTHON</div>
+    <div class="wordmark cxr" style="left:220px; top:620px; width:1620px; text-align:right; font-size:172px; line-height:1.04;">POLYGLOT<br>PURESCRIPT<span class="stop">.</span></div>
+    <div class="blk cxr" style="left:840px; top:996px; width:1000px; text-align:right;">
+      <div class="note" style="font-size:24px; letter-spacing:.5em; color:rgba(33,29,22,.7);">ONE LANGUAGE · EVERY RUNTIME</div>
+    </div>
+    <div class="blk" style="left:64px; top:996px;">
+      <div class="note" style="font-size:16px; letter-spacing:.34em;">A SERIES IN THIRTEEN PARTS</div>
+    </div>
+    <div class="amb" style="left:150px; top:120px; font-size:72px;">λ</div>
+  </div>
+</div>
+
+<script src="wash-bundle.js"></script>
+<script>
+/* =========================================================================
+   T — THE ONE TIMING TABLE.
+   b1..b15 are the fifteen measured durations from
+   docs/kb/plans/takes/video-0-FINAL-beats.json (total 603 750 ms).
+   Everything else that is a duration, a rate, a stagger or an offset also
+   lives here, and NOWHERE else in this file. Retiming = editing this table.
+   ========================================================================= */
+const T = {
+  b1: 20861, b2: 19870, b3: 16074, b4: 23830, b5: 33309,
+  b6: 50915, b7: 61193, b8: 26411, b9: 19764, b10: 52614,
+  b11: 48372, b12: 22535, b13: 59253, b14: 59002, b15: 89747,
+
+  step: 16,          // ms per tick (fixed nominal step — determinism)
+  rate: 0.72,        // px/ms — THE constant camera speed, every leg
+  fade: 900,         // copy fade duration
+  gfxFade: 1200,     // furniture-reveal fade (glyphs, strands, chart)
+  pairGap: 600,      // pause between a pair's fade-out and fade-in
+  stagger: 60,       // wash layer stagger (settles)
+  staggerBig: 110,   // stagger for the flood / cascade / title / poster (soaks)
+
+  b15lines: [0, 4000, 9000, 16000, 25000, 35000], // sub-reveals at frame L
+  b15move: 58000,    // depart L for M this long after beat 15 begins
+  b15wordmark: 1200, // wordmark lands this long after arriving at M
+  b15try: 3200,      // "TRY IT YOURSELF" after arriving at M
+  pullbackDelay: 2000, // pull-back begins this long after the wordmark
+  pullbackDur: 12000,
+  pullbackHold: 3000,  // rest on the whole surface BEFORE the dissolve starts
+  dissolveDur: 4000
+};
+
+/* ========================================================================= */
+const C = getComputedStyle(document.documentElement);
+const BLUE = C.getPropertyValue('--blue').trim(), OCHRE = C.getPropertyValue('--ochre').trim();
+const RT = { js:C.getPropertyValue('--js').trim(), beam:C.getPropertyValue('--beam').trim(),
+             julia:C.getPropertyValue('--julia').trim(), go:C.getPropertyValue('--go').trim(),
+             py:C.getPropertyValue('--py').trim() };
+const INK = C.getPropertyValue('--ink').trim();
+const GUIDES = new URLSearchParams(location.search).get('guides') === '1';
+if (GUIDES) document.body.classList.add('guides');
+
+const NS='http://www.w3.org/2000/svg';
+function el(t,parent,attrs){const e=document.createElementNS(NS,t);
+  for(const k in attrs)e.setAttribute(k,attrs[k]);parent.appendChild(e);return e;}
+function arrow(parent,x,y,a,c,s){const r=a*Math.PI/180;s=s||1;
+  const R=(px,py)=>(x+(px*Math.cos(r)-py*Math.sin(r))*s).toFixed(1)+','
+                  +(y+(px*Math.sin(r)+py*Math.cos(r))*s).toFixed(1);
+  el('polygon',parent,{points:[R(0,0),R(-22,-10),R(-22,10)].join(' '),fill:c||INK});}
+function mulberry32(a){a=a>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;
+  let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;
+  return((t^t>>>14)>>>0)/4294967296;};}
+
+/* furniture reveal groups, keyed by beat */
+const GFX = {};
+function rg(parent, n){const g=el('g',parent,{});g.style.opacity='0';
+  (GFX[n]=GFX[n]||[]).push(g);return g;}
+
+/* ---------------- the wide stage furniture (study geometry, verbatim;
+     washes deliberately ABSENT — PolyglotWash owns them) ---------------- */
+(function(){
+  const lg=document.getElementById('lineGW');
+  const fg=document.getElementById('flatGW');
+  const ag=document.getElementById('arrGW');
+
+  /* board frame */
+  el('rect',fg,{x:30,y:30,width:7620,height:3180,fill:'none',
+    stroke:'rgba(33,29,22,.3)','stroke-width':5});
+
+  /* THE SPINE (ink hairline of the argument) */
+  const spine={fill:'none',stroke:INK,'stroke-width':5};
+  el('path',lg,Object.assign({d:'M 380 540 H 4862'},spine));
+  el('path',lg,Object.assign({d:
+    'M 4998 540 H 7300 Q 7520 540 7520 760 V 1400 Q 7520 1620 7300 1620'+
+    ' H 660 Q 206 1620 206 2050 V 2520 Q 206 2950 660 2950 H 7320'+
+    ' Q 7450 2950 7450 3012'},spine));
+  /* the tunnel (beat 6): thin, one-way, dead-ends */
+  el('path',lg,{d:'M 4790 540 V 908 H 5330',fill:'none',stroke:INK,
+    'stroke-width':3});
+  el('path',lg,{d:'M 5330 886 V 930',fill:'none',stroke:INK,'stroke-width':5});
+  /* the SQL dip (beat 3) — the tunnel in miniature */
+  el('path',lg,{d:'M 2000 540 V 596 H 2510 V 540',fill:'none',
+    stroke:BLUE,'stroke-width':3});
+  /* the drop-line: 9 -> 15 (deferral made visible) */
+  el('path',lg,{d:'M 5900 1580 V 2195',fill:'none',stroke:INK,
+    'stroke-width':3,'stroke-dasharray':'14 16',opacity:.55});
+  /* prussian layer joins the spine at the bar and rides to the wordmark —
+     revealed with beat 12, the typed layer made literal */
+  el('path',rg(lg,12),{d:'M 1300 1674 H 680 Q 224 1674 224 2104 V 2500'+
+    ' Q 224 2918 680 2918 H 7310',fill:'none',stroke:BLUE,'stroke-width':5,
+    opacity:.75});
+
+  /* the five strands — revealed at the fan (beat 11): colour enters there */
+  const HUES=[RT.py,RT.go,RT.julia,RT.beam,RT.js];
+  const gStrand=rg(lg,11);
+  for(let k=0;k<5;k++){
+    const L=1730+80*k, G=1690+11*k, X=240+9*k, R=2863-95*k;
+    el('path',gStrand,{d:`M 2950 1620 C 2870 1620 2780 ${L} 2660 ${L}`+
+      ` H 1250 C 1150 ${L} 1000 ${G} 850 ${G} H 660`+
+      ` Q ${X} ${G} ${X} ${G+430} V ${R-180} Q ${X} ${R} ${X+180} ${R} H 550`,
+      fill:'none',stroke:HUES[k],'stroke-width':7,opacity:.92});
+  }
+
+  /* THE WALL — the standing pieces are the world (static); the chunk out
+     and the strike lines are the BREACH, beat 7's event */
+  el('rect',fg,{x:4880,y:150,width:100,height:330,fill:INK});
+  el('rect',fg,{x:4880,y:610,width:100,height:260,fill:INK});
+  const wt1=el('text',fg,{'font-size':23,'font-weight':800,
+    fill:'rgba(242,237,226,.85)','letter-spacing':'.24em',
+    transform:'translate(4938,462) rotate(-90)'});
+  wt1.textContent='THIRTY YEARS';
+  const wt2=el('text',fg,{'font-size':23,'font-weight':800,
+    fill:'rgba(242,237,226,.85)','letter-spacing':'.24em',
+    transform:'translate(4938,856) rotate(-90)'});
+  wt2.textContent='AT THIS WALL';
+  /* the chunk is keyed 70: it fades in at beat 7's DEPARTURE, while the
+     wall is still in frame — the breach happens on screen, not after the
+     camera has already left the wall behind (frame E cannot see x5080) */
+  el('rect',rg(fg,70),{x:5080,y:700,width:100,height:130,fill:INK,opacity:.9,
+    transform:'rotate(24 5130 765)'});
+  const gStrike=rg(lg,7);
+  el('path',gStrike,{d:'M 7340 262 L 7615 195',stroke:INK,'stroke-width':6,fill:'none'});
+  el('path',gStrike,{d:'M 7340 392 L 7615 325',stroke:INK,'stroke-width':6,fill:'none'});
+
+  /* beat 2: the row of general-purpose squares; the one deliberate choice */
+  for(let j=0;j<5;j++)
+    el('rect',fg,{x:1580+j*48,y:474,width:22,height:22,fill:INK,opacity:.55});
+  el('rect',fg,{x:1670,y:610,width:22,height:22,fill:BLUE});
+  /* beat 4: the snarl (a path that went wrong) */
+  (function(){const rng=mulberry32(1969+99*7919);let d='M 3300 425';
+    for(let i=0;i<16;i++)d+=` L ${(3300+(rng()-.5)*150).toFixed(0)} ${(465+(rng()-.5)*120).toFixed(0)}`;
+    el('path',lg,{d,fill:'none',stroke:INK,'stroke-width':2.5,opacity:.7});})();
+  /* beat 1: the start diamond */
+  el('rect',fg,{x:-16,y:-16,width:32,height:32,fill:INK,
+    transform:'translate(350,540) rotate(45)'});
+
+  /* beat 8: representation glyph — revealed with the beat */
+  const g8f=rg(fg,8), g8l=rg(lg,8), g8a=rg(ag,8);
+  el('rect',g8f,{x:7060,y:1740,width:64,height:64,fill:'none',stroke:INK,
+    'stroke-width':4});
+  el('path',g8l,{d:'M 7160 1772 H 7230',stroke:INK,'stroke-width':4,fill:'none'});
+  arrow(g8a,7242,1772,0,INK,.8);
+  el('rect',g8f,{x:-32,y:-32,width:64,height:64,fill:'none',stroke:BLUE,
+    'stroke-width':4,transform:'translate(7318,1772) rotate(45)'});
+
+  /* beat 10: the MISFIT GLYPH — beat 8's inverse, revealed with the beat */
+  const g10f=rg(fg,10), g10l=rg(lg,10), g10a=rg(ag,10);
+  el('rect',g10f,{x:3740,y:1290,width:240,height:240,fill:'none',stroke:INK,
+    'stroke-width':6});
+  el('rect',g10f,{x:-134,y:-134,width:268,height:268,fill:'none',stroke:BLUE,
+    'stroke-width':6,transform:'translate(3860,1410) rotate(45)'});
+  el('path',g10l,{d:'M 4066 1410 H 4130',stroke:INK,'stroke-width':3,fill:'none'});
+  arrow(g10a,4150,1410,0,INK,.8);
+  el('path',g10l,{d:'M 3860 1650 V 1715',stroke:INK,'stroke-width':3,fill:'none'});
+  arrow(g10a,3860,1740,90,INK,.8);
+
+  /* beat 13: bracket lines — production pair, series trio */
+  const g13=rg(lg,13);
+  el('path',g13,{d:'M 812 2458 H 800 V 2608 H 812',fill:'none',
+    stroke:INK,'stroke-width':3,opacity:.6});
+  el('path',g13,{d:'M 812 2648 H 800 V 2892 H 812',fill:'none',
+    stroke:INK,'stroke-width':3,opacity:.6});
+  /* beat 14: the unit chart — one mark, one project */
+  const g14=rg(fg,14);
+  for(let r=0;r<5;r++)for(let c2=0;c2<8;c2++)
+    el('rect',g14,{x:3660+c2*62,y:2600+r*52,width:30,height:12,
+      fill:BLUE,opacity:.55});
+
+  /* arrows — direction is never in doubt (furniture, static) */
+  arrow(ag,830,540,0);   arrow(ag,1690,540,0);  arrow(ag,2560,540,0);
+  arrow(ag,3440,540,0);  arrow(ag,4600,540,0);  arrow(ag,5010,540,0);
+  arrow(ag,5210,908,0);
+  arrow(ag,6300,540,0);  arrow(ag,6960,540,0);
+  arrow(ag,7520,1150,90);
+  arrow(ag,7150,1620,180); arrow(ag,6620,1620,180); arrow(ag,5580,1620,180);
+  arrow(ag,4640,1620,180); arrow(ag,3620,1620,180); arrow(ag,2300,1620,180);
+  arrow(ag,1420,1620,180);
+  arrow(ag,206,2400,90);
+  arrow(ag,2500,2950,0); arrow(ag,4480,2950,0);  arrow(ag,6300,2950,0);
+  arrow(ag,7450,3020,90);
+
+  /* station rulers — study instrumentation; only under ?guides=1 */
+  if (GUIDES) {
+    const BEATS=[[1,20.9],[2,19.9],[3,16.1],[4,23.8],[5,33.3],[6,50.9],[7,61.2],
+                 [8,26.4],[9,19.8],[10,52.6],[11,48.4],[12,22.5],
+                 [13,59.3],[14,59.0],[15,89.7]];
+    function ruler(list,y,x0,x1){
+      const F=500,tot=list.reduce((s,b)=>s+b[1],0),span=Math.abs(x1-x0),
+        rem=span-F*list.length,dir=x1>x0?1:-1;
+      let x=x0;
+      el('path',lg,{d:`M ${x0} ${y} H ${x1}`,stroke:'rgba(33,29,22,.3)',
+        'stroke-width':2,fill:'none'});
+      list.forEach(b=>{const w=F+rem*b[1]/tot;
+        el('path',lg,{d:`M ${x} ${y-9} V ${y+9}`,stroke:'rgba(33,29,22,.4)',
+          'stroke-width':2,fill:'none'});
+        const t=el('text',lg,{x:x+dir*w/2,y:y+34,'text-anchor':'middle',
+          'font-size':19,'font-weight':600,fill:'rgba(33,29,22,.45)',
+          'letter-spacing':'.08em'});
+        t.textContent=`${b[0]} · ${b[1].toFixed(1)}s`;
+        x+=dir*w;});
+      el('path',lg,{d:`M ${x1} ${y-9} V ${y+9}`,stroke:'rgba(33,29,22,.4)',
+        'stroke-width':2,fill:'none'});}
+    ruler(BEATS.slice(0,7), 1000,40,7640);
+    ruler(BEATS.slice(7,12),2082,7640,40);
+    ruler(BEATS.slice(12),  3168,40,7640);
+  }
+})();
+
+/* ---------------- the poster furniture (unchanged — it is finished);
+     its four washes paint via PolyglotWash beat 16 at the dissolve ------ */
+(function(){
+  const lg=document.getElementById('lineGP');
+  const fg=document.getElementById('flatGP');
+
+  el('path',lg,{d:'M 70 540 H 210',stroke:INK,'stroke-width':4,fill:'none'});
+  el('rect',fg,{x:-11,y:-11,width:22,height:22,fill:INK,
+    transform:'translate(100,540) rotate(45)'});
+
+  el('rect',fg,{x:520,y:90, width:80,height:360,fill:INK});
+  el('rect',fg,{x:520,y:610,width:80,height:380,fill:INK});
+  el('rect',fg,{x:660,y:700,width:80,height:140,fill:INK,opacity:.92,
+    transform:'rotate(22 700 770)'});
+  const vt=el('text',fg,{x:0,y:0,'font-size':26,'font-weight':800,
+    fill:'rgba(242,237,226,.85)','letter-spacing':'.3em',
+    transform:'translate(572,960) rotate(-90)'});
+  vt.textContent='THIRTY YEARS';
+
+  const HUES=[RT.js,RT.beam,RT.julia,RT.go,RT.py];
+  for(let k=0;k<5;k++){const yk=140+95*k;
+    el('path',lg,{d:`M 830 530 C 1100 ${530-k*8} 1400 ${yk+70} 1720 ${yk}`,
+      fill:'none',stroke:HUES[k],'stroke-width':22,opacity:.95,
+      'stroke-linecap':'round'});
+    if(k<2) el('circle',lg,{cx:1770,cy:yk-6,r:17,fill:HUES[k]});
+    else    el('circle',lg,{cx:1770,cy:yk-6,r:14,fill:'none',
+               stroke:HUES[k],'stroke-width':6});
+  }
+})();
+
+/* =========================================================================
+   THE TIMELINE
+   ========================================================================= */
+const WORLD = document.getElementById('world');
+const POSTER = document.getElementById('poster');
+
+/* camera stops (fx, fy) — study header, round 4 */
+const STOP = { A:[0,0], B:[1682,0], C:[3096,0], D:[4359,0], E:[5760,0],
+               F:[5760,1080], G:[3251,1080], H:[1460,1080], I:[0,1080],
+               J:[0,2160], K:[2434,2160], L:[4560,2160], M:[5760,2160] };
+/* pull-back target: whole surface, 1920/7680 = 0.25, centred vertically */
+const WIDE_VIEW = { x:0, y:-540, s:0.25 };
+
+/* beat -> stop; pairWith = the earlier beat whose copy fades out first;
+   turnWash = pseudo-beat painted at DEPARTURE (the turn is the event) */
+const BEATS = [
+  { n:1,  dur:T.b1,  stop:'A' },
+  { n:2,  dur:T.b2,  stop:'A', pairWith:1 },
+  { n:3,  dur:T.b3,  stop:'B' },
+  { n:4,  dur:T.b4,  stop:'B', pairWith:3 },
+  { n:5,  dur:T.b5,  stop:'C' },
+  { n:6,  dur:T.b6,  stop:'D' },
+  { n:7,  dur:T.b7,  stop:'E', preGfx:70 },     // the breach: chunk out at departure
+  { n:8,  dur:T.b8,  stop:'F', turnWash:80 },   // east turn: the cascade
+  { n:9,  dur:T.b9,  stop:'F', pairWith:8 },
+  { n:10, dur:T.b10, stop:'G' },
+  { n:11, dur:T.b11, stop:'H' },
+  { n:12, dur:T.b12, stop:'I' },
+  { n:13, dur:T.b13, stop:'J' },                // west turn: the bundle dives
+  { n:14, dur:T.b14, stop:'K' },
+  { n:15, dur:T.b15, stop:'L' }                 // 15b (M) scheduled below
+];
+/* measured beat starts, for the check() drift audit */
+const MEASURED_AT = [0,20861,40731,56805,80635,113944,164859,226052,252463,
+                     272227,324841,373213,395748,455001,514003];
+
+/* reveal targets: remember each element's designed opacity, then dark it */
+for (const e of document.querySelectorAll('[data-beat],[data-b15]')) {
+  e.dataset.target = e.style.opacity === '' ? '1' : e.style.opacity;
+  e.style.opacity = '0';
+}
+const beatEls = n => [...document.querySelectorAll(`[data-beat="${n}"]`)];
+const b15Els  = i => [...document.querySelectorAll(`[data-b15="${i}"]`)];
+
+/* fades — processed by the tick, never by CSS transitions (which stall in
+   a covered tab just like rAF does) */
+let FADES = [];
+function fade(e, t0, dur, from, to){ FADES.push({e, t0, dur, from, to}); }
+function fadeInEls(els, t0, dur){ for (const e of els) fade(e, t0, dur, 0, parseFloat(e.dataset.target||'1')); }
+function fadeOutEls(els, t0, dur){ for (const e of els) fade(e, t0, dur, parseFloat(e.dataset.target||'1'), 0); }
+
+const WASH = () => window.PolyglotWash;
+const HAS_WASH = n => WASH() && WASH().beats.indexOf(n) >= 0;
+const STAG = n => (n===7||n===15||n===16||n===80) ? T.staggerBig : T.stagger;
+function paint(n){ if (HAS_WASH(n)) WASH().paintBeat(n, STAG(n)); }
+
+function revealBeat(n, t0){
+  fadeInEls(beatEls(n), t0, T.fade);
+  paint(n);
+  for (const g of (GFX[n]||[])) fade(g, t0, T.gfxFade, 0, 1);
+}
+
+/* ---- build the schedule: events + camera keyframes, all derived from T */
+let EVENTS=[], KF=[], INFO=[], TOTAL=0, EV_I=0;
+(function build(){
+  let t=0, prev='A';
+  for (const b of BEATS){
+    const at=t; let travel=0;
+    const [x0,y0]=STOP[prev], [x1,y1]=STOP[b.stop];
+    if (x0!==x1 || y0!==y1){
+      travel=Math.hypot(x1-x0,y1-y0)/T.rate;
+      KF.push({t0:at,t1:at+travel,from:{x:x0,y:y0,s:1},to:{x:x1,y:y1,s:1}});
+    }
+    const arrive=at+travel;
+    if (b.pairWith) EVENTS.push({t:at, label:`b${b.pairWith} copy out`,
+      fn:(tt)=>fadeOutEls(beatEls(b.pairWith), tt, T.fade)});
+    if (b.turnWash) EVENTS.push({t:at, label:'cascade paints (east turn)',
+      fn:()=>paint(b.turnWash)});
+    if (b.preGfx) EVENTS.push({t:at, label:`gfx ${b.preGfx} at departure`,
+      fn:(tt)=>{ for (const g of (GFX[b.preGfx]||[])) fade(g, tt, T.gfxFade, 0, 1); }});
+    if (b.n !== 15){
+      const d = b.pairWith ? T.pairGap : 0;
+      EVENTS.push({t:arrive+d, label:`beat ${b.n} resolves`,
+        fn:(tt)=>revealBeat(b.n, tt)});
+    } else {
+      /* 15a — the answer, at L, six sub-reveals in place */
+      EVENTS.push({t:arrive, label:'beat 15 washes (title ground)', fn:()=>paint(15)});
+      T.b15lines.forEach((off,i)=>
+        EVENTS.push({t:arrive+off, label:`15 line ${i}`,
+          fn:(tt)=>fadeInEls(b15Els(i), tt, T.fade)}));
+      /* 15b — depart for M; wordmark lands; pull-back is M's dwell */
+      const mT0 = at + T.b15move;
+      const mTravel = Math.hypot(STOP.M[0]-STOP.L[0], STOP.M[1]-STOP.L[1]) / T.rate;
+      KF.push({t0:mT0, t1:mT0+mTravel, from:{x:STOP.L[0],y:STOP.L[1],s:1},
+               to:{x:STOP.M[0],y:STOP.M[1],s:1}});
+      const arriveM = mT0 + mTravel;
+      EVENTS.push({t:arriveM, label:'15 · when-it-compiles',
+        fn:(tt)=>fadeInEls(b15Els(6), tt, T.fade)});
+      EVENTS.push({t:arriveM+T.b15wordmark, label:'15 · WORDMARK LANDS',
+        fn:(tt)=>fadeInEls(b15Els(7), tt, T.fade)});
+      EVENTS.push({t:arriveM+T.b15try, label:'15 · try it yourself',
+        fn:(tt)=>fadeInEls(b15Els(8), tt, T.fade)});
+      const pullT0 = arriveM + T.b15wordmark + T.pullbackDelay;
+      KF.push({t0:pullT0, t1:pullT0+T.pullbackDur,
+               from:{x:STOP.M[0],y:STOP.M[1],s:1}, to:WIDE_VIEW});
+      /* The pull-back IS the reminder of the journey, so the journey has to
+         be on it. The earlier member of each fade pair (1, 3, 8) went to zero
+         when its partner arrived, and without this it stays at zero — leaving
+         three holes in the closing shot, one of them the film's own opening
+         thesis and its promise of a series. Bring them back as the retreat
+         begins; at 0.25 scale they read as texture, which is the point. */
+      EVENTS.push({t:pullT0, label:'pair-earlier copy returns',
+        fn:(tt)=>{ for (const n of BEATS.filter(x=>x.pairWith).map(x=>x.pairWith))
+                     fadeInEls(beatEls(n), tt, T.pullbackDur * 0.5); }});
+      /* Hold on the wide view before dissolving. Without the hold the poster
+         starts fading in at the instant the camera arrives, so the reminder
+         never gets a moment to be looked at. This runs past the last spoken
+         word, so it costs silence, not narration. */
+      const dissT0 = pullT0 + T.pullbackDur + T.pullbackHold;
+      EVENTS.push({t:dissT0, label:'dissolve to poster',
+        fn:(tt)=>{ fade(POSTER, tt, T.dissolveDur, 0, 1); paint(16); }});
+    }
+    INFO.push({n:b.n, at, dur:b.dur, stop:b.stop, travel:Math.round(travel),
+               arrive:Math.round(arrive)});
+    prev=b.stop; t+=b.dur;
+  }
+  TOTAL=t;
+  EVENTS.sort((a,b)=>a.t-b.t);
+  KF.sort((a,b)=>a.t0-b.t0);
+})();
+
+/* ---- camera ---- */
+function cameraAt(tt){
+  let pos={x:STOP.A[0], y:STOP.A[1], s:1};
+  for (const k of KF){
+    if (tt>=k.t1) pos={...k.to};
+    else if (tt>=k.t0){
+      const p=(tt-k.t0)/(k.t1-k.t0);
+      pos={x:k.from.x+(k.to.x-k.from.x)*p,
+           y:k.from.y+(k.to.y-k.from.y)*p,
+           s:k.from.s+(k.to.s-k.from.s)*p};
+      break;
+    } else break;
+  }
+  return pos;
+}
+function applyCamera(tt){
+  const c=cameraAt(tt);
+  WORLD.style.transform=`scale(${c.s}) translate(${-c.x}px,${-c.y}px)`;
+}
+
+/* ---- the tick — the only clock in the piece ---- */
+let ELAPSED=0, TIMER=null;
+function advance(dt){
+  ELAPSED+=dt;
+  while (EV_I<EVENTS.length && EVENTS[EV_I].t<=ELAPSED){
+    EVENTS[EV_I].fn(EVENTS[EV_I].t);
+    EV_I++;
+  }
+  FADES=FADES.filter(f=>{
+    if (ELAPSED<f.t0) return true;
+    const p=Math.min(1,(ELAPSED-f.t0)/f.dur);
+    f.e.style.opacity=(f.from+(f.to-f.from)*p).toFixed(3);
+    return p<1;
+  });
+  applyCamera(ELAPSED);
+  if (WASH()) WASH().tick(dt);
+  if (ELAPSED>=TOTAL && TIMER){ DEMO.stop(); console.log('[film] done — holding final frame'); }
+}
+
+function resetState(){
+  if (TIMER){ clearInterval(TIMER); TIMER=null; }
+  ELAPSED=0; EV_I=0; FADES=[];
+  for (const e of document.querySelectorAll('[data-beat],[data-b15]')) e.style.opacity='0';
+  for (const n in GFX) for (const g of GFX[n]) g.style.opacity='0';
+  POSTER.style.opacity='0';
+  if (WASH()) WASH().reset();
+  applyCamera(0);
+}
+
+const fmt = ms => {
+  const s=ms/1000, m=Math.floor(s/60);
+  return `${m}:${(s-m*60).toFixed(2).padStart(5,'0')}`;
+};
+
+const DEMO = {
+  speed: 1,
+  play(){
+    if (TIMER) return;
+    if (ELAPSED===0) console.log('[film] rolling — total ' + fmt(TOTAL));
+    TIMER=setInterval(()=>advance(T.step*DEMO.speed), T.step);
+  },
+  stop(){ if (TIMER){ clearInterval(TIMER); TIMER=null; } },
+  reset(){ resetState(); },
+  /* deterministic fast-forward for verification — fixed 16ms steps, so a
+     seek passes through exactly the frames a real run would produce */
+  seek(ms){ resetState(); while (ELAPSED<ms) advance(T.step); },
+  status(){ return { elapsed: fmt(ELAPSED), camera: cameraAt(ELAPSED),
+    nextEvent: EVENTS[EV_I] ? {at: fmt(EVENTS[EV_I].t), label: EVENTS[EV_I].label} : null }; },
+  check(){
+    const rows=INFO.map((b,i)=>({
+      beat:b.n, measured_at:fmt(MEASURED_AT[i]), scheduled_at:fmt(b.at),
+      drift_ms:b.at-MEASURED_AT[i], dur_s:(b.dur/1000).toFixed(2),
+      stop:b.stop, travel_ms:b.travel, dwell_s:((b.dur-b.travel)/1000).toFixed(2)
+    }));
+    console.table(rows);
+    const ok=TOTAL===603750;
+    console.log(`total: ${fmt(TOTAL)} (${TOTAL} ms) — beat sheet says 10:03.75 (603750 ms) ${ok?'✓':'✗ MISMATCH'}`);
+    for (const b of INFO) if (b.travel>=b.dur)
+      console.warn(`beat ${b.n}: travel ${b.travel}ms exceeds its ${b.dur}ms duration`);
+    if (document.visibilityState!=='visible')
+      console.warn('TAB NOT VISIBLE — fine for the timer, fatal for a capture. Bring the tab frontmost before recording.');
+    if (!WASH()) console.warn('PolyglotWash MISSING — wash-bundle.js did not load; washes will not paint.');
+    else {
+      const missing=WASH().beats.filter(n=>!document.querySelector('#washB'+n));
+      if (missing.length) console.warn('wash containers missing for beats: '+missing.join(', '));
+      else console.log(`washes: ${WASH().beats.length} beat groups wired (incl. 80 = cascade, 16 = poster) ✓`);
+    }
+    if (window.innerWidth<1920||window.innerHeight<1080)
+      console.warn(`window ${window.innerWidth}×${window.innerHeight} < 1920×1080 — the frame will clip in capture.`);
+    return ok;
+  }
+};
+window.DEMO = DEMO;
+window.addEventListener('keydown', e=>{ if (e.key==='0') DEMO.play(); });
+
+applyCamera(0);
+console.log('[film] ready — DEMO.check() for pre-flight, 0 to roll.');
+</script>
+</body>
+</html>

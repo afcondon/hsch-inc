@@ -1,0 +1,5 @@
+# Verification captures — regenerate from the film, don't version 26 PNGs
+film-frames/
+wash-bundle.js
+wash/output/
+wash/.spago/

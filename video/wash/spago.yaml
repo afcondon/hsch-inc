@@ -1,0 +1,29 @@
+workspace:
+  packageSet:
+    registry: 77.13.1
+  extraPackages:
+    hylograph-onion:
+      path: ../../../../purescript-hylograph-libs/purescript-hylograph-onion
+    hylograph-selection:
+      path: ../../../../purescript-hylograph-libs/purescript-hylograph-selection
+
+package:
+  name: polyglot-video-wash
+  description: "Video 0 wash layer — the study's wash table rendered through the real hylograph-onion"
+  dependencies:
+    - arrays
+    - console
+    - datetime
+    - effect
+    - foldable-traversable
+    - integers
+    - maybe
+    - numbers
+    - prelude
+    - refs
+    - hylograph-onion
+    - hylograph-selection
+  bundle:
+    module: Wash.Main
+    outfile: ../wash-bundle.js
+    platform: browser
