@@ -3,6 +3,11 @@
 Produce a narrated screen-recording of a showcase, to embed on the site
 instead of keeping a live backend running for it.
 
+> **Making a video that argues something rather than showing something?**
+> See the sibling skill `argument-video.md`. This skill assumes an app
+> exists and you drive it; that one covers the case where the picture has
+> to be built to carry a case, with no software to point at.
+
 ## When to use this
 
 Under the 2026-07-30 showcase policy there are three classes of exhibit:

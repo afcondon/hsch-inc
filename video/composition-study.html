@@ -5,13 +5,14 @@
 <title>polyglot purescript — video 0 · composition study</title>
 <!--
   ============================================================================
-  POLYGLOT PURESCRIPT — VIDEO 0 · STATIC COMPOSITION STUDY — ROUND 2
+  POLYGLOT PURESCRIPT — VIDEO 0 · STATIC COMPOSITION STUDY — ROUND 3
   ============================================================================
   Fifteen beats, ~10:04 of measured narration, one continuous surface.
   NO animation, NO timeline, NO Hylograph. Words, arrows, shapes, composed.
 
   THE FOLD (kept, on merit — the traversal was declared open in round 2):
-  three passes of 1080 on a 14400 x 3240 stage.
+  three passes of 1080 on a 7680 x 3240 stage (2.37:1 — scope ratio; a full
+  pull-back fills 75% of frame height, so the closing retreat lands again).
 
     PASS 1  west -> east   beats 1-7    the observation -> THE WALL -> BREACH
     PASS 2  east -> west   beats 8-12   the rebuild; objection planted at 9;
@@ -28,23 +29,44 @@
     east turn = beat 7's flood cascading down;
     west turn = the five strands + spine leaving as ONE BUNDLE.
 
-  ROUND 2 CHANGES:
-  1 STATION FLOOR — every beat now owns >= one frame-width (1920); the
-    remainder of each pass is distributed by measured duration. This forces
-    the stage to 14400 wide (pass 1: 7 beats x 1920 = 13440 minimum).
-    Beat 3 gets a frame of its own; frames 1-4 are four different pictures.
-  2 THE TURN IS A BUNDLE — spine, typed-layer line and the five strands
+  ROUND 3 (the one change): THE 1920 STATION FLOOR IS REMOVED. It was
+  round 2's instructed fix and it was wrong: it grew the stage to 14400
+  (4.44:1), under-filled nearly every frame, and broke the closing
+  pull-back. Station width returns to DURATION-WEIGHTED with a modest
+  500px minimum (furniture non-collision, not a private frame).
+
+  SHORT ADJACENT BEATS NOW SHARE A FRAME AND SEPARATE BY FADE — the real
+  fix for packing: separation in TIME, not space. The camera holds; the
+  earlier beat's copy fades out, the next fades in. Furniture (spine, dip,
+  squares, washes, placard) is PERMANENT; only copy swaps. The pairs are
+  part of the design, not an animation detail:
+
+    FRAME A (fx 0,    pass 1)  beats 1 -> 2   (1's copy fades, 2's fades in)
+    FRAME B (fx 1682, pass 1)  beats 3 -> 4
+    FRAME F (fx 5760, pass 2)  beats 8 -> 9   (the cost-structure copy fades
+                               down and the tilted placard fades UP — the
+                               objection interrupts a resting frame)
+  All other beats own a frame; beat 15 rests twice (answer, then wordmark).
+
+  CAMERA STOPS (fx per stop; fy = pass x 1080):
+    pass 1: A 0 (1+2) · B 1682 (3+4) · C 3096 (5) · D 4359 (6) · E 5760 (7)
+    pass 2: F 5760 (8+9) · G 3251 (10) · H 1460 (11) · I 0 (12)
+    pass 3: J 0 (13) · K 2434 (14) · L 4560 (15a) · M 5760 (15b)
+  Both turns are pure vertical drops: E->F holds fx 5760 while the cascade
+  falls; I->J holds fx 0 while the bundle dives. The turn is the event.
+
+  KEPT FROM ROUND 2 (all of it):
+  - THE TURN IS A BUNDLE — spine, typed-layer line and the five strands
     converge to a 77px cable before the west edge and change direction
-    together: one rope, not seven laps. The pointless descent blob is gone.
-  3 PASS 2 CARRIES ITS WEIGHT — beat 8 gains its captioned representation
-    glyph and the cascade's landing pool; beat 9 gains the deck's assembly
-    line; beat 10's two boxes are composed into one frame.
-  4 PASS 2'S DIRECTION, answered — camera still travels east->west, but
-    REVEAL IS DECOUPLED FROM TRAVEL (fade/defocus now permitted): travel
-    introduces each beat's pictorial anchor (placed at the station's east
-    side, so it enters frame first); the copy fades in whole once the camera
-    rests, so text is never spooled in end-first. Copy in 8-11 is set
-    right-aligned — the hard edge resolves toward the direction of travel.
+    together: one rope, not seven laps. No descent blob.
+  - PASS 2 CARRIES ITS WEIGHT — beat 8's captioned representation glyph and
+    landing pool; beat 9's assembly line; beat 10's two boxes as one frame.
+  - PASS 2'S DIRECTION — travel introduces each beat's pictorial anchor
+    (east side of its station, enters frame first); copy fades in whole
+    once the camera rests; copy in 8-11 right-aligned so the hard edge
+    resolves toward travel.
+  - Beat 3's dip, beat 14's unit chart, the beat-9 ghost, the poster
+    (finished), frames 7 / 12 / 13 / 15.
 
   COLOUR LAW (colour encodes, never decorates):
     prussian  = the argument itself, and the typed layer (they are the same)
@@ -181,61 +203,63 @@
 <div class="memo">
 
   <p class="kicker">POLYGLOT PURESCRIPT · VIDEO 0 OF 13 · OPENING TITLES</p>
-  <h1>COMPOSITION STUDY <span class="thin">— round 2. Fifteen beats, one folded surface, every beat owns a frame. Static. A study, not the artefact.</span></h1>
+  <h1>COMPOSITION STUDY <span class="thin">— round 3. Fifteen beats, one folded surface; short neighbours share a frame and separate by fade. Static. A study, not the artefact.</span></h1>
   <div class="rule"></div>
 
   <!-- ================= I · THE WIDE COMPOSITION ================= -->
-  <h2 class="sec"><span class="n">I ·</span> THE WIDE COMPOSITION — 14400 × 3240, THREE PASSES OF 1080</h2>
+  <h2 class="sec"><span class="n">I ·</span> THE WIDE COMPOSITION — 7680 × 3240, THREE PASSES OF 1080</h2>
   <p class="secnote">All fifteen beats on one continuous surface, folded twice.
   Read pass 1 west→east, drop with the flood, pass 2 east→west, drop with the
-  strand bundle, pass 3 west→east to the full stop. Every beat's station now
-  has a floor of one camera frame (1920px); each pass's remainder is
-  distributed by measured duration, so long beats still earn more room. Ticks
-  under each pass mark the stations; the figures are the measured durations.
-  Judge frames with the exporter, not this fit-to-width view.</p>
+  strand bundle, pass 3 west→east to the full stop. Station width is
+  duration-weighted with a modest 500px minimum — enough that neighbours'
+  furniture never collides, not enough to guarantee a private frame. Short
+  adjacent beats (1+2, 3+4, 8+9) share a camera frame and separate by fade:
+  the camera holds, one beat's copy fades out, the next fades in. Ticks under
+  each pass mark the stations; the figures are the measured durations. Judge
+  frames with the exporter, not this fit-to-width view.</p>
   <div class="ctl" id="ctlWide">
     <button data-z="fit" class="on">FIT</button>
     <button data-z="0.5">50%</button>
     <button data-z="1">100%</button>
   </div>
   <div class="viewport" id="vpWide">
-    <div class="stage" id="stWide" style="width:14400px; height:3240px;">
-      <svg class="lay" id="washWide" viewBox="0 0 14400 3240" width="14400" height="3240">
+    <div class="stage" id="stWide" style="width:7680px; height:3240px;">
+      <svg class="lay" id="washWide" viewBox="0 0 7680 3240" width="7680" height="3240">
         <defs>
-          <clipPath id="clipWallW"><rect x="0" y="0" width="10860" height="1080"/></clipPath>
+          <clipPath id="clipWallW"><rect x="0" y="0" width="4880" height="1080"/></clipPath>
         </defs>
         <g id="washGW"></g>
       </svg>
-      <svg class="lay" id="graphWide" viewBox="0 0 14400 3240" width="14400" height="3240">
+      <svg class="lay" id="graphWide" viewBox="0 0 7680 3240" width="7680" height="3240">
         <g id="lineGW"></g><g id="flatGW"></g><g id="arrGW"></g>
       </svg>
 
       <!-- ===================== PASS 1 · beats 1-7 ===================== -->
 
-      <!-- 1 -->
-      <div class="blk cx" style="left:680px; top:190px; width:660px;">
+      <!-- 1 (shares FRAME A with 2; resolves first, then fades) -->
+      <div class="blk cx" style="left:120px; top:190px; width:640px;">
         <div class="tagrow"><span class="tag">1 · AN ARGUMENT FOR POLYGLOT PROGRAMMING</span><span class="dur">20.9 s</span></div>
         <div class="sent">EACH PART OF A SYSTEM IN A LANGUAGE THAT SUITS IT.</div>
         <div class="sent blue">ONE TYPED LAYER OVER THE TOP, SO IT HOLDS TOGETHER.</div>
         <div class="note">A SERIES — I'LL SHOW IT WORKING.</div>
       </div>
 
-      <!-- 2 (squares and wash moved clear of the copy — round 2 small fix) -->
-      <div class="blk cx" style="left:2760px; top:210px; width:560px;">
+      <!-- 2 (shares FRAME A with 1; fades in as 1's copy fades out) -->
+      <div class="blk cx" style="left:1010px; top:210px; width:560px;">
         <div class="tagrow"><span class="tag">2 · HOW DO WE CHOOSE A LANGUAGE?</span><span class="dur">19.9 s</span></div>
         <div class="sent">MOSTLY, WE DON'T. GENERAL-PURPOSE LANGUAGES FOR GENERAL-PURPOSE WORK.</div>
         <div class="small">BUT THERE ARE PLACES WE DO CHOOSE — AND DON'T NOTICE.</div>
       </div>
 
-      <!-- 3 (its own station now — the SQL dip is the bypass in miniature) -->
-      <div class="blk cx" style="left:4730px; top:680px; width:600px;">
+      <!-- 3 (shares FRAME B with 4; the SQL dip is the bypass in miniature) -->
+      <div class="blk cx" style="left:1950px; top:680px; width:600px;">
         <div class="tagrow"><span class="tag">3 · YOU ALREADY DO IT. YOU WRITE SQL.</span><span class="dur">16.1 s</span></div>
         <div class="quote">"I write Java — and then I write the queries in SQL."</div>
         <div class="sent" style="font-size:31px;">NOBODY CALLS THAT POLYGLOT.</div>
       </div>
 
-      <!-- 4 -->
-      <div class="blk cx" style="left:6680px; top:190px; width:700px;">
+      <!-- 4 (shares FRAME B with 3; fades in after 3 resolves) -->
+      <div class="blk cx" style="left:2620px; top:190px; width:700px;">
         <div class="tagrow"><span class="tag">4 · AND YOU KNOW WHEN YOU'VE GOT IT WRONG</span><span class="dur">23.8 s</span></div>
         <div class="sent" style="font-size:32px;">A SAT SOLVER, POORLY, IN WHATEVER YOU HAD TO HAND.</div>
         <div class="sent" style="font-size:32px;">A COMPILER IN THE WRONG LANGUAGE — FAST TO WRITE, AND NOBODY CAN MAINTAIN IT.</div>
@@ -243,31 +267,31 @@
       </div>
 
       <!-- 5 (below; ochre enters here, and only here) -->
-      <div class="blk cx" style="left:8620px; top:600px; width:860px;">
+      <div class="blk cx" style="left:3640px; top:600px; width:860px;">
         <div class="tagrow"><span class="tag">5 · IT COSTS YOU TWICE</span><span class="dur">33.3 s</span></div>
       </div>
-      <div class="slab" style="left:8620px; top:672px; width:290px; height:74px;">YOURS</div>
-      <div class="blk cx" style="left:8970px; top:678px; width:520px;">
+      <div class="slab" style="left:3640px; top:672px; width:290px; height:74px;">YOURS</div>
+      <div class="blk cx" style="left:3990px; top:678px; width:520px;">
         <div class="small">THE LEARNING CURVE — AND IT DISPLACES WHAT YOU KNEW. NET ZERO AT BEST.</div>
       </div>
-      <div class="slab" style="left:8620px; top:790px; width:290px; height:74px;">THE PROJECT'S</div>
-      <div class="blk cx" style="left:8970px; top:796px; width:520px;">
+      <div class="slab" style="left:3640px; top:790px; width:290px; height:74px;">THE PROJECT'S</div>
+      <div class="blk cx" style="left:3990px; top:796px; width:520px;">
         <div class="small">TOOLING, DEPLOYMENT, MAINTENANCE, VERSION BUMPS.</div>
       </div>
 
       <!-- 6 (east of the wall, low register; the tunnel runs beneath) -->
-      <div class="blk cx" style="left:11260px; top:590px; width:980px;">
+      <div class="blk cx" style="left:5280px; top:590px; width:900px;">
         <div class="tagrow"><span class="tag">6 · WE'VE ALWAYS DONE IT — ONE DIRECTION, ONE PROCESS</span><span class="dur">50.9 s</span></div>
         <div class="sent" style="font-size:30px;">UNIX PIPES · SHELL · PERL · TWENTY YEARS OF PYTHON WRAPPED AROUND FAST C.</div>
         <div class="quote" style="font-size:26px;">"You're not thinking 'pandoc is written in Haskell' — you're thinking 'here's a shell script that prints this document'."</div>
         <div class="sent" style="font-size:30px;">BUT IF THE LANGUAGES I WANT LIVE ON DIFFERENT RUNTIMES — I'M IN A MULTI-PROCESS WORLD.</div>
       </div>
-      <div class="blk cx" style="left:10690px; top:945px; width:800px;">
+      <div class="blk cx" style="left:4340px; top:955px; width:800px;">
         <div class="note">ONE DIRECTION · ONE PROCESS · NO TYPES ACROSS</div>
       </div>
 
       <!-- 7 (the breach — the loudest event on the surface) -->
-      <div class="blk cx" style="left:12400px; top:110px; width:1420px;">
+      <div class="blk cx" style="left:6100px; top:110px; width:1420px;">
         <div class="tagrow"><span class="tag">7 · AND NOW BOTH HALVES OF THE COST HAVE GONE</span><span class="dur">61.2 s</span></div>
         <div class="big">WHATEVER YOU THINK OF AI WRITING CODE — IT IS VERY GOOD AT WRITING CODE.</div>
         <div class="quote">"Spec it. Write it in Rust. I don't write Rust — I get a daemon, it's fast, it passes the suite."</div>
@@ -276,10 +300,10 @@
       </div>
       <!-- the two costs, struck out (ochre's second and last appearance
            before the full stop) -->
-      <div class="slab" style="left:13860px; top:200px; width:250px; height:56px; opacity:.45; font-size:21px;">YOURS</div>
-      <div class="blk cx" style="left:13860px; top:266px; width:400px;"><div class="note" style="font-size:18px;">ABSORBED</div></div>
-      <div class="slab" style="left:13860px; top:330px; width:250px; height:56px; opacity:.45; font-size:21px;">THE PROJECT'S</div>
-      <div class="blk cx" style="left:13860px; top:396px; width:400px;"><div class="note" style="font-size:18px;">SOLVED A DECADE AGO</div></div>
+      <div class="slab" style="left:7350px; top:200px; width:250px; height:56px; opacity:.45; font-size:21px;">YOURS</div>
+      <div class="blk cx" style="left:7350px; top:266px; width:300px;"><div class="note" style="font-size:18px;">ABSORBED</div></div>
+      <div class="slab" style="left:7350px; top:330px; width:250px; height:56px; opacity:.45; font-size:21px;">THE PROJECT'S</div>
+      <div class="blk cx" style="left:7350px; top:396px; width:300px;"><div class="note" style="font-size:18px;">SOLVED A DECADE AGO</div></div>
 
       <!-- ===================== PASS 2 · beats 8-12 =====================
            Camera travels east->west. Copy is right-aligned so the hard edge
@@ -288,61 +312,63 @@
            copy FADES IN IN PLACE once the camera rests — reveal is no longer
            the camera's job in this pass. -->
 
-      <!-- 8 -->
-      <div class="blk cxr" style="left:12540px; top:1180px; width:800px; text-align:right;">
+      <!-- 8 (shares FRAME F with 9; resolves first — east half of the frame) -->
+      <div class="blk cxr" style="left:6600px; top:1180px; width:800px; text-align:right;">
         <div class="tagrow"><span class="tag">8 · A DIFFERENT COST STRUCTURE</span><span class="dur">26.4 s</span></div>
         <div class="sent" style="font-size:30px;">THE ONE-TIME LIFT: ABSORBED. REPRODUCING, DEPLOYING: NO LONGER ARDUOUS.</div>
         <div class="sent blue" style="font-size:30px;">SO MOVE THE PROBLEM TO A REPRESENTATION WHERE IT'S EASIER TO SOLVE.</div>
       </div>
-      <!-- the representation glyph, now captioned (round 2 fix 3) -->
-      <div class="blk cxr" style="left:13040px; top:1892px; width:800px; text-align:right;">
+      <!-- the representation glyph, captioned (round 2 fix 3) -->
+      <div class="blk cxr" style="left:6620px; top:1892px; width:800px; text-align:right;">
         <div class="note" style="font-size:18px; letter-spacing:.18em;">SAME PROBLEM — MOVED TO THE REPRESENTATION THAT SUITS IT</div>
       </div>
 
-      <!-- 9 · THE OBJECTION — the only tilted knockout slab in the piece -->
-      <div class="placard" style="left:10584px; top:1230px; width:680px;">
+      <!-- 9 · THE OBJECTION — the only tilted knockout slab in the piece.
+           Shares FRAME F with 8: the cost-structure copy fades down and the
+           placard fades UP — the objection interrupts a resting frame. -->
+      <div class="placard" style="left:5770px; top:1230px; width:630px;">
         <div class="tagrow"><span class="tag">9 · THE OBJECTION</span><span class="dur" style="color:rgba(242,237,226,.4);">19.8 s</span></div>
         <div class="sent cx" style="width:116%;">"BUT IT'S ALL JUST ASSEMBLY LANGUAGE NOW"</div>
         <div class="quote cx" style="width:116%; font-size:25px;">"The agent writes the code — who cares what language?"</div>
         <div class="note cx" style="width:116%;">A SOLID ARGUMENT. ANSWERED AT 15 ↓</div>
       </div>
-      <div class="blk cxr" style="left:9760px; top:1780px; width:720px; text-align:right;">
+      <div class="blk cxr" style="left:6180px; top:1790px; width:640px; text-align:right;">
         <div class="small">I STARTED IN ASSEMBLY — AND I HAVEN'T LOOKED AT IT IN 35 YEARS.</div>
       </div>
 
       <!-- 10 · both LIKE-WHAT boxes composed into one frame (round 2 fix 3) -->
-      <div class="blk cxr" style="left:7720px; top:1170px; width:700px; text-align:right;">
+      <div class="blk cxr" style="left:4260px; top:1170px; width:700px; text-align:right;">
         <div class="tagrow"><span class="tag">10 · …LIKE WHAT?</span><span class="dur">52.6 s</span></div>
       </div>
-      <div class="box" style="left:7460px; top:1300px; width:640px;">
+      <div class="box" style="left:4180px; top:1300px; width:640px;">
         <div class="h cx">RUINOUS TO WRITE</div>
         <div class="small cx" style="width:116%;">SYMBOLIC DIFFERENTIATION IN JAVASCRIPT. A COMPILER IN C++ RATHER THAN HASKELL.</div>
       </div>
-      <div class="box" style="left:6680px; top:1760px; width:600px;">
+      <div class="box" style="left:3400px; top:1760px; width:600px;">
         <div class="h cx">RUINOUS TO RUN</div>
         <div class="small cx" style="width:116%;">NUMPY WOULD SIMPLY NOT WORK WRITTEN IN PYTHON.</div>
       </div>
 
       <!-- 11 · the boundaries multiply; the FAN (colour enters) -->
-      <div class="blk cxr" style="left:3340px; top:1155px; width:1340px; text-align:right;">
+      <div class="blk cxr" style="left:1560px; top:1155px; width:1340px; text-align:right;">
         <div class="tagrow"><span class="tag">11 · THEN THE BOUNDARIES MULTIPLY</span><span class="dur">48.4 s</span></div>
         <div class="sent" style="font-size:31px;">MORE LANGUAGES, MORE BOUNDARIES — INESCAPABLE. CODECS THAT CANNOT GET OUT OF STEP; LOGIC THAT MEANS THE SAME THING ON EVERY RUNTIME — OR VERY SUBTLE, VERY UNAPPEALING BUGS.</div>
         <div class="big blue" style="font-size:41px;">ONE CONSISTENT LANGUAGE, <u>INSIDE</u> THE RUNTIME OF EVERY PROCESS — A CONTROL SURFACE.</div>
       </div>
       <!-- fan labels (strand starts; order reverses through the west turn
            so the chips land production-first) -->
-      <div class="fanlab" style="left:4680px; top:1686px; color:var(--py);">PYTHON</div>
-      <div class="fanlab" style="left:4680px; top:1766px; color:var(--go);">GO</div>
-      <div class="fanlab" style="left:4680px; top:1846px; color:var(--julia);">JULIA</div>
-      <div class="fanlab" style="left:4680px; top:1926px; color:var(--beam);">BEAM</div>
-      <div class="fanlab" style="left:4680px; top:2006px; color:var(--js);">JAVASCRIPT</div>
+      <div class="fanlab" style="left:2680px; top:1686px; color:var(--py);">PYTHON</div>
+      <div class="fanlab" style="left:2680px; top:1766px; color:var(--go);">GO</div>
+      <div class="fanlab" style="left:2680px; top:1846px; color:var(--julia);">JULIA</div>
+      <div class="fanlab" style="left:2680px; top:1926px; color:var(--beam);">BEAM</div>
+      <div class="fanlab" style="left:2680px; top:2006px; color:var(--js);">JAVASCRIPT</div>
 
       <!-- 12 · the typed bar, literally over the top of the strands;
            west of it the strands gather into the cable for the turn -->
-      <div class="blk cx" style="left:730px; top:1495px; width:1300px;">
+      <div class="blk cx" style="left:530px; top:1495px; width:1300px;">
         <div class="note">— ONE TYPED LAYER, OVER THE TOP. LITERALLY —</div>
       </div>
-      <div class="bar" style="left:720px; top:1548px; width:1160px;">
+      <div class="bar" style="left:520px; top:1548px; width:1000px;">
         <div class="tagrow" style="margin-bottom:2px;"><span class="tag" style="font-size:22px; color:rgba(242,237,226,.6);">12 · WHAT I WANT. YOURS MAY DIFFER.</span><span class="dur" style="color:rgba(242,237,226,.4);">22.5 s</span></div>
         <div class="sent cx" style="width:116%;">STRONG ALGEBRAIC DATA TYPES · REAL CONTAINERS — MAPS, SETS, NON-EMPTY · SYMMETRIC CODECS · PARSE, DON'T VALIDATE</div>
       </div>
@@ -350,29 +376,29 @@
       <!-- ===================== PASS 3 · beats 13-15 ===================== -->
 
       <!-- 13 · the chips: same five hues, now sorted -->
-      <div class="blk cx" style="left:2400px; top:2230px; width:900px;">
+      <div class="blk cx" style="left:830px; top:2230px; width:900px;">
         <div class="tagrow"><span class="tag">13 · SO WHICH NICE LANGUAGES ARE MULTI-RUNTIME?</span><span class="dur">59.3 s</span></div>
         <div class="sent" style="font-size:33px;">NOT MANY. <span style="color:var(--blue);">PURESCRIPT IS ONE — AND IT WAS DESIGNED THAT WAY.</span></div>
       </div>
-      <div class="chip" style="left:2140px; top:2451px; background:var(--js);">JAVASCRIPT</div>
-      <div class="chip" style="left:2140px; top:2546px; background:var(--beam);">THE BEAM</div>
-      <div class="chip ring" style="left:2140px; top:2641px; border-color:var(--julia); color:var(--julia);">JULIA</div>
-      <div class="chip ring" style="left:2140px; top:2736px; border-color:var(--go); color:var(--go);">GO</div>
-      <div class="chip ring" style="left:2140px; top:2831px; border-color:var(--py); color:var(--py);">PYTHON</div>
-      <div class="blk cx" style="left:2430px; top:2500px; width:1050px;">
+      <div class="chip" style="left:560px; top:2451px; background:var(--js);">JAVASCRIPT</div>
+      <div class="chip" style="left:560px; top:2546px; background:var(--beam);">THE BEAM</div>
+      <div class="chip ring" style="left:560px; top:2641px; border-color:var(--julia); color:var(--julia);">JULIA</div>
+      <div class="chip ring" style="left:560px; top:2736px; border-color:var(--go); color:var(--go);">GO</div>
+      <div class="chip ring" style="left:560px; top:2831px; border-color:var(--py); color:var(--py);">PYTHON</div>
+      <div class="blk cx" style="left:850px; top:2500px; width:1050px;">
         <div class="small">IN PRODUCTION — FOR YEARS. NODE, THE BROWSER, THE BEAM.</div>
       </div>
-      <div class="blk cx" style="left:2430px; top:2700px; width:1050px;">
+      <div class="blk cx" style="left:850px; top:2700px; width:1050px;">
         <div class="sent" style="font-size:31px;">THIS SERIES.</div>
         <div class="small">JULIA, GO AND PYTHON — EACH IN ITS OWN EPISODE.</div>
       </div>
-      <div class="blk cx" style="left:2420px; top:2985px; width:760px;">
+      <div class="blk cx" style="left:840px; top:2985px; width:760px;">
         <div class="note" style="font-size:19px; letter-spacing:.14em;">NOT EVERY RUNTIME SUITS IT — RUST WANTS NO GARBAGE COLLECTOR, SO THE SHIM GETS BIG.</div>
       </div>
 
       <!-- 14 · the evidence; the tick-field is now a unit chart (one mark,
            one project) so it reads as a count, not texture -->
-      <div class="blk cx" style="left:5760px; top:2230px; width:1000px;">
+      <div class="blk cx" style="left:2500px; top:2230px; width:1000px;">
         <div class="tagrow"><span class="tag">14 · IT SUITS AN AGENT — WHICH SURPRISED ME</span><span class="dur">59.0 s</span></div>
         <div class="quote" style="font-size:27px;">I expected the training data to favour Python and JavaScript.</div>
         <div class="sent" style="font-size:32px;">IT DIDN'T WORK OUT THAT WAY.</div>
@@ -380,41 +406,41 @@
         <div class="big blue" style="font-size:64px; margin-top:6px;">≈ 500,000 LINES</div>
         <div class="sent" style="font-size:28px;">ACROSS DOZENS OF PROJECTS.</div>
       </div>
-      <div class="blk cxr" style="left:6840px; top:2330px; width:620px; text-align:right;">
+      <div class="blk cxr" style="left:3460px; top:2330px; width:620px; text-align:right;">
         <div class="small">STRONG COMPILE-TIME GUARANTEES — AND THE MODEL EATS THE LOOP. FEWER TESTS, FASTER CYCLE.</div>
       </div>
-      <div class="blk cxr" style="left:6944px; top:2845px; width:500px; text-align:right;">
+      <div class="blk cxr" style="left:3624px; top:2845px; width:500px; text-align:right;">
         <div class="note" style="font-size:17px; letter-spacing:.18em;">ONE MARK · ONE PROJECT</div>
       </div>
 
       <!-- 15 · the answer; the ghost of 9 hangs over it -->
-      <div class="ghost" style="left:10614px; top:2200px; width:620px;">
+      <div class="ghost" style="left:5554px; top:2200px; width:620px;">
         <div class="tag cx">THE OBJECTION — HELD SINCE 9</div>
         <div class="sent cx" style="width:116%;">"BUT IT'S ALL JUST ASSEMBLY LANGUAGE NOW"</div>
       </div>
-      <div class="blk cx" style="left:9700px; top:2255px; width:700px;">
+      <div class="blk cx" style="left:4620px; top:2255px; width:700px;">
         <div class="tagrow"><span class="tag">15 · AN AGENT IS NOT A COMPILER</span><span class="dur">89.7 s</span></div>
       </div>
-      <div class="blk cx" style="left:9700px; top:2430px; width:1980px;">
+      <div class="blk cx" style="left:4620px; top:2430px; width:1980px;">
         <div class="sent" style="font-size:29px;">NOW — THAT ASSEMBLY ARGUMENT. <span style="color:rgba(33,29,22,.5);">↑</span></div>
         <div class="big" style="font-size:44px;">I HAVE NEVER ONCE PATCHED MY COMPILED OUTPUT.</div>
         <div class="sent" style="font-size:29px;">A COMPILER IS DETERMINISTIC · ALWAYS THERE · FREE. AN AGENT IS NONE OF THE THREE.</div>
         <div class="quote" style="font-size:27px;">200,000 lines of C++, in production — and the agent's gone. Now what?</div>
         <div class="sent" style="font-size:29px;">I WANT TO READ THE CODE — IN A WAY I NEVER WANTED TO READ ASSEMBLY. 50,000 LINES OF PURESCRIPT: I REFACTOR IT MYSELF.</div>
       </div>
-      <div class="blk cxr" style="left:12330px; top:2968px; width:1520px; text-align:right;">
+      <div class="blk cxr" style="left:5940px; top:2968px; width:1520px; text-align:right;">
         <div class="sent blue" style="font-size:38px;">"WHEN IT COMPILES, IT JUST WORKS."</div>
       </div>
-      <div class="wordmark cxr" style="left:12340px; top:3030px; width:1840px; text-align:right; font-size:118px;">POLYGLOT PURESCRIPT<span class="stop">.</span></div>
-      <div class="blk cxr" style="left:12680px; top:3158px; width:1500px; text-align:right;">
+      <div class="wordmark cxr" style="left:5620px; top:3030px; width:1840px; text-align:right; font-size:118px;">POLYGLOT PURESCRIPT<span class="stop">.</span></div>
+      <div class="blk cxr" style="left:5960px; top:3158px; width:1500px; text-align:right;">
         <div class="note" style="font-size:19px;">TRY IT YOURSELF — A SERIES IN THIRTEEN PARTS</div>
       </div>
 
       <!-- ambient language marks, quiet zones only -->
-      <div class="amb" style="left:700px; top:820px; font-size:100px;">λ</div>
-      <div class="amb" style="left:7050px; top:1990px; font-size:56px;">::</div>
-      <div class="amb" style="left:4820px; top:3040px; font-size:64px;">∀</div>
-      <div class="amb" style="left:8280px; top:3020px; font-size:60px;">→</div>
+      <div class="amb" style="left:150px; top:820px; font-size:100px;">λ</div>
+      <div class="amb" style="left:3800px; top:1990px; font-size:56px;">::</div>
+      <div class="amb" style="left:2150px; top:3040px; font-size:64px;">∀</div>
+      <div class="amb" style="left:4380px; top:3020px; font-size:60px;">→</div>
     </div>
   </div>
   <div class="legend">
@@ -476,11 +502,24 @@
     unbroken gesture; any carriage return would cut it exactly where it is
     the picture. The cost of the snake — pass 2 reading against text
     direction — is paid differently now (see the pass-two note below).</p>
+    <p><b>Shared frames, resolved by fade.</b> Round 2 gave every beat a
+    1920px floor and it was the wrong fix: the stage swelled to 14400,
+    frames were marooned in cream, and the pull-back died. Round 3 packs
+    by TIME instead of space: three pairs of short adjacent beats share a
+    camera frame, and within each the camera holds while the earlier
+    beat's copy fades out and the next fades in. Furniture — spine, dip,
+    squares, washes, the placard — is permanent; only copy swaps.
+    <b>Frame A</b> (fx 0, pass 1): beat 1 resolves, then beat 2.
+    <b>Frame B</b> (fx 1682, pass 1): beat 3's dip and quote resolve, then
+    beat 4. <b>Frame F</b> (fx 5760, pass 2): beat 8's cost structure
+    resolves east of centre, fades down, and beat 9's tilted placard fades
+    UP in the west half — the objection interrupts a resting frame, which
+    is better staging than the objection owning a private one.</p>
     <p>The eye enters at the diamond and the first bloom, top-left, and runs
-    the spine east through beats 1–5. Every beat now owns at least one full
-    camera frame: beat 3's SQL dip — the bypass in miniature — finally gets
-    its own picture instead of sharing one with its neighbours. Ochre enters
-    at 5 as two slabs: the two costs, stacked into the wall's foundation.</p>
+    the spine east through beats 1–5. Beat 3's SQL dip — the bypass in
+    miniature — keeps its own moment inside frame B even though it now
+    shares the picture. Ochre enters at 5 as two slabs: the two costs,
+    stacked toward the wall's foundation.</p>
     <p><b>Stop one: the wall.</b> The first full-ink mass on the surface.
     The pigment pools and darkens against its west face — thirty years of
     accumulation, held. Beat 6's tradition runs UNDER it as a thin one-way
@@ -490,7 +529,11 @@
     the two ochre slabs are struck through, and the flood is the largest wash
     in the piece. Its momentum carries the eye off the east edge and DOWN:
     the turn is not travel, it is the event still happening. The cascade
-    lands in a pool at the head of pass 2.</p>
+    lands in a pool at the head of pass 2 — and because frame E and frame F
+    both sit at fx 5760, the camera's drop is purely vertical. The same is
+    true of the west turn (frames I and J both at fx 0): both folds are now
+    camera drops with no horizontal component, which is the strongest
+    possible claim that the turns land on events, not travel.</p>
     <p><b>The pass-two note.</b> The camera travels east→west; the text still
     sets left-to-right. Round 2 resolves this by taking reveal away from the
     camera: each beat's pictorial anchor (the glyph, the placard, the boxes,
@@ -524,40 +567,43 @@
     wordmark: the argument terminates in the price, and the price is now a
     dot.</p>
     <p><b>The frame audit.</b> Round 1 was judged on its fit-to-width view
-    and passed; judged frame-by-frame it failed four ways. Round 2 was
-    composed frame-first: fifteen 1920×1080 stations, each owning its beat's
-    material, slack distributed between stations rather than inside them.
-    The exporter (`composition-export.html`) is the instrument of record.</p>
+    and passed; judged frame-by-frame it failed four ways. Round 2
+    over-corrected with a width floor and the frames went hollow. Round 3
+    is composed as thirteen camera stops — A 0 · B 1682 · C 3096 · D 4359 ·
+    E 5760 / F 5760 · G 3251 · H 1460 · I 0 / J 0 · K 2434 · L 4560 ·
+    M 5760 — three of them shared by a fade pair, two of them beat 15's
+    double rest. The exporter (`composition-export.html`) is the instrument
+    of record.</p>
   </div>
 
   <!-- ================= IV · FINDINGS ================= -->
   <h2 class="sec"><span class="n">IV ·</span> WHAT DID NOT FIT, AND WHAT THE STUDY FOUND</h2>
   <div class="prose">
     <ol>
-      <li><b>The station floor forces the stage to 14400.</b> Seven beats in
-      pass 1 at a 1920 floor is 13440px before any beat earns duration bonus;
-      the stage is 14400 (7.5 frames) so long beats still get more. The
-      surface is now 4.44 : 1 — the round-1 finding that the fold "fixes the
-      poster" by aspect ratio no longer holds for a full pull-back, which
-      would show a band filling ~37% of frame height. The poster is unaffected
-      (it is composed separately) but the closing pull-back shot should now
-      stop at a partial zoom, or dissolve to the poster rather than reach it
-      by camera. This is the honest price of giving every beat a frame.</li>
-      <li><b>Station width no longer equals duration share.</b> The ruler
-      under each pass marks station boundaries; the printed figures are still
-      the measured durations. Duration now buys a beat extra width only above
-      the floor. The ruler remains the place where the two systems are
-      visibly reconciled.</li>
-      <li><b>Reveal-by-fade is pass 2's answer, and it is an animation-time
-      fact.</b> The still can show the layout half of the fix (right-aligned
-      copy, anchors east) but not the temporal half (copy fading in whole
-      once the camera rests). Anyone judging pass 2 from the still alone
-      should read the pass-two note first.</li>
+      <li><b>The 1920 floor is out; the stage is 7680 × 3240 (2.37 : 1 —
+      the scope ratio).</b> A full pull-back now shows the surface filling
+      75% of frame height, so the closing retreat is worth landing on
+      again. Station width is duration-weighted above a 500px minimum —
+      enough that a station's furniture cannot collide with its
+      neighbour's, deliberately not enough to guarantee a private frame.</li>
+      <li><b>Three fade pairs are part of the design, not an animation
+      detail.</b> Beats 1→2 (frame A, fx 0), 3→4 (frame B, fx 1682) and
+      8→9 (frame F, fx 5760) share a camera frame; within each, the earlier
+      beat's copy fades out before the next fades in, furniture persisting
+      throughout. In the still both members of a pair are set side by side
+      so the layout can be judged; in the animation they are never both at
+      full strength. A bonus of the repack: both fold turns became purely
+      vertical camera drops (E→F holds fx 5760; I→J holds fx 0).</li>
+      <li><b>Reveal-by-fade is also pass 2's answer, and it is an
+      animation-time fact.</b> The still can show the layout half of the fix
+      (right-aligned copy, anchors east) but not the temporal half (copy
+      fading in whole once the camera rests). Anyone judging pass 2 from the
+      still alone should read the pass-two note first.</li>
       <li><b>Beat 15 is six sub-beats and the static shows its end state.</b>
-      Its station is nearly three frames wide, and the camera should rest
-      twice: once on the answer (ghost top-right), once on the wordmark.
-      All six lines are set, but at animation time they must reveal
-      sequentially in place.</li>
+      Its station is over a frame and a half wide, and the camera rests
+      twice: L (fx 4560) on the answer with the ghost top-right, M (fx 5760)
+      on the wordmark. All six lines are set, but at animation time they
+      must reveal sequentially in place.</li>
       <li><b>Deliberately left out:</b> the .NET aside (the deck cut it);
       Rust demoted to small print at 13 per the deck's reordering; the
       pandoc quote trimmed to its clause; the asterisk graphic (settled
@@ -633,62 +679,62 @@ function arrow(parent,x,y,a,c,s){const r=a*Math.PI/180;s=s||1;
   /* washes */
   const W=[
     {seed:11,x:430,  y:540, rx:150,ry:100,c:BLUE,n:16},          /* 1 bloom   */
-    {seed:12,x:3620, y:545, rx:55, ry:38, c:BLUE,n:10,dep:4},
-    {seed:13,x:5030, y:562, rx:50, ry:34, c:BLUE,n:10,dep:4},    /* in the dip */
-    {seed:14,x:6600, y:538, rx:55, ry:38, c:BLUE,n:10,dep:4},
-    {seed:15,x:8300, y:542, rx:50, ry:36, c:BLUE,n:10,dep:4},
-    {seed:35,x:8790, y:905, rx:95, ry:40, c:OCHRE,n:10,dep:4,lo:.04}, /* cost */
-    {seed:16,x:10805,y:600, rx:120,ry:210,c:BLUE,n:26,lo:.05,
+    {seed:12,x:1240, y:545, rx:55, ry:38, c:BLUE,n:10,dep:4},
+    {seed:13,x:2255, y:562, rx:50, ry:34, c:BLUE,n:10,dep:4},    /* in the dip */
+    {seed:14,x:3060, y:538, rx:55, ry:38, c:BLUE,n:10,dep:4},
+    {seed:15,x:4200, y:542, rx:50, ry:36, c:BLUE,n:10,dep:4},
+    {seed:35,x:3810, y:905, rx:95, ry:40, c:OCHRE,n:10,dep:4,lo:.04}, /* cost */
+    {seed:16,x:4825, y:600, rx:120,ry:210,c:BLUE,n:26,lo:.05,
       clampHi:55,clip:'clipWallW'},                              /* the pool  */
-    {seed:17,x:12150,y:520, rx:480,ry:130,c:BLUE,n:24,lo:.05},   /* FLOOD     */
-    {seed:18,x:13430,y:530, rx:260,ry:90, c:BLUE,n:16},
-    {seed:19,x:14200,y:1100,rx:100,ry:280,c:BLUE,n:16},          /* cascade   */
-    {seed:20,x:13950,y:1630,rx:90, ry:40, c:BLUE,n:12,dep:4},    /* landing   */
-    {seed:21,x:13030,y:1616,rx:55, ry:36, c:BLUE,n:10,dep:4},
-    {seed:38,x:9700, y:1618,rx:50, ry:34, c:BLUE,n:10,dep:4},
-    {seed:39,x:7550, y:1616,rx:45, ry:32, c:BLUE,n:10,dep:4},
-    {seed:22,x:2500, y:1616,rx:45, ry:32, c:BLUE,n:10,dep:4},
-    {seed:23,x:4560,y:1730,rx:42, ry:26, c:RT.py,   n:10,dep:4}, /* fan blooms */
-    {seed:24,x:4560,y:1810,rx:42, ry:26, c:RT.go,   n:10,dep:4},
-    {seed:25,x:4560,y:1890,rx:42, ry:26, c:RT.julia,n:10,dep:4},
-    {seed:26,x:4560,y:1970,rx:42, ry:26, c:RT.beam, n:10,dep:4},
-    {seed:27,x:4560,y:2050,rx:42, ry:26, c:RT.js,   n:10,dep:4},
-    {seed:29,x:2240, y:2483,rx:65, ry:30, c:RT.js,   n:10,dep:4,lo:.05},
-    {seed:30,x:2240, y:2578,rx:65, ry:30, c:RT.beam, n:10,dep:4,lo:.05},
-    {seed:31,x:2240, y:2673,rx:65, ry:30, c:RT.julia,n:10,dep:4,lo:.05},
-    {seed:32,x:2240, y:2768,rx:65, ry:30, c:RT.go,   n:10,dep:4,lo:.05},
-    {seed:33,x:2240, y:2863,rx:65, ry:30, c:RT.py,   n:10,dep:4,lo:.05},
-    {seed:34,x:4300, y:2945,rx:50, ry:34, c:BLUE,n:10,dep:4},
-    {seed:36,x:8500, y:2952,rx:50, ry:34, c:BLUE,n:10,dep:4},
-    {seed:37,x:13300,y:3060,rx:640,ry:170,c:BLUE,n:26,lo:.04},   /* title     */
+    {seed:17,x:6100, y:520, rx:480,ry:130,c:BLUE,n:24,lo:.05},   /* FLOOD     */
+    {seed:18,x:6900, y:530, rx:260,ry:90, c:BLUE,n:16},
+    {seed:19,x:7480, y:1100,rx:100,ry:280,c:BLUE,n:16},          /* cascade   */
+    {seed:20,x:7440, y:1630,rx:90, ry:40, c:BLUE,n:12,dep:4},    /* landing   */
+    {seed:21,x:6960, y:1616,rx:55, ry:36, c:BLUE,n:10,dep:4},
+    {seed:38,x:4900, y:1618,rx:50, ry:34, c:BLUE,n:10,dep:4},
+    {seed:39,x:4300, y:1616,rx:45, ry:32, c:BLUE,n:10,dep:4},
+    {seed:22,x:1140, y:1616,rx:45, ry:32, c:BLUE,n:10,dep:4},
+    {seed:23,x:2560,y:1730,rx:42, ry:26, c:RT.py,   n:10,dep:4}, /* fan blooms */
+    {seed:24,x:2560,y:1810,rx:42, ry:26, c:RT.go,   n:10,dep:4},
+    {seed:25,x:2560,y:1890,rx:42, ry:26, c:RT.julia,n:10,dep:4},
+    {seed:26,x:2560,y:1970,rx:42, ry:26, c:RT.beam, n:10,dep:4},
+    {seed:27,x:2560,y:2050,rx:42, ry:26, c:RT.js,   n:10,dep:4},
+    {seed:29,x:660,  y:2483,rx:65, ry:30, c:RT.js,   n:10,dep:4,lo:.05},
+    {seed:30,x:660,  y:2578,rx:65, ry:30, c:RT.beam, n:10,dep:4,lo:.05},
+    {seed:31,x:660,  y:2673,rx:65, ry:30, c:RT.julia,n:10,dep:4,lo:.05},
+    {seed:32,x:660,  y:2768,rx:65, ry:30, c:RT.go,   n:10,dep:4,lo:.05},
+    {seed:33,x:660,  y:2863,rx:65, ry:30, c:RT.py,   n:10,dep:4,lo:.05},
+    {seed:34,x:2100, y:2945,rx:50, ry:34, c:BLUE,n:10,dep:4},
+    {seed:36,x:4460, y:2952,rx:50, ry:34, c:BLUE,n:10,dep:4},
+    {seed:37,x:6580, y:3060,rx:640,ry:170,c:BLUE,n:26,lo:.04},   /* title     */
   ];
   W.forEach(d=>wash(wg,d));
 
   /* board frame */
-  el('rect',fg,{x:30,y:30,width:14340,height:3180,fill:'none',
+  el('rect',fg,{x:30,y:30,width:7620,height:3180,fill:'none',
     stroke:'rgba(33,29,22,.3)','stroke-width':5});
 
   /* THE SPINE (ink hairline of the argument) */
   const spine={fill:'none',stroke:INK,'stroke-width':5};
-  el('path',lg,Object.assign({d:'M 380 540 H 10842'},spine));
+  el('path',lg,Object.assign({d:'M 380 540 H 4862'},spine));
   el('path',lg,Object.assign({d:
-    'M 10978 540 H 14020 Q 14240 540 14240 760 V 1400 Q 14240 1620 14020 1620'+
-    ' H 660 Q 206 1620 206 2050 V 2520 Q 206 2950 660 2950 H 14040'+
-    ' Q 14170 2950 14170 3012'},spine));
+    'M 4998 540 H 7300 Q 7520 540 7520 760 V 1400 Q 7520 1620 7300 1620'+
+    ' H 660 Q 206 1620 206 2050 V 2520 Q 206 2950 660 2950 H 7320'+
+    ' Q 7450 2950 7450 3012'},spine));
   /* the tunnel (beat 6): thin, one-way, dead-ends */
-  el('path',lg,{d:'M 10720 540 V 908 H 11480',fill:'none',stroke:INK,
+  el('path',lg,{d:'M 4790 540 V 908 H 5330',fill:'none',stroke:INK,
     'stroke-width':3});
-  el('path',lg,{d:'M 11480 886 V 930',fill:'none',stroke:INK,'stroke-width':5});
+  el('path',lg,{d:'M 5330 886 V 930',fill:'none',stroke:INK,'stroke-width':5});
   /* the SQL dip (beat 3) — the tunnel in miniature */
-  el('path',lg,{d:'M 4780 540 V 596 H 5290 V 540',fill:'none',
+  el('path',lg,{d:'M 2000 540 V 596 H 2510 V 540',fill:'none',
     stroke:BLUE,'stroke-width':3});
   /* the drop-line: 9 -> 15 (deferral made visible) */
-  el('path',lg,{d:'M 10960 1580 V 2195',fill:'none',stroke:INK,
+  el('path',lg,{d:'M 5900 1580 V 2195',fill:'none',stroke:INK,
     'stroke-width':3,'stroke-dasharray':'14 16',opacity:.55});
   /* prussian layer joins the spine at the bar, closes with it through the
      turn, and rides to the wordmark */
   el('path',lg,{d:'M 1300 1674 H 680 Q 224 1674 224 2104 V 2500'+
-    ' Q 224 2918 680 2918 H 14030',fill:'none',stroke:BLUE,'stroke-width':5,
+    ' Q 224 2918 680 2918 H 7310',fill:'none',stroke:BLUE,'stroke-width':5,
     opacity:.75});
 
   /* the five strands: fan (11) -> under the bar (12) -> GATHER into the
@@ -698,78 +744,79 @@ function arrow(parent,x,y,a,c,s){const r=a*Math.PI/180;s=s||1;
   const HUES=[RT.py,RT.go,RT.julia,RT.beam,RT.js];
   for(let k=0;k<5;k++){
     const L=1730+80*k, G=1690+11*k, X=240+9*k, R=2863-95*k;
-    el('path',lg,{d:`M 5060 1620 C 4940 1620 4820 ${L} 4640 ${L}`+
+    el('path',lg,{d:`M 2950 1620 C 2870 1620 2780 ${L} 2660 ${L}`+
       ` H 1250 C 1150 ${L} 1000 ${G} 850 ${G} H 660`+
-      ` Q ${X} ${G} ${X} ${G+430} V ${R-180} Q ${X} ${R} ${X+180} ${R} H 2130`,
+      ` Q ${X} ${G} ${X} ${G+430} V ${R-180} Q ${X} ${R} ${X+180} ${R} H 550`,
       fill:'none',stroke:HUES[k],'stroke-width':7,opacity:.92});
   }
 
   /* THE WALL — one slab, three pieces; the chunk is out */
-  el('rect',fg,{x:10860,y:150,width:100,height:330,fill:INK});
-  el('rect',fg,{x:10860,y:610,width:100,height:260,fill:INK});
+  el('rect',fg,{x:4880,y:150,width:100,height:330,fill:INK});
+  el('rect',fg,{x:4880,y:610,width:100,height:260,fill:INK});
   const wt1=el('text',fg,{'font-size':23,'font-weight':800,
     fill:'rgba(242,237,226,.85)','letter-spacing':'.24em',
-    transform:'translate(10918,462) rotate(-90)'});
+    transform:'translate(4938,462) rotate(-90)'});
   wt1.textContent='THIRTY YEARS';
   const wt2=el('text',fg,{'font-size':23,'font-weight':800,
     fill:'rgba(242,237,226,.85)','letter-spacing':'.24em',
-    transform:'translate(10918,856) rotate(-90)'});
+    transform:'translate(4938,856) rotate(-90)'});
   wt2.textContent='AT THIS WALL';
-  el('rect',fg,{x:11060,y:700,width:100,height:130,fill:INK,opacity:.9,
-    transform:'rotate(24 11110 765)'});
+  el('rect',fg,{x:5080,y:700,width:100,height:130,fill:INK,opacity:.9,
+    transform:'rotate(24 5130 765)'});
   /* strike lines through the two cancelled costs */
-  el('path',lg,{d:'M 13850 262 L 14125 195',stroke:INK,'stroke-width':6,fill:'none'});
-  el('path',lg,{d:'M 13850 392 L 14125 325',stroke:INK,'stroke-width':6,fill:'none'});
+  el('path',lg,{d:'M 7340 262 L 7615 195',stroke:INK,'stroke-width':6,fill:'none'});
+  el('path',lg,{d:'M 7340 392 L 7615 325',stroke:INK,'stroke-width':6,fill:'none'});
   /* beat 2: the row of general-purpose squares; the one deliberate choice
      (moved clear of the copy — round 2 small fix) */
   for(let j=0;j<5;j++)
-    el('rect',fg,{x:3330+j*48,y:474,width:22,height:22,fill:INK,opacity:.55});
-  el('rect',fg,{x:3420,y:610,width:22,height:22,fill:BLUE});
+    el('rect',fg,{x:1580+j*48,y:474,width:22,height:22,fill:INK,opacity:.55});
+  el('rect',fg,{x:1670,y:610,width:22,height:22,fill:BLUE});
   /* beat 4: the snarl (a path that went wrong) */
-  (function(){const rng=mulberry32(SEED+99*7919);let d='M 7440 425';
-    for(let i=0;i<16;i++)d+=` L ${(7440+(rng()-.5)*150).toFixed(0)} ${(465+(rng()-.5)*120).toFixed(0)}`;
+  (function(){const rng=mulberry32(SEED+99*7919);let d='M 3300 425';
+    for(let i=0;i<16;i++)d+=` L ${(3300+(rng()-.5)*150).toFixed(0)} ${(465+(rng()-.5)*120).toFixed(0)}`;
     el('path',lg,{d,fill:'none',stroke:INK,'stroke-width':2.5,opacity:.7});})();
   /* beat 1: the start diamond */
   el('rect',fg,{x:-16,y:-16,width:32,height:32,fill:INK,
     transform:'translate(350,540) rotate(45)'});
   /* beat 8: representation glyph — same square, easier orientation */
-  el('rect',fg,{x:13460,y:1740,width:64,height:64,fill:'none',stroke:INK,
+  el('rect',fg,{x:7060,y:1740,width:64,height:64,fill:'none',stroke:INK,
     'stroke-width':4});
-  el('path',lg,{d:'M 13560 1772 H 13630',stroke:INK,'stroke-width':4,fill:'none'});
-  arrow(ag,13642,1772,0,INK,.8);
+  el('path',lg,{d:'M 7160 1772 H 7230',stroke:INK,'stroke-width':4,fill:'none'});
+  arrow(ag,7242,1772,0,INK,.8);
   el('rect',fg,{x:-32,y:-32,width:64,height:64,fill:'none',stroke:BLUE,
-    'stroke-width':4,transform:'translate(13718,1772) rotate(45)'});
+    'stroke-width':4,transform:'translate(7318,1772) rotate(45)'});
   /* beat 13: bracket lines — production pair, series trio */
-  el('path',lg,{d:'M 2402 2458 H 2390 V 2608 H 2402',fill:'none',
+  el('path',lg,{d:'M 812 2458 H 800 V 2608 H 812',fill:'none',
     stroke:INK,'stroke-width':3,opacity:.6});
-  el('path',lg,{d:'M 2402 2648 H 2390 V 2892 H 2402',fill:'none',
+  el('path',lg,{d:'M 812 2648 H 800 V 2892 H 812',fill:'none',
     stroke:INK,'stroke-width':3,opacity:.6});
   /* beat 14: the unit chart — one mark, one project; aligned so it reads
      as a count, not texture (round 2 small fix) */
   for(let r=0;r<5;r++)for(let c2=0;c2<8;c2++)
-    el('rect',fg,{x:6980+c2*62,y:2600+r*52,width:30,height:12,
+    el('rect',fg,{x:3660+c2*62,y:2600+r*52,width:30,height:12,
       fill:BLUE,opacity:.55});
 
   /* arrows — direction is never in doubt */
-  arrow(ag,1600,540,0);  arrow(ag,3600,540,0);  arrow(ag,5600,540,0);
-  arrow(ag,7600,540,0);  arrow(ag,9700,540,0);  arrow(ag,10990,540,0);
-  arrow(ag,11340,908,0);                          /* one-way tunnel */
-  arrow(ag,12600,540,0); arrow(ag,13640,540,0);
-  arrow(ag,14240,1150,90);                        /* cascade down   */
-  arrow(ag,13400,1620,180);arrow(ag,11900,1620,180);arrow(ag,10020,1620,180);
-  arrow(ag,8300,1620,180); arrow(ag,6600,1620,180); arrow(ag,5000,1620,180);
-  arrow(ag,3250,1620,180); arrow(ag,1550,1620,180);
+  arrow(ag,830,540,0);   arrow(ag,1690,540,0);  arrow(ag,2560,540,0);
+  arrow(ag,3440,540,0);  arrow(ag,4600,540,0);  arrow(ag,5010,540,0);
+  arrow(ag,5210,908,0);                           /* one-way tunnel */
+  arrow(ag,6300,540,0);  arrow(ag,6960,540,0);
+  arrow(ag,7520,1150,90);                         /* cascade down   */
+  arrow(ag,7150,1620,180); arrow(ag,6620,1620,180); arrow(ag,5580,1620,180);
+  arrow(ag,4640,1620,180); arrow(ag,3620,1620,180); arrow(ag,2300,1620,180);
+  arrow(ag,1420,1620,180);
   arrow(ag,206,2400,90);                          /* down the bundle */
-  arrow(ag,4700,2950,0); arrow(ag,8400,2950,0);  arrow(ag,12000,2950,0);
-  arrow(ag,14170,3020,90);                        /* onto the stop  */
+  arrow(ag,2500,2950,0); arrow(ag,4480,2950,0);  arrow(ag,6300,2950,0);
+  arrow(ag,7450,3020,90);                         /* onto the stop  */
 
-  /* station rulers, one per pass — floor 1920 per beat, remainder by
-     measured duration; the figures are the durations */
+  /* station rulers, one per pass — width is duration-weighted above a
+     modest 500px minimum (furniture non-collision, NOT a private frame);
+     the figures are the measured durations */
   const BEATS=[[1,20.9],[2,19.9],[3,16.1],[4,23.8],[5,33.3],[6,50.9],[7,61.2],
                [8,26.4],[9,19.8],[10,52.6],[11,48.4],[12,22.5],
                [13,59.3],[14,59.0],[15,89.7]];
   function ruler(list,y,x0,x1){
-    const F=1920,tot=list.reduce((s,b)=>s+b[1],0),span=Math.abs(x1-x0),
+    const F=500,tot=list.reduce((s,b)=>s+b[1],0),span=Math.abs(x1-x0),
       rem=span-F*list.length,dir=x1>x0?1:-1;
     let x=x0;
     el('path',lg,{d:`M ${x0} ${y} H ${x1}`,stroke:'rgba(33,29,22,.3)',
@@ -784,9 +831,9 @@ function arrow(parent,x,y,a,c,s){const r=a*Math.PI/180;s=s||1;
       x+=dir*w;});
     el('path',lg,{d:`M ${x1} ${y-9} V ${y+9}`,stroke:'rgba(33,29,22,.4)',
       'stroke-width':2,fill:'none'});}
-  ruler(BEATS.slice(0,7), 1000,40,14360);
-  ruler(BEATS.slice(7,12),2082,14360,40);
-  ruler(BEATS.slice(12),  3168,40,14360);
+  ruler(BEATS.slice(0,7), 1000,40,7640);
+  ruler(BEATS.slice(7,12),2082,7640,40);
+  ruler(BEATS.slice(12),  3168,40,7640);
 })();
 
 /* ---------------- the poster stage (unchanged — it is finished) -------- */
@@ -834,7 +881,7 @@ function arrow(parent,x,y,a,c,s){const r=a*Math.PI/180;s=s||1;
 (function(){
   const qs=new URLSearchParams(location.search);
   const stages=[
-    {vp:'vpWide',st:'stWide',w:14400,h:3240,mode:qs.get('z')||'fit'},
+    {vp:'vpWide',st:'stWide',w:7680,h:3240,mode:qs.get('z')||'fit'},
     {vp:'vpPoster',st:'stPoster',w:1920,h:1080,mode:'fit'}];
   const row=qs.get('row');
   function apply(s){

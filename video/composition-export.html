@@ -1,12 +1,12 @@
 <!doctype html><meta charset="utf-8">
 <title>export — wide composition</title>
-<!-- Dev-only harness: renders composition-study.html's 6720x3240 stage alone,
+<!-- Dev-only harness: renders composition-study.html's 7680x3240 stage alone,
      with no page chrome, so it can be captured headless as one image.
      ?s=0.5 halves it. Not part of the study; delete freely. -->
 <style>
   html,body{margin:0;padding:0;overflow:hidden;background:#f2ede2}
   #clip{position:relative;overflow:hidden}
-  iframe{position:absolute;border:0;width:15000px;height:9000px;
+  iframe{position:absolute;border:0;width:8200px;height:9000px;
          transform-origin:0 0;background:#f2ede2}
 </style>
 <div id="clip"><iframe id="f" src="composition-study.html?z=1"></iframe></div>
@@ -17,7 +17,7 @@ const S = +(Q.get('s') || 1);
 // which is what the viewer actually sees at any moment.
 const FX = Q.get('fx') !== null ? +Q.get('fx') : null;
 const FY = Q.get('fy') !== null ? +Q.get('fy') : 0;
-const W = FX === null ? 14400 : 1920;
+const W = FX === null ? 7680 : 1920;
 const H = FX === null ? 3240 : 1080;
 const clip = document.getElementById('clip'), f = document.getElementById('f');
 clip.style.width  = (W*S)+'px';
@@ -33,15 +33,15 @@ f.addEventListener('load', () => {
   if (vp) {
     vp.scrollLeft = 0; vp.scrollTop = 0;
     vp.style.overflow = 'visible';
-    vp.style.width = 14400 + 'px';
+    vp.style.width = 7680 + 'px';
     vp.style.maxWidth = 'none';
     vp.style.height = 3240 + 'px';
   }
   for (let n = st.parentElement; n && n !== d.body; n = n.parentElement) {
     n.style.maxWidth = 'none'; n.style.overflow = 'visible';
-    if (getComputedStyle(n).width !== 'auto') n.style.width = 14400 + 'px';
+    if (getComputedStyle(n).width !== 'auto') n.style.width = 7680 + 'px';
   }
-  d.body.style.width = 14800 + 'px';
+  d.body.style.width = 8000 + 'px';
   d.body.style.maxWidth = 'none';
   const r = st.getBoundingClientRect();
   // place the stage's top-left at the clip's origin, then scale
