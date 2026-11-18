@@ -91,23 +91,24 @@ node --version    # v18+</code></pre>
 
     <h2>Try a Demo</h2>
 
-    <p>The fastest way to see Hylograph in action is to clone a library and run its demo. Every library with a demo builds clean from a fresh clone using only registry dependencies.</p>
+    <p>The fastest way to see Hylograph in action is to <a href="https://afcondon.github.io/purescript-hylograph-demos/">browse the demos online</a>, or clone the demos repo and build them locally:</p>
 
     <h3>The Hylographic Fold (recommended first)</h3>
 
-    <p>A seven-chapter interactive guide to how Hylograph works:</p>
+    <p>A seven-chapter interactive guide to how Hylograph works: <a href="https://afcondon.github.io/purescript-hylograph-demos/selection/">view it online</a>.</p>
 
-    <pre><code>git clone https://github.com/afcondon/purescript-hylograph-selection.git
-cd purescript-hylograph-selection/demo
-spago build
-spago bundle -p hylograph-selection-demo
+    <h3>Build something locally</h3>
+
+    <p>The <a href="https://github.com/afcondon/hylograph-howto">how-to projects</a> are the ones to clone. Each is a standalone project that builds from the registry alone:</p>
+
+    <pre><code>git clone https://github.com/afcondon/hylograph-howto.git
+cd hylograph-howto/simple-webpage
+spago bundle
 # Open public/index.html in your browser</code></pre>
 
-    <p>Or see it live: <a href="https://afcondon.github.io/purescript-hylograph-selection/">afcondon.github.io/purescript-hylograph-selection</a></p>
+    <h3>All demos</h3>
 
-    <h3>Other demos</h3>
-
-    <p>Same pattern for any library with a demo &mdash; clone, <code>cd demo</code>, <code>spago build</code>, <code>spago bundle</code>, open <code>public/index.html</code>.</p>
+    <p>The demos covering graph algorithms, layout, music, simulation and more are in the <a href="https://github.com/afcondon/purescript-hylograph-demos#readme">demos repository</a>. That repository depends on sibling checkouts of several libraries that are not yet published, so it does not build from a clone on its own; browse the demos online instead.</p>
 
     <h2>Libraries</h2>
 
@@ -117,12 +118,12 @@ spago bundle -p hylograph-selection-demo
       </tr>
       <tr>
         <td><a href="https://github.com/afcondon/purescript-hylograph-selection">hylograph-selection</a></td>
-        <td>Core: HATS tree construction, interpreters (SVG, English, Mermaid, MetaHATS), scales, color schemes, coordinated highlighting, zoom, brush, pointer events.</td>
+        <td>Core: HATS tree construction, the DOM and English interpreters, scales, color schemes, coordinated highlighting, zoom, brush, pointer events.</td>
         <td><span class="demo-tag">demo</span></td>
       </tr>
       <tr>
         <td><a href="https://github.com/afcondon/purescript-hylograph-simulation">hylograph-simulation</a></td>
-        <td>Force simulation &mdash; n-body, collision, link forces, centering.</td>
+        <td>Force simulation &mdash; n-body, collision, link forces, centering. The force calculations are <code>d3-force</code>'s; the simulation loop is the library's own.</td>
         <td><span class="demo-tag">demo</span></td>
       </tr>
       <tr>
@@ -132,27 +133,27 @@ spago bundle -p hylograph-selection-demo
       </tr>
       <tr>
         <td><a href="https://github.com/afcondon/purescript-hylograph-layout">hylograph-layout</a></td>
-        <td>Layout algorithms &mdash; tree layouts, edge bundling, Sankey diagrams, treemaps, beeswarm.</td>
+        <td>Layout algorithms in pure PureScript &mdash; tree and cluster layouts, pack, partition, treemap, edge bundling, Sankey, chord.</td>
         <td><span class="demo-tag">demo</span></td>
       </tr>
       <tr>
         <td><a href="https://github.com/afcondon/purescript-hylograph-graph">hylograph-graph</a></td>
-        <td>Graph data structures &mdash; adjacency lists, traversals, connected components, topological sort.</td>
+        <td>Graph data structures and algorithms &mdash; shortest path, traversals, connected and biconnected components, topological sort.</td>
         <td><span class="demo-tag">demo</span></td>
       </tr>
       <tr>
         <td><a href="https://github.com/afcondon/purescript-hylograph-music">hylograph-music</a></td>
-        <td>Proof of concept: data to sound. Same fold, different output.</td>
+        <td>Proof of concept: data to sound, with an audio interpreter for HATS trees.</td>
         <td><span class="demo-tag">demo</span></td>
       </tr>
       <tr>
         <td><a href="https://github.com/afcondon/purescript-hylograph-canvas">hylograph-canvas</a></td>
-        <td>Canvas rendering backend for high-performance visualizations.</td>
+        <td>Canvas 2D drawing of circles and lines, with zoom and pan. Not a HATS interpreter.</td>
         <td></td>
       </tr>
       <tr>
         <td><a href="https://github.com/afcondon/purescript-hylograph-optics">hylograph-optics</a></td>
-        <td>Optics (lenses, prisms) for traversing and transforming HATS trees.</td>
+        <td>Optics (lenses, traversals) over rose trees and graphs.</td>
         <td></td>
       </tr>
       <tr>
@@ -189,10 +190,9 @@ spago install hylograph-selection</code></pre>
 
 import Prelude
 import Effect (Effect)
-import Hylograph.HATS (Tree, elem, forEach, staticStr)
+import Hylograph.HATS (Tree, ElementType(..), elem, forEach)
 import Hylograph.HATS.Friendly as F
 import Hylograph.HATS.InterpreterTick (rerender)
-import Hylograph.Internal.Element.Types (ElementType(..))
 
 myViz :: Tree
 myViz =
@@ -207,7 +207,6 @@ myViz =
           elem Circle
             [ F.cx d.x, F.cy 100.0, F.r 30.0
             , F.fill "#2563eb"
-            , staticStr "textContent" d.label
             ] []
     ]
 
@@ -216,7 +215,7 @@ main = void $ rerender "#app" myViz</code></pre>
 
     <p>Create an <code>index.html</code> with a <code>&lt;div id="app"&gt;&lt;/div&gt;</code>, bundle with <code>spago bundle</code>, and open it in a browser. Three blue circles.</p>
 
-    <p>From here, explore the <a href="https://afcondon.github.io/purescript-hylograph-selection/">interactive demo</a> to understand how folds, composition, and interpreters work together.</p>
+    <p>From here, explore the <a href="https://afcondon.github.io/purescript-hylograph-demos/selection/">interactive demo</a> to understand how folds, composition, and interpreters work together.</p>
 
   </main>
 </body>

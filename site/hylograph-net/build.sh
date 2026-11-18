@@ -5,7 +5,7 @@
 set -e
 
 SITE_DIR="$(cd "$(dirname "$0")" && pwd)"
-LIBS_DIR="$SITE_DIR/../../../purescript-hylograph-libs"
+LIBS_DIR="$SITE_DIR/../../../../purescript-hylograph-libs"
 PUBLIC_DIR="$SITE_DIR/public"
 
 # Check for pandoc
@@ -158,7 +158,7 @@ if [ -d "$CONTENT_DIR" ]; then
 fi
 
 # Copy how-to site if available
-HOWTO_SITE="$SITE_DIR/../../../hylograph-howto/site"
+HOWTO_SITE="$SITE_DIR/../../../../hylograph-howto/site"
 if [ -d "$HOWTO_SITE" ]; then
   echo "Copying how-to site..."
   # Copy the generated site content into public/how-to/

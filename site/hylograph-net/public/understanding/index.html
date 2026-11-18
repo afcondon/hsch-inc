@@ -85,27 +85,26 @@ map can project three different ways into the same diagram. The fold
 doesn’t care what shape the data has — it only needs to know how to take
 one step.</p>
 <p><em>See: <a
-href="https://afcondon.github.io/purescript-hylograph-selection/">The
+href="https://afcondon.github.io/purescript-hylograph-demos/selection/">The
 Hylographic Fold</a> — Chapters 0–3 of the interactive demo.</em></p>
-<p><em>See: <a
-href="https://afcondon.github.io/purescript-psd3-prim-zoo-mosh/">The
-Morphism Zoo</a> — type substitution walkthrough showing how abstract
-morphisms specialise to concrete operations.</em></p>
 <h2 id="enumeration-assembly">3. Enumeration × Assembly</h2>
 <p>This re-conceptualization of the direct “join” of data elements to
 DOM elements allows us to tease out four concerns from one: iterating
 over data, creating elements, structuring the DOM, and handling updates
 and thus animation. <em>Enumeration</em> is how you traverse the input.
-<em>Assembly</em> is how you structure the output. These are independent
-— any enumeration strategy combines with any assembly strategy, giving
-you an N×M matrix of possibilities from a single primitive.</p>
+<em>Assembly</em> is how you structure the output. The fold keeps these
+as two separate fields, and the intent is that any enumeration combines
+with any assembly. That is not yet true of the interpreter that draws to
+the page: it implements one assembly (siblings), and the structure of
+the output comes from where you put folds inside templates, as in the
+chess board below.</p>
 <p>The same chess board emerges from a flat fold over 64 cells or a
 nested fold over 8 rows of 8. Same output, different structure — and the
 nested fold remembers the grouping, enabling row-level operations that
 the flat fold can’t express. D3 has nested joins and D3 has a general
 update pattern but in Hylograph these are cleanly orthogonal issues.</p>
 <p><em>See: <a
-href="https://afcondon.github.io/purescript-hylograph-selection/#ch2">Chapter
+href="https://afcondon.github.io/purescript-hylograph-demos/selection/#ch2">Chapter
 2: Any Structure</a></em></p>
 <h2 id="type-safety-eliminates-the-ball-of-mud">4. Type safety
 eliminates the ball of mud</h2>
@@ -135,7 +134,7 @@ visualisation techniques. When a visualization component is truly
 reusable and type-safe, it becomes a UI primitive — as reliable as a
 button or a text field, but capable of showing structure.</p>
 <p><em>See: <a
-href="https://afcondon.github.io/purescript-hylograph-selection/#ch4">Chapter
+href="https://afcondon.github.io/purescript-hylograph-demos/selection/#ch4">Chapter
 4: HATS</a> — notice the <code>d.value</code> and <code>d.label</code>
 in the code are type-checked against the data.</em></p>
 <p><em>See: <a
@@ -151,21 +150,27 @@ from one tree</h2>
 <p>A HATS tree is data, not instructions. It describes <em>what</em> to
 build, not <em>how</em>. Different interpreters walk the same tree and
 produce entirely different outputs: SVG for the browser, plain English
-for accessibility, a meta-visualization of the tree’s own structure, a
-musical rendition of a chart for a sight-impaired user.</p>
-<p>This is made possible due to the <em>finally tagless</em> pattern in
-functional programming: you define an algebra of operations, and each
-interpreter provides a different semantics. The tree doesn’t know or
-care which interpreter reads it, and amazingly it overcomes what’s known
-as “the Expression Problem” for embedded languages. It allows us to
-write the functions which compute our visualisation’s attributes using
-perfectly normal PureScript functions which in turn have available to
-them all the massive PureScript library ecosystem and, via FFI if
-necessary, JavaScript libraries too.</p>
+for accessibility, a meta-visualization of the tree’s own structure. An
+audio interpreter, for a musical rendition of a chart for a
+sight-impaired user, exists as a proof of concept in
+<code>hylograph-music</code>.</p>
+<p>The tree is an ordinary algebraic data type, and an interpreter is a
+function that pattern-matches on it; the tree doesn’t know or care which
+interpreter reads it. (From 2021 to 2025 the library got this separation
+from the <em>finally tagless</em> pattern, in which each interpreter is
+an instance of a type class of operations. A tree data type replaced it,
+in stages, between November 2025 and January 2026.) The functions which
+compute our visualisation’s attributes are perfectly normal PureScript
+functions, which in turn have available to them all the massive
+PureScript library ecosystem and, via FFI if necessary, JavaScript
+libraries too. That freedom has a price: a template is a function, so an
+interpreter can run it for each datum but cannot look inside it. The
+English interpreter can say that there is a fold over five items, and
+cannot say what each one will look like.</p>
 <p><em>See: <a
-href="https://afcondon.github.io/purescript-hylograph-selection/#ch5">Chapter
+href="https://afcondon.github.io/purescript-hylograph-demos/selection/#ch5">Chapter
 5: Interpreters</a> and <a
-href="https://afcondon.github.io/purescript-hylograph-selection/#ch6">Chapter
+href="https://afcondon.github.io/purescript-hylograph-demos/selection/#ch6">Chapter
 6: The Meta Fold</a></em></p>
 <h2 id="visualization-as-active-infrastructure">6. Visualization as
 active infrastructure</h2>

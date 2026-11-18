@@ -21,20 +21,28 @@ id="purescript-hylograph-selection">purescript-hylograph-selection</h1>
 <blockquote>
 <p><strong>This is the core package of <a
 href="https://hylograph.net">Hylograph</a></strong>, a PureScript
-library system for building interactive data visualizations. Hylograph
-provides declarative tree construction, force simulation, graph data
-structures, layout algorithms, and more — all in pure PureScript with
-zero JavaScript visualization dependencies. See <a
-href="https://hylograph.net">hylograph.net</a> for documentation,
+library system for building interactive data visualizations: declarative
+tree construction, scales, layout algorithms, graph algorithms and force
+simulation. Rendering, scales and layouts are pure PureScript with no
+JavaScript visualization dependency. Force simulation is the one
+exception: its force calculations come from <code>d3-force</code>, run
+by the library’s own simulation loop (see <a
+href="https://github.com/afcondon/purescript-hylograph-simulation">hylograph-simulation</a>).
+See <a href="https://hylograph.net">hylograph.net</a> for documentation,
 guides, and examples.</p>
 </blockquote>
 <p>Declarative DOM tree construction and interpretation for PureScript.
-Zero runtime dependencies on D3 or any other JavaScript visualization
-library.</p>
-<p><strong><a
-href="https://afcondon.github.io/purescript-hylograph-selection/">Interactive
-Demo: The Hylographic Fold</a></strong> — a seven-chapter guide
-explaining how HATS works, built entirely with HATS.</p>
+This package has no runtime dependency on D3 or any other JavaScript
+visualization library.</p>
+<p>Live interactive demo can be seen as part of the <a
+href="https://afcondon.github.io/purescript-hylograph-demos/">suite of
+Hylograph library demos</a>. Click the screenshot below for <strong>The
+Hylographic Fold</strong> — a seven-chapter guide explaining how HATS
+works, built entirely with HATS.</p>
+<p><a
+href="https://afcondon.github.io/purescript-hylograph-demos/selection/"><img
+src="https://afcondon.github.io/purescript-hylograph-demos/thumbnails/HATS.jpg"
+alt="The Hylographic Fold Demo" /></a></p>
 <h2 id="installation">Installation</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">spago</span> install hylograph-selection</span></code></pre></div>
@@ -43,36 +51,62 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 (Hylomorphic Abstract Tree Syntax). A HATS tree describes <em>what</em>
 to build; interpreters decide <em>how</em>.</p>
 <div class="sourceCode" id="cb2"><pre
-class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.HATS</span> (elem, forEach, staticStr)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.HATS.Friendly</span> <span class="kw">as</span> <span class="dt">F</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.HATS.InterpreterTick</span> (rerender)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.Internal.Element.Types</span> (<span class="dt">ElementType</span>(..))</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ot">barChart ::</span> <span class="dt">Array</span> {<span class="ot"> label ::</span> <span class="dt">String</span>,<span class="ot"> value ::</span> <span class="dt">Number</span> } <span class="ot">-&gt;</span> <span class="dt">Tree</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>barChart <span class="kw">data</span> <span class="ot">=</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">elem</span> <span class="dt">SVG</span> [ F.viewBox <span class="fl">0.0</span> <span class="fl">0.0</span> <span class="fl">400.0</span> <span class="fl">300.0</span> ]</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    [ forEach <span class="st">&quot;bars&quot;</span> <span class="dt">Group</span> <span class="kw">data</span> _<span class="op">.</span>label \d <span class="ot">-&gt;</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="fu">elem</span> <span class="dt">Rect</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>          [ F.x (d<span class="op">.</span>idx <span class="op">*</span> <span class="fl">50.0</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>          , F.y (<span class="fl">300.0</span> <span class="op">-</span> d<span class="op">.</span>value)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>          , F.width <span class="fl">40.0</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>          , F.height d<span class="op">.</span>value</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>          , F.fill <span class="st">&quot;#C9A962&quot;</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>          ] []</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    ]</span></code></pre></div>
-<p>The same tree can be interpreted as SVG (rendered to the DOM),
-English (plain text description), Mermaid (diagram syntax), or MetaHATS
-(a visualization of the tree’s own structure).</p>
+class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Prelude</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Array</span> (mapWithIndex)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Int</span> (toNumber)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Effect</span> (<span class="dt">Effect</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.HATS</span> (<span class="dt">Tree</span>, <span class="dt">ElementType</span>(..), elem, forEach)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.HATS.Friendly</span> <span class="kw">as</span> <span class="dt">F</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.HATS.InterpreterTick</span> (rerender)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">Bar</span> <span class="ot">=</span> {<span class="ot"> label ::</span> <span class="dt">String</span>,<span class="ot"> value ::</span> <span class="dt">Number</span> }</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ot">barChart ::</span> <span class="dt">Array</span> <span class="dt">Bar</span> <span class="ot">-&gt;</span> <span class="dt">Tree</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>barChart bars <span class="ot">=</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">elem</span> <span class="dt">SVG</span> [ F.viewBox <span class="fl">0.0</span> <span class="fl">0.0</span> <span class="fl">400.0</span> <span class="fl">300.0</span> ]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    [ forEach <span class="st">&quot;bars&quot;</span> <span class="dt">Rect</span> (mapWithIndex (\i bar <span class="ot">-&gt;</span> { i, bar }) bars) _<span class="op">.</span>bar<span class="op">.</span>label \d <span class="ot">-&gt;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">elem</span> <span class="dt">Rect</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>          [ F.x (toNumber d<span class="op">.</span>i <span class="op">*</span> <span class="fl">50.0</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>          , F.y (<span class="fl">300.0</span> <span class="op">-</span> d<span class="op">.</span>bar<span class="op">.</span>value)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>          , F.width <span class="fl">40.0</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>          , F.height d<span class="op">.</span>bar<span class="op">.</span>value</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>          , F.fill <span class="st">&quot;#C9A962&quot;</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>          ] []</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="ot">main ::</span> <span class="dt">Effect</span> <span class="dt">Unit</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> void <span class="op">$</span> rerender <span class="st">&quot;#chart&quot;</span> <span class="op">$</span> barChart</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  [ { label<span class="op">:</span> <span class="st">&quot;a&quot;</span>, value<span class="op">:</span> <span class="fl">120.0</span> }</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  , { label<span class="op">:</span> <span class="st">&quot;b&quot;</span>, value<span class="op">:</span> <span class="fl">200.0</span> }</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  , { label<span class="op">:</span> <span class="st">&quot;c&quot;</span>, value<span class="op">:</span> <span class="fl">80.0</span> }</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  ]</span></code></pre></div>
+<p>A <code>Tree</code> is an ordinary data structure, so an interpreter
+is any function that walks it. Two are in everyday use: the DOM
+interpreter (<code>rerender</code>, which is what draws the SVG above)
+and the English interpreter (<code>runEnglish</code>, a plain-text
+description of the structure). Both stop at the same place. The template
+passed to <code>forEach</code> is a PureScript function, so an
+interpreter can run it for each datum but cannot read it: English prints
+<code>Fold "bars" over 3 items from array</code> and then
+<code>(Template function defined for creating elements from data)</code>;
+it cannot say what a bar looks like.</p>
 <h2 id="key-features">Key Features</h2>
 <ul>
-<li><strong>Pure PureScript scales</strong> — linear, log, pow, sqrt
-with D3-compatible tick/nice algorithms. 37 color interpolators
-(Viridis, Blues, RdYlGn, etc.). No D3 dependency.</li>
+<li><strong>Pure PureScript scales</strong> — linear, log, pow, sqrt. No
+D3 dependency. The linear and pow scales pass tests translated from D3’s
+own suite. The log scale maps values as D3’s does, but its
+<code>ticks</code> and <code>nice</code> use the linear algorithm rather
+than D3’s powers-of-the-base one. 37 color interpolators (Viridis,
+Blues, RdYlGn, etc.).</li>
 <li><strong>Coordinated highlighting</strong> — hover an element and
 related elements across multiple views respond. Configurable
 identity/classify functions.</li>
-<li><strong>Multiple interpreters</strong> — SVG, English, Mermaid,
-MetaHATS, SemiQuine (code generation).</li>
+<li><strong>Interpreters</strong> — DOM (SVG and HTML) and English are
+in use. MetaHATS (a tree that draws another tree’s structure), Mermaid
+and SemiQuine (code generation) ship as experiments: nothing in the
+published demos calls the library’s copies, Mermaid has no test, and
+SemiQuine’s output is not yet valid PureScript.</li>
 <li><strong>Composable trees</strong> — combine fragments with
 <code>siblings</code>, nest with <code>forEach</code>.</li>
 </ul>
@@ -92,7 +126,7 @@ etc.)</li>
 <li><code>Hylograph.Scale</code> — Facade re-exporting Pure +
 ColorSchemes + Interpolation</li>
 <li><code>Hylograph.Scale.Pure</code> — Linear, log, pow, sqrt scales
-with tick/nice</li>
+with tick/nice (linear ticks for log; see above)</li>
 <li><code>Hylograph.Scale.ColorSchemes</code> — Categorical palettes
 (Category10, Tableau10, etc.)</li>
 <li><code>Hylograph.Scale.Sequential</code> — 37
@@ -104,14 +138,16 @@ threshold</li>
 </ul>
 <h3 id="interpreters">Interpreters</h3>
 <ul>
+<li><code>Hylograph.HATS.InterpreterTick</code> — the DOM interpreter
+(listed under Core)</li>
 <li><code>Hylograph.Interpreter.English</code> — Plain English
 description</li>
-<li><code>Hylograph.Interpreter.Mermaid</code> — Mermaid diagram
-generation</li>
-<li><code>Hylograph.Interpreter.SemiQuine</code> — PureScript code
-generation</li>
 <li><code>Hylograph.Interpreter.MetaHATS</code> — Tree structure
-visualization</li>
+visualization (experimental)</li>
+<li><code>Hylograph.Interpreter.Mermaid</code> — Mermaid diagram
+generation (experimental, untested)</li>
+<li><code>Hylograph.Interpreter.SemiQuine</code> — PureScript code
+generation (experimental; output does not compile)</li>
 </ul>
 <h3 id="interactions">Interactions</h3>
 <ul>
@@ -137,47 +173,50 @@ highlighting across views</li>
 <tbody>
 <tr>
 <td><strong>hylograph-selection</strong></td>
-<td>Core: HATS tree construction, interpreters (SVG, English, Mermaid,
-MetaHATS), scales, color schemes, coordinated highlighting, zoom, brush,
-pointer events. <em>This package.</em></td>
+<td>Core: HATS tree construction, the DOM and English interpreters,
+scales, color schemes, coordinated highlighting, zoom, brush, pointer
+events. <em>This package.</em></td>
 </tr>
 <tr>
 <td><strong>hylograph-graph</strong></td>
-<td>Graph data structures — adjacency lists, traversals, connected
-components, topological sort.</td>
+<td>Graph data structures and algorithms — shortest path (Dijkstra),
+BFS/DFS, connected and biconnected components, topological sort.</td>
 </tr>
 <tr>
 <td><strong>hylograph-layout</strong></td>
-<td>Layout algorithms — tree layouts, edge bundling, Sankey diagrams,
-treemaps, beeswarm, force-directed placement.</td>
+<td>Layout algorithms in pure PureScript — tree and cluster layouts,
+pack, partition, treemap, edge bundling, Sankey, chord, adjacency
+matrix.</td>
 </tr>
 <tr>
 <td><strong>hylograph-simulation</strong></td>
-<td>Force simulation — n-body, collision, link forces, centering.
-Halogen integration for animated simulations.</td>
+<td>Force simulation — n-body, collision, link forces, centering. The
+force calculations are <code>d3-force</code>’s; the simulation loop is
+the library’s own, which is what lets data enter and leave a running
+simulation.</td>
 </tr>
 <tr>
 <td><strong>hylograph-simulation-halogen</strong></td>
-<td>Halogen component wrapper for force simulations with tick-driven
+<td>Halogen adapter for simulation events, for tick-driven
 rendering.</td>
 </tr>
 <tr>
 <td><strong>hylograph-canvas</strong></td>
-<td>Canvas rendering backend for high-performance visualizations.</td>
+<td>Canvas 2D drawing of circles and lines, with zoom and pan. It does
+not interpret HATS trees.</td>
 </tr>
 <tr>
 <td><strong>hylograph-optics</strong></td>
-<td>Optics (lenses, prisms) for traversing and transforming HATS
-trees.</td>
+<td>Optics (lenses, traversals) over rose trees and graphs.</td>
 </tr>
 <tr>
 <td><strong>hylograph-music</strong></td>
-<td>Proof of concept: interpret data to sound just as readily as data to
-visuals. Same fold, different output.</td>
+<td>Proof of concept: an audio interpreter that plays a HATS tree as
+notes.</td>
 </tr>
 </tbody>
 </table>
-<p>All packages are published to the <a
+<p>These packages are published to the <a
 href="https://pursuit.purescript.org">PureScript Registry</a> and
 documented at <a href="https://hylograph.net">hylograph.net</a>.</p>
 <h2 id="license">License</h2>

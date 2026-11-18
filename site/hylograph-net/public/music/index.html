@@ -17,15 +17,30 @@
 
     <article class="readme">
 <h1 id="purescript-hylograph-music">purescript-hylograph-music</h1>
-<p><a href="/anscombe/"><img src="../../site/lib-music/public/demo.jpeg"
+<p><strong>Audio interpreter for Hylograph - data sonification (proof of
+concept)</strong></p>
+<p>Live interactive demo can be seen as part of the <a
+href="https://afcondon.github.io/purescript-hylograph-demos/">suite of
+Hylograph library demos</a>. Click the screenshot below for
+<strong>Anscombe’s Quartet</strong> sonified.</p>
+<p><a
+href="https://afcondon.github.io/purescript-hylograph-demos/music/"><img
+src="https://afcondon.github.io/purescript-hylograph-demos/thumbnails/music.jpg"
 alt="Anscombe’s Quartet Demo" /></a></p>
-<p><strong>Audio interpreter for Hylograph - Data Sonification and
-Accessibility</strong></p>
-<h2 id="vision">Vision</h2>
-<p>This package explores data sonification by implementing an audio
-interpreter for the Hylograph tagless DSL. The same Hylograph code that
-creates visual charts can be interpreted as sound, making data
-accessible through hearing rather than sight.</p>
+<h2 id="what-this-is">What this is</h2>
+<p><code>interpretAudio</code> walks a HATS <code>Tree</code> and
+schedules one Web Audio note for each element in it, reading the
+element’s attributes as sound: <code>time</code>, <code>pitch</code>,
+<code>duration</code>, <code>volume</code>, <code>timbre</code>. A
+<code>forEach</code> over data becomes a sequence of notes. It is a
+third interpreter of the same tree type the DOM and English interpreters
+read, with sound as its output.</p>
+<p>What is published and what is not: the interpreter exists and
+compiles, but nothing calls it yet. The Anscombe’s Quartet demo linked
+above schedules its notes directly through this package’s Web Audio
+bindings (<code>scheduleNote</code>) and draws its charts with Halogen
+SVG. It is a sonification of the data, not yet a HATS chart played by
+the audio interpreter.</p>
 <h2 id="installation">Installation</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">spago</span> install hylograph-music</span></code></pre></div>
@@ -38,18 +53,25 @@ impractical</p>
 <p>Audio provides an alternative modality for data comprehension. Just
 as a scatter plot reveals patterns spatially, a sonification can reveal
 patterns temporally and spectrally.</p>
-<h3 id="demonstrating-finally-tagless">2. Demonstrating Finally
-Tagless</h3>
-<p>This package proves that Hylograph’s tagless architecture truly
-separates description from interpretation: - Same Hylograph program -
-Multiple interpreters: D3 (visual), English (text), WebAudio (sound) -
-No changes to user code</p>
+<h3 id="a-tree-is-data-so-it-can-be-played">2. A tree is data, so it can
+be played</h3>
+<p>A HATS tree describes what to build and leaves the how to an
+interpreter. The DOM interpreter turns it into SVG, the English
+interpreter into text, and this one into sound. (This package began
+against the earlier finally-tagless <code>SelectionM</code> API, which
+is what older versions of this README described; the interpreter now
+reads HATS trees.)</p>
 <h3 id="foundation-for-music-dsl">3. Foundation for Music DSL</h3>
 <p>While focused on sonification, this work explores patterns that could
 inform a future music composition DSL inspired by: - Tidal Cycles’
 mini-notation - Modular synthesis patching philosophy - The data join
 pattern for separating temporal structure from musical content</p>
 <h2 id="conceptual-mapping">Conceptual Mapping</h2>
+<p>A design sketch of the correspondence. What is implemented is the
+five attribute names <code>time</code>, <code>pitch</code>,
+<code>duration</code>, <code>volume</code> and <code>timbre</code>;
+nothing maps <code>cx</code> or <code>fill</code> onto sound
+automatically.</p>
 <table>
 <thead>
 <tr>
@@ -96,34 +118,35 @@ pattern for separating temporal structure from musical content</p>
 </tr>
 </tbody>
 </table>
-<h2 id="example-usage-future">Example Usage (Future)</h2>
+<h2 id="example">Example</h2>
 <div class="sourceCode" id="cb2"><pre
-class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- This code works with both D3 and Music interpreters!</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ot">sonifyData ::</span> <span class="kw">forall</span> m sel<span class="op">.</span> <span class="dt">SelectionM</span> sel m <span class="ot">=&gt;</span> <span class="dt">Array</span> <span class="dt">Number</span> <span class="ot">-&gt;</span> m <span class="dt">Unit</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>sonifyData dataset <span class="ot">=</span> <span class="kw">do</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  context <span class="ot">&lt;-</span> select <span class="st">&quot;audio&quot;</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  tones <span class="ot">&lt;-</span> context</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">#</span> renderData <span class="dt">Tone</span> dataset <span class="st">&quot;tone&quot;</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        (<span class="dt">Just</span> \d <span class="ot">-&gt;</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>          [ time (\i _ <span class="ot">-&gt;</span> i <span class="op">*</span> <span class="fl">0.5</span>)        <span class="co">-- Evenly spaced in time</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>          , pitch (\_ d <span class="ot">-&gt;</span> <span class="fl">200.0</span> <span class="op">+</span> d <span class="op">*</span> <span class="fl">10.0</span>)  <span class="co">-- Map data to frequency</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>          , duration (\_ _ <span class="ot">-&gt;</span> <span class="fl">0.3</span>)        <span class="co">-- 300ms notes</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>          , volume (\_ d <span class="ot">-&gt;</span> d <span class="op">/</span> <span class="fl">100.0</span>)    <span class="co">-- Map data to volume</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>          , timbre (\_ _ <span class="ot">-&gt;</span> <span class="st">&quot;sine&quot;</span>)       <span class="co">-- Pure sine wave</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>          ])</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Nothing</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Nothing</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pure</span> unit</span>
+class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Prelude</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Array</span> (mapWithIndex)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Int</span> (toNumber)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Effect</span> (<span class="dt">Effect</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.HATS</span> (<span class="dt">Tree</span>, <span class="dt">ElementType</span>(..), elem, forEach, staticNum, staticStr)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.Music.Interpreter.WebAudio</span> (initMusicContext, interpretAudio)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">-- One note per datum: when it sounds, how high, how long.</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ot">melody ::</span> <span class="dt">Array</span> <span class="dt">Number</span> <span class="ot">-&gt;</span> <span class="dt">Tree</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>melody values <span class="ot">=</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  forEach <span class="st">&quot;notes&quot;</span> <span class="dt">Circle</span> (mapWithIndex (\i v <span class="ot">-&gt;</span> { i, v }) values) (<span class="fu">show</span> <span class="op">&lt;&lt;&lt;</span> _<span class="op">.</span>i) \d <span class="ot">-&gt;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">elem</span> <span class="dt">Circle</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>      [ staticNum <span class="st">&quot;time&quot;</span> (toNumber d<span class="op">.</span>i <span class="op">*</span> <span class="fl">0.4</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>      , staticNum <span class="st">&quot;pitch&quot;</span> (<span class="fl">220.0</span> <span class="op">+</span> d<span class="op">.</span>v <span class="op">*</span> <span class="fl">20.0</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>      , staticNum <span class="st">&quot;duration&quot;</span> <span class="fl">0.3</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>      , staticStr <span class="st">&quot;timbre&quot;</span> <span class="st">&quot;sine&quot;</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      ] []</span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">-- Interpret as visualization</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  runD3M <span class="op">$</span> sonifyData anscombeQuartet1</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">-- Interpret as sonification</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  runMusicM <span class="op">$</span> sonifyData anscombeQuartet1</span></code></pre></div>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">-- Call from a click handler: browsers only start audio on a user gesture.</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="ot">play ::</span> <span class="dt">Effect</span> <span class="dt">Unit</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>play <span class="ot">=</span> initMusicContext (interpretAudio (melody [ <span class="fl">4.0</span>, <span class="fl">7.0</span>, <span class="fl">5.0</span>, <span class="fl">9.0</span> ]))</span></code></pre></div>
+<p>The interpreter reads attribute <em>names</em>, so a tree written for
+the DOM (with <code>cx</code>, <code>cy</code>, <code>r</code>) plays as
+default notes until it is given <code>time</code> and
+<code>pitch</code>. Mapping visual attributes onto sound automatically,
+as in the table above, is not implemented.</p>
 <h2 id="anscombes-quartet">Anscombe’s Quartet</h2>
 <p>Anscombe’s Quartet demonstrates why this matters. Four datasets with
 identical statistics: - Same mean - Same variance - Same correlation</p>
@@ -149,18 +172,14 @@ simultaneously for richer understanding</li>
 sensory modes</li>
 </ol>
 <h2 id="architecture">Architecture</h2>
-<pre><code>hylograph-selection/              # Core tagless DSL (unchanged)
-  └── Hylograph/Internal/
-      └── Capabilities/Selection.purs  # SelectionM typeclass
+<pre><code>hylograph-selection/                   # HATS: the Tree type and its DOM interpreter
+  └── Hylograph/HATS.purs
 
-hylograph-music/                  # Audio interpreter (this package)
+hylograph-music/                       # this package
   └── Hylograph/Music/
-      ├── Interpreter/WebAudio.purs    # Implements SelectionM for sound
-      ├── Attributes.purs              # Audio attribute mappings
-      └── Internal/FFI.purs            # Web Audio API bindings</code></pre>
-<p>The <code>MusicSelection_</code> type represents scheduled audio
-events rather than DOM elements, but the operations are the same:
-select, join data, set attributes, handle enter/update/exit.</p>
+      ├── Interpreter/WebAudio.purs    # interpretAudio :: Tree -&gt; MusicM Unit
+      ├── Attributes.purs              # attribute helpers for the older typed-attribute API
+      └── Internal/FFI.purs            # Web Audio bindings (createAudioContext, scheduleNote)</code></pre>
 <h2 id="modules">Modules</h2>
 <ul>
 <li><code>Hylograph.Music.Interpreter.WebAudio</code> - WebAudio
@@ -183,28 +202,22 @@ comprehension</p>
 progressions, melodies) - Output: Music - Goal: Creative music making
 and generative composition</p>
 <p><strong>Shared patterns:</strong> - Typed data joins (structure +
-content) - Multiple interpreters (audio, notation, visualization,
-English) - Finally tagless architecture - Separation of “what/when”
-(temporal structure) from “how” (sonic content)</p>
+content) - Multiple interpreters of one description (audio, notation,
+visualization, English) - Separation of “what/when” (temporal structure)
+from “how” (sonic content)</p>
 <p>Both benefit from exploring how the join pattern works in the
 temporal/auditory domain.</p>
 <h2 id="status">Status</h2>
-<p>Early exploration. The basic package structure and type signatures
-exist, but the implementation is stub-only. Next steps:</p>
-<ol type="1">
-<li>Implement basic Web Audio FFI bindings</li>
-<li>Implement <code>appendData</code> to schedule simple tones from
-data</li>
-<li>Create proof-of-concept demo sonifying a simple dataset</li>
-<li>Explore attribute mappings (which data dimensions map best to which
-sonic parameters?)</li>
-<li>Compare with D3 interpreter to identify shared abstractions</li>
-</ol>
+<p>Proof of concept. The Web Audio bindings work and are what the
+Anscombe demo uses. The tree interpreter (<code>interpretAudio</code>)
+compiles against the current HATS types and has no test and no demo that
+calls it. Enter/update/exit have no audio meaning yet.</p>
 <h2 id="part-of-hylograph">Part of Hylograph</h2>
 <ul>
 <li><strong>hylograph-music</strong> - Audio interpreter (this
 package)</li>
-<li><strong>hylograph-selection</strong> - Core tagless DSL</li>
+<li><strong>hylograph-selection</strong> - HATS trees and DOM
+rendering</li>
 <li><strong>hylograph-simulation</strong> - Force simulation</li>
 <li><strong>hylograph-graph</strong> - Graph algorithms</li>
 </ul>

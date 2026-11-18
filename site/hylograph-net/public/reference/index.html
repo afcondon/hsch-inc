@@ -113,28 +113,28 @@
     <p>Each package has auto-generated API docs on <a href="https://pursuit.purescript.org">Pursuit</a>, the PureScript documentation hub. Click any package to browse its types, functions, and module structure.</p>
 
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection" class="pursuit-card">
-      <span class="pursuit-card-name">hylograph-selection <span class="pursuit-badge">v0.5.0</span></span>
+      <span class="pursuit-card-name">hylograph-selection <span class="pursuit-badge">v0.5.3</span></span>
       <span class="pursuit-card-desc">Core: HATS trees, interpreters, scales, color schemes, coordinated highlighting, interactions.</span>
     </a>
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-simulation" class="pursuit-card">
-      <span class="pursuit-card-name">hylograph-simulation <span class="pursuit-badge">v0.5.0</span></span>
-      <span class="pursuit-card-desc">Force simulation engine &mdash; n-body, collision, link, centering forces.</span>
+      <span class="pursuit-card-name">hylograph-simulation <span class="pursuit-badge">v0.6.0</span></span>
+      <span class="pursuit-card-desc">Force simulation &mdash; n-body, collision, link, centering forces. Force calculations by <code>d3-force</code>; the simulation loop is the library&rsquo;s own.</span>
     </a>
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-simulation-halogen" class="pursuit-card">
-      <span class="pursuit-card-name">hylograph-simulation-halogen <span class="pursuit-badge">v0.5.0</span></span>
+      <span class="pursuit-card-name">hylograph-simulation-halogen <span class="pursuit-badge">v0.5.1</span></span>
       <span class="pursuit-card-desc">Halogen component wrapper for tick-driven force simulation rendering.</span>
     </a>
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-layout" class="pursuit-card">
-      <span class="pursuit-card-name">hylograph-layout <span class="pursuit-badge">v0.2.1</span></span>
-      <span class="pursuit-card-desc">Layout algorithms &mdash; tree, edge bundle, Sankey, treemap, beeswarm.</span>
+      <span class="pursuit-card-name">hylograph-layout <span class="pursuit-badge">v0.4.0</span></span>
+      <span class="pursuit-card-desc">Layout algorithms in pure PureScript &mdash; tree, cluster, pack, partition, treemap, edge bundle, Sankey, chord.</span>
     </a>
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-graph" class="pursuit-card">
-      <span class="pursuit-card-name">hylograph-graph <span class="pursuit-badge">v0.2.0</span></span>
-      <span class="pursuit-card-desc">Graph data structures &mdash; adjacency lists, traversals, components, topo sort.</span>
+      <span class="pursuit-card-name">hylograph-graph <span class="pursuit-badge">v0.3.1</span></span>
+      <span class="pursuit-card-desc">Graph data structures and algorithms &mdash; shortest path, traversals, components, decomposition, topo sort.</span>
     </a>
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-music" class="pursuit-card">
       <span class="pursuit-card-name">hylograph-music <span class="pursuit-badge">v0.4.0</span></span>
-      <span class="pursuit-card-desc">Data to sound &mdash; same fold, audio output.</span>
+      <span class="pursuit-card-desc">Data to sound &mdash; a proof-of-concept audio interpreter for HATS trees.</span>
     </a>
 
     <h2>Key Signatures</h2>
@@ -156,8 +156,8 @@
       <p class="sig-note">Attach interactive behaviors (hover, drag, zoom) to a tree node.</p>
 
       <!-- rerender -->
-      <code class="sig-full"><div class="sig-decl"><dfn class="sig-name">rerender</dfn><small class="sig-dcolon"> ::</small></div><div class="sig-body"><ol class="sig-arrow-chain"><li class="sig-param"><code class="sig-con">String</code></li><li class="sig-param"><code class="sig-con">Tree</code></li><li class="sig-param"><code class="sig-app"><code class="sig-con sig-con-effect">Effect</code><code class="sig-con">Unit</code></code></li></ol></div></code>
-      <p class="sig-note">The interpreter boundary: pure tree in, effectful DOM out.</p>
+      <code class="sig-full"><div class="sig-decl"><dfn class="sig-name">rerender</dfn><small class="sig-dcolon"> ::</small></div><div class="sig-body"><ol class="sig-arrow-chain"><li class="sig-param"><code class="sig-con">String</code></li><li class="sig-param"><code class="sig-con">Tree</code></li><li class="sig-param"><code class="sig-app"><code class="sig-con sig-con-effect">Effect</code><code class="sig-con">RerenderResult</code></code></li></ol></div></code>
+      <p class="sig-note">The interpreter boundary: pure tree in, effectful DOM out. The result holds the named selections and any transitions still to be ticked; discard it with <code>void</code> for a static chart.</p>
 
       <!-- applyScale -->
       <code class="sig-full"><div class="sig-decl"><dfn class="sig-name">applyScale</dfn><small class="sig-dcolon"> ::</small></div><div class="sig-body"><ol class="sig-arrow-chain"><li class="sig-param"><code class="sig-con">ContinuousScale</code></li><li class="sig-param"><code class="sig-con">Number</code></li><li class="sig-param"><code class="sig-con">Number</code></li></ol></div></code>
@@ -174,7 +174,7 @@
       <ul class="module-list">
         <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.HATS">Hylograph.HATS</a> <span class="desc">&mdash; Tree type, elem, forEach, withBehaviors</span></li>
         <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.HATS.Friendly">Hylograph.HATS.Friendly</a> <span class="desc">&mdash; F.width, F.cx, F.fill and friends</span></li>
-        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.HATS.InterpreterTick">Hylograph.HATS.InterpreterTick</a> <span class="desc">&mdash; rerender (SVG interpreter)</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.HATS.InterpreterTick">Hylograph.HATS.InterpreterTick</a> <span class="desc">&mdash; rerender (the DOM interpreter: SVG and HTML)</span></li>
       </ul>
     </div>
 
@@ -182,7 +182,7 @@
       <h3>Scales &amp; Color</h3>
       <ul class="module-list">
         <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Scale">Hylograph.Scale</a> <span class="desc">&mdash; Facade: linear, log, pow, sqrt + color schemes + interpolators</span></li>
-        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Scale.Pure">Hylograph.Scale.Pure</a> <span class="desc">&mdash; Pure implementation (no D3)</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Scale.Pure">Hylograph.Scale.Pure</a> <span class="desc">&mdash; Pure implementation (no D3); log scale uses linear ticks</span></li>
         <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Scale.Sequential">Hylograph.Scale.Sequential</a> <span class="desc">&mdash; 37 color interpolators (Viridis, Blues, RdYlGn, etc.)</span></li>
       </ul>
     </div>
@@ -191,8 +191,8 @@
       <h3>Interpreters</h3>
       <ul class="module-list">
         <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interpreter.English">Hylograph.Interpreter.English</a> <span class="desc">&mdash; Plain English description of a tree</span></li>
-        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interpreter.Mermaid">Hylograph.Interpreter.Mermaid</a> <span class="desc">&mdash; Mermaid diagram syntax</span></li>
-        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interpreter.MetaHATS">Hylograph.Interpreter.MetaHATS</a> <span class="desc">&mdash; Tree &rarr; Tree structure visualization</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interpreter.Mermaid">Hylograph.Interpreter.Mermaid</a> <span class="desc">&mdash; Mermaid diagram syntax (experimental, untested)</span></li>
+        <li><a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection/docs/Hylograph.Interpreter.MetaHATS">Hylograph.Interpreter.MetaHATS</a> <span class="desc">&mdash; Tree &rarr; Tree structure visualization (experimental)</span></li>
       </ul>
     </div>
 

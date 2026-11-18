@@ -18,17 +18,15 @@ D3's "data join" can be seen to be a special case of a more general operation. I
 
 An array can unfold into a tree. A tree can fold into a flat list. A map can project three different ways into the same diagram. The fold doesn't care what shape the data has — it only needs to know how to take one step.
 
-*See: [The Hylographic Fold](https://afcondon.github.io/purescript-hylograph-selection/) — Chapters 0–3 of the interactive demo.*
-
-*See: [The Morphism Zoo](https://afcondon.github.io/purescript-psd3-prim-zoo-mosh/) — type substitution walkthrough showing how abstract morphisms specialise to concrete operations.*
+*See: [The Hylographic Fold](https://afcondon.github.io/purescript-hylograph-demos/selection/) — Chapters 0–3 of the interactive demo.*
 
 ## 3. Enumeration × Assembly
 
-This re-conceptualization of the direct "join" of data elements to DOM elements allows us to tease out four concerns from one: iterating over data, creating elements, structuring the DOM, and handling updates and thus animation. *Enumeration* is how you traverse the input. *Assembly* is how you structure the output. These are independent — any enumeration strategy combines with any assembly strategy, giving you an N×M matrix of possibilities from a single primitive.
+This re-conceptualization of the direct "join" of data elements to DOM elements allows us to tease out four concerns from one: iterating over data, creating elements, structuring the DOM, and handling updates and thus animation. *Enumeration* is how you traverse the input. *Assembly* is how you structure the output. The fold keeps these as two separate fields, and the intent is that any enumeration combines with any assembly. That is not yet true of the interpreter that draws to the page: it implements one assembly (siblings), and the structure of the output comes from where you put folds inside templates, as in the chess board below.
 
 The same chess board emerges from a flat fold over 64 cells or a nested fold over 8 rows of 8. Same output, different structure — and the nested fold remembers the grouping, enabling row-level operations that the flat fold can't express. D3 has nested joins and D3 has a general update pattern but in Hylograph these are cleanly orthogonal issues.
 
-*See: [Chapter 2: Any Structure](https://afcondon.github.io/purescript-hylograph-selection/#ch2)*
+*See: [Chapter 2: Any Structure](https://afcondon.github.io/purescript-hylograph-demos/selection/#ch2)*
 
 ## 4. Type safety eliminates the ball of mud
 
@@ -44,7 +42,7 @@ This isn't an incremental improvement. It means visualization components are gen
 
 With componentisation, we get the possibility of UI with visualisation techniques. When a visualization component is truly reusable and type-safe, it becomes a UI primitive — as reliable as a button or a text field, but capable of showing structure.
 
-*See: [Chapter 4: HATS](https://afcondon.github.io/purescript-hylograph-selection/#ch4) — notice the `d.value` and `d.label` in the code are type-checked against the data.*
+*See: [Chapter 4: HATS](https://afcondon.github.io/purescript-hylograph-demos/selection/#ch4) — notice the `d.value` and `d.label` in the code are type-checked against the data.*
 
 *See: [Hindley–Milner type system](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) (Wikipedia) — the theoretical foundation for PureScript's type inference. *
 
@@ -52,11 +50,11 @@ With componentisation, we get the possibility of UI with visualisation technique
 
 ## 5. Multiple interpreters from one tree
 
-A HATS tree is data, not instructions. It describes *what* to build, not *how*. Different interpreters walk the same tree and produce entirely different outputs: SVG for the browser, plain English for accessibility, a meta-visualization of the tree's own structure, a musical rendition of a chart for a sight-impaired user. 
+A HATS tree is data, not instructions. It describes *what* to build, not *how*. Different interpreters walk the same tree and produce entirely different outputs: SVG for the browser, plain English for accessibility, a meta-visualization of the tree's own structure. An audio interpreter, for a musical rendition of a chart for a sight-impaired user, exists as a proof of concept in `hylograph-music`.
 
-This is made possible due to the *finally tagless* pattern in functional programming: you define an algebra of operations, and each interpreter provides a different semantics. The tree doesn't know or care which interpreter reads it, and amazingly it overcomes what's known as "the Expression Problem" for embedded languages. It allows us to write the functions which compute our visualisation's attributes using perfectly normal PureScript functions which in turn have available to them all the massive PureScript library ecosystem and, via FFI if necessary, JavaScript libraries too.
+The tree is an ordinary algebraic data type, and an interpreter is a function that pattern-matches on it; the tree doesn't know or care which interpreter reads it. (From 2021 to 2025 the library got this separation from the *finally tagless* pattern, in which each interpreter is an instance of a type class of operations. A tree data type replaced it, in stages, between November 2025 and January 2026.) The functions which compute our visualisation's attributes are perfectly normal PureScript functions, which in turn have available to them all the massive PureScript library ecosystem and, via FFI if necessary, JavaScript libraries too. That freedom has a price: a template is a function, so an interpreter can run it for each datum but cannot look inside it. The English interpreter can say that there is a fold over five items, and cannot say what each one will look like.
 
-*See: [Chapter 5: Interpreters](https://afcondon.github.io/purescript-hylograph-selection/#ch5) and [Chapter 6: The Meta Fold](https://afcondon.github.io/purescript-hylograph-selection/#ch6)*
+*See: [Chapter 5: Interpreters](https://afcondon.github.io/purescript-hylograph-demos/selection/#ch5) and [Chapter 6: The Meta Fold](https://afcondon.github.io/purescript-hylograph-demos/selection/#ch6)*
 
 ## 6. Visualization as active infrastructure
 

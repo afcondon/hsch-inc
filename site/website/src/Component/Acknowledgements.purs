@@ -118,7 +118,7 @@ render _ =
             [ HP.classes [ HH.ClassName "acknowledgements-section" ] ]
             [ HH.h2_ [ HH.text "AI Collaboration" ]
             , HH.p_
-                [ HH.text "The 2024-2025 iteration of this project was developed in collaboration with Claude (Anthropic). This represents a significant experiment in human-AI pair programming on a complex, long-running project."
+                [ HH.text "The iteration of this project from October 2025 onwards was developed in collaboration with Claude (Anthropic). This represents a significant experiment in human-AI pair programming on a complex, long-running project."
                 ]
             , HH.p_
                 [ HH.text "We believe transparency about AI involvement is important. This collaboration demonstrates both the potential and the nature of human-AI development: the human brings domain expertise, architectural vision, and quality judgment; the AI brings rapid implementation, pattern recognition across large codebases, and tireless iteration. Neither could have produced this result alone."
