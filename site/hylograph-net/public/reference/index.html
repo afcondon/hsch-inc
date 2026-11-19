@@ -113,19 +113,27 @@
     <p>Each package has auto-generated API docs on <a href="https://pursuit.purescript.org">Pursuit</a>, the PureScript documentation hub. Click any package to browse its types, functions, and module structure.</p>
 
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-selection" class="pursuit-card">
-      <span class="pursuit-card-name">hylograph-selection <span class="pursuit-badge">v0.5.3</span></span>
+      <span class="pursuit-card-name">hylograph-selection <span class="pursuit-badge">v0.6.0</span></span>
       <span class="pursuit-card-desc">Core: HATS trees, interpreters, scales, color schemes, coordinated highlighting, interactions.</span>
     </a>
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-simulation" class="pursuit-card">
-      <span class="pursuit-card-name">hylograph-simulation <span class="pursuit-badge">v0.6.0</span></span>
-      <span class="pursuit-card-desc">Force simulation &mdash; n-body, collision, link, centering forces. Force calculations by <code>d3-force</code>; the simulation loop is the library&rsquo;s own.</span>
+      <span class="pursuit-card-name">hylograph-simulation <span class="pursuit-badge">v1.1.0</span></span>
+      <span class="pursuit-card-desc">Force simulation &mdash; n-body, collision, link, centring and six more forces, on a PureScript kernel with an optional Rust/WASM one. No D3: since 1.0 the forces are <code>hylograph-forces</code>.</span>
+    </a>
+    <a href="https://pursuit.purescript.org/packages/purescript-hylograph-forces" class="pursuit-card">
+      <span class="pursuit-card-name">hylograph-forces <span class="pursuit-badge">v0.1.0</span></span>
+      <span class="pursuit-card-desc">The force kernel: d3-force&rsquo;s seven forces in PureScript, held to d3-force 3.0.0 bit for bit, and six that d3 does not have (towards, rectangle collision, containment, cohesion, scoped many-body, directional links).</span>
+    </a>
+    <a href="https://pursuit.purescript.org/packages/purescript-hylograph-wasm-kernel" class="pursuit-card">
+      <span class="pursuit-card-name">hylograph-wasm-kernel <span class="pursuit-badge">v1.0.0</span></span>
+      <span class="pursuit-card-desc">The optional Rust/WASM kernel, carried inside the package: call <code>install</code> and <code>engine: WASM</code> works, with nothing to build or serve.</span>
     </a>
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-simulation-halogen" class="pursuit-card">
-      <span class="pursuit-card-name">hylograph-simulation-halogen <span class="pursuit-badge">v0.5.1</span></span>
-      <span class="pursuit-card-desc">Halogen component wrapper for tick-driven force simulation rendering.</span>
+      <span class="pursuit-card-name">hylograph-simulation-halogen <span class="pursuit-badge">v0.6.0</span></span>
+      <span class="pursuit-card-desc">Halogen subscription adapter: a simulation&rsquo;s events as a Halogen emitter.</span>
     </a>
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-layout" class="pursuit-card">
-      <span class="pursuit-card-name">hylograph-layout <span class="pursuit-badge">v0.4.0</span></span>
+      <span class="pursuit-card-name">hylograph-layout <span class="pursuit-badge">v0.5.0</span></span>
       <span class="pursuit-card-desc">Layout algorithms in pure PureScript &mdash; tree, cluster, pack, partition, treemap, edge bundle, Sankey, chord.</span>
     </a>
     <a href="https://pursuit.purescript.org/packages/purescript-hylograph-graph" class="pursuit-card">

@@ -123,12 +123,22 @@ spago bundle
       </tr>
       <tr>
         <td><a href="https://github.com/afcondon/purescript-hylograph-simulation">hylograph-simulation</a></td>
-        <td>Force simulation &mdash; n-body, collision, link forces, centering. The force calculations are <code>d3-force</code>'s; the simulation loop is the library's own.</td>
+        <td>Force simulation &mdash; n-body, collision, link forces, centring and six more. Since 1.0 there is no D3 in it: the forces are <code>hylograph-forces</code>, in PureScript, with an optional Rust/WASM kernel.</td>
         <td><span class="demo-tag">demo</span></td>
       </tr>
       <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-forces">hylograph-forces</a></td>
+        <td>The force kernel under <code>hylograph-simulation</code>: d3-force's forces in PureScript, held to d3-force bit for bit, and six that d3 does not have.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/afcondon/purescript-hylograph-wasm-kernel">hylograph-wasm-kernel</a></td>
+        <td>The optional Rust/WASM kernel for <code>hylograph-simulation</code>, carried inside the package: nothing to build or serve.</td>
+        <td></td>
+      </tr>
+      <tr>
         <td><a href="https://github.com/afcondon/purescript-hylograph-simulation-halogen">hylograph-simulation-halogen</a></td>
-        <td>Halogen component wrapper for force simulations with tick-driven rendering.</td>
+        <td>Halogen subscription adapter: a simulation's events as a Halogen emitter.</td>
         <td></td>
       </tr>
       <tr>
@@ -174,7 +184,7 @@ spago bundle
     </table>
 
     <div class="note">
-      All packages are published to the <a href="https://pursuit.purescript.org">PureScript Registry</a>. Install any of them with <code>spago install hylograph-selection</code> (or whichever package you need).
+      All packages are published to the <a href="https://pursuit.purescript.org">PureScript Registry</a>. Install any of them with <code>spago install hylograph-selection</code> (or whichever package you need). A package set can lag a new release: to use a version newer than your set carries, name it under <code>workspace.extraPackages</code> in <code>spago.yaml</code>, for example <code>hylograph-simulation: "1.1.0"</code>.
     </div>
 
     <h2>Your First Visualization</h2>

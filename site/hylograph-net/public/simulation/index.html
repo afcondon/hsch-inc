@@ -19,8 +19,10 @@
 <h1
 id="purescript-hylograph-simulation">purescript-hylograph-simulation</h1>
 <p>Force-directed graph simulation: the library’s own simulation loop
-over a replaceable force kernel (<code>d3-force</code>’s force functions
-by default, or Rust/WASM).</p>
+over a replaceable force kernel. The default kernel is PureScript (<a
+href="https://github.com/afcondon/purescript-hylograph-forces">hylograph-forces</a>:
+d3-force’s forces, and six more); a Rust/WASM kernel is the fast path.
+There is no D3 in this library.</p>
 <p>Live interactive demo can be seen as part of the <a
 href="https://afcondon.github.io/purescript-hylograph-demos/">suite of
 Hylograph library demos</a>. Click the screenshot below for the
@@ -46,7 +48,7 @@ class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb1-
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="ot">main ::</span> <span class="dt">Effect</span> <span class="dt">Unit</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  { handle, events } <span class="ot">&lt;-</span> runSimulation</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    { engine<span class="op">:</span> <span class="dt">D3</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    { engine<span class="op">:</span> <span class="dt">Pure</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    , setup<span class="op">:</span> setup <span class="st">&quot;physics&quot;</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        [ manyBody <span class="st">&quot;charge&quot;</span> <span class="op">#</span> withStrength (static (<span class="op">-</span><span class="fl">50.0</span>))</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        , center <span class="st">&quot;center&quot;</span> <span class="op">#</span> withX (static <span class="fl">200.0</span>) <span class="op">#</span> withY (static <span class="fl">150.0</span>)</span>
@@ -74,44 +76,143 @@ class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb1-
 <h2 id="installation">Installation</h2>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">spago</span> install hylograph-simulation</span></code></pre></div>
-<h2 id="what-comes-from-d3-and-what-does-not">What comes from D3, and
-what does not</h2>
-<p>The force <em>calculations</em> are D3’s.
-<code>ForceEngine/Core.js</code> imports the force functions from
-<code>d3-force</code> (<code>forceManyBody</code>,
-<code>forceCollide</code>, <code>forceLink</code>,
-<code>forceCenter</code>, <code>forceX</code>, <code>forceY</code>,
-<code>forceRadial</code>), plus <code>select</code> and
-<code>pointer</code> from <code>d3-selection</code> and
-<code>drag</code> from <code>d3-drag</code> for dragging nodes.</p>
-<p>The <em>simulation</em> is not D3’s. There is no
-<code>d3.forceSimulation</code>, no D3 timer and no D3 lifecycle: the
-tick loop, alpha decay, velocity integration and ownership of the node
-array are this library’s. That is what makes the general update pattern
-work on a running simulation (<code>handle.updateData</code> adds and
-removes nodes and links and reheats it), which D3’s own simulation
-wrapper makes hard because it owns the data.</p>
+<p>Its kernel, <code>hylograph-forces</code>, and
+<code>hylograph-selection</code> 0.6 were published after package set
+80.8.0 was cut. If your package set does not have them yet, name them in
+your workspace:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">workspace</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">extraPackages</span><span class="kw">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">hylograph-simulation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.1.0&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">hylograph-forces</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;0.1.0&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">hylograph-selection</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;0.6.0&quot;</span></span></code></pre></div>
+<p><strong>The WASM engine is optional and its module is not in this
+package.</strong> The default engine needs nothing loaded. To use
+<code>engine: WASM</code> (or <code>Stepped.Rust</code>), build the
+module from its source, <a
+href="https://github.com/afcondon/hylograph-force-kernel">hylograph-force-kernel</a>
+(<code>wasm-pack build --target web</code>; its README has the steps),
+serve the resulting <code>pkg/</code> directory beside your page, and
+call <code>initWasm</code> with the URL of <code>force_kernel.js</code>
+before creating a simulation.</p>
+<p>Since 1.1.0 there is a second way in,
+<code>installKernel :: KernelModule -&gt; Effect Unit</code> (in
+<code>Hylograph.ForceEngine.WASM</code>, and re-exported by
+<code>Hylograph.Simulation</code>,
+<code>Hylograph.Simulation.Stepped</code>,
+<code>Hylograph.ForceEngine.Setup.WASM</code> and
+<code>Hylograph.ForceEngine.WASMEngine</code>). It takes a module that
+something else has already loaded and instantiated, and afterwards
+everything that works after <code>initWasm</code> works. The package
+<code>hylograph-wasm-kernel</code> (1.0.0, not yet published) uses it to
+carry the module inside a PureScript package, so that nothing has to be
+built or served: <code>Hylograph.Kernel.WASM.install</code> decodes the
+bytes it carries and installs them. This package does not depend on that
+one, so the default engine still costs nothing. Whichever function runs
+first wins: once a module is installed, <code>initWasm</code> and
+<code>installKernel</code> both do nothing.</p>
+<h2 id="no-d3">No D3</h2>
+<p>Until 2026-11-18 the force calculations here were d3-force’s
+functions and dragging went through d3-drag. Neither is used now, and
+the library has no npm dependencies.</p>
+<p>The forces are <code>hylograph-forces</code>: d3-force 3.0.0’s seven
+forces ported to PureScript and held to d3-force bit for bit by a
+differential test (same nodes, same parameters, every value of every
+node compared after every tick), plus the forces the Rust kernel added
+(towards, rectangle collision, containment, cohesion, group-scoped
+many-body, directional links), held bit for bit to that kernel built at
+64 bits. See that package’s README for the tables and the timings.</p>
+<p>The <em>simulation</em> was never D3’s: the tick loop, alpha decay,
+velocity integration and ownership of the node array are this library’s.
+That is what makes the general update pattern work on a running
+simulation (<code>handle.updateData</code> adds and removes nodes and
+links and reheats it).</p>
+<p>Dragging uses native Pointer Events: <code>attachDrag</code> is
+<code>Hylograph.Interaction.Pointer.attachSimulationDrag</code> from
+hylograph-selection, and the pinning and group drags are a small amount
+of this library’s own JavaScript.</p>
+<p>Three things changed with the kernel:</p>
+<ul>
+<li><strong>Layouts repeat.</strong> Coincident nodes are separated by a
+seeded generator, one per simulation, where the old engine used
+<code>Math.random</code>. The same nodes, links and setup give the same
+positions on every run.</li>
+<li><strong>A node with no position starts on d3’s phyllotaxis
+spiral</strong>, and a pinned node starts on its pin (d3’s
+<code>initializeNodes</code>). The old engine put an unpositioned node
+somewhere at random.</li>
+<li><strong>A link naming a node that is not there is an error</strong>
+(<code>node not found: &lt;id&gt;</code>, d3’s words) when the setup has
+a force along the links: <code>applySetup</code> throws and
+<code>tryApplySetup</code> returns it as a <code>Left</code>, on both
+engines.</li>
+</ul>
 <p>A second kernel, written in Rust and compiled to WebAssembly, sits
 behind the same <code>Engine</code> switch (<code>engine: WASM</code>,
 after <code>initWASM</code> has loaded the module; bindings in
-<code>Hylograph.ForceEngine.WASM</code>) and uses no D3 force code. It
-is there to show the kernel is replaceable; it is less exercised than
-the D3 one.</p>
-<p>The same two kernels are also packaged separately, as <a
-href="https://github.com/afcondon/purescript-hylograph-d3-kernel">hylograph-d3-kernel</a>
-and <a
-href="https://github.com/afcondon/purescript-hylograph-wasm-kernel">hylograph-wasm-kernel</a>
-over <code>hylograph-simulation-core</code>. This package does not
-depend on them; it carries its own copy of both sets of bindings.</p>
-<h3 id="npm-dependencies">npm dependencies</h3>
-<p>The PureScript registry cannot declare npm dependencies, so a project
-that bundles this library has to install them itself:</p>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install d3-force d3-selection d3-drag</span></code></pre></div>
+<code>Hylograph.ForceEngine.WASM</code>). One <code>Setup</code> drives
+both, every force included, and <code>test/engine-parity.mjs</code>
+holds them to each other (to float width one tick from identical state:
+the shipped kernel is f32).</p>
+<p>The handle’s calls do the same on both too
+(<code>test/browser-check.mjs</code> drives each engine in headless
+Chrome): a drag after the simulation has completed,
+<code>pinNodes</code>, <code>unpinNodes</code>,
+<code>interpolatePositions</code>. And a <code>Setup</code>’s params
+(alpha, alphaDecay, alphaTarget, velocityRetention) are the simulation’s
+on both, whatever it was created with. What still differs: the default
+engine moves the same node objects every tick, and the WASM engine hands
+out fresh records after each tick (a pin set on the latest ones is
+honoured).</p>
+<p><code>engine: D3</code> still compiles and now means
+<code>Pure</code>.</p>
+<h3 id="how-fast">How fast</h3>
+<p>Many-body, links and centring through this library’s own loop,
+milliseconds per tick, Node 22 on an M1 Pro that was busy with other
+work (<code>node test/timing.mjs</code>; each block of ten ticks counted
+at its fastest over three interleaved runs):</p>
+<table>
+<thead>
+<tr>
+<th>Nodes</th>
+<th>default engine (PureScript, stock <code>purs</code>)</th>
+<th>WASM engine</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td>0.19</td>
+<td>0.04</td>
+</tr>
+<tr>
+<td>1,000</td>
+<td>2.9</td>
+<td>0.87</td>
+</tr>
+<tr>
+<td>10,000</td>
+<td>46</td>
+<td>12.6</td>
+</tr>
+</tbody>
+</table>
+<p>The WASM engine is 3 to 4 times faster. The default engine is about
+where d3-force’s own functions are in the same loop (hylograph-forces’s
+README has that comparison, and the figures under
+<code>purs-backend-es</code>, which are about a third lower). Not
+measured in a browser.</p>
+<p>The D3 kernel that this library used to carry was packaged separately
+as <a
+href="https://github.com/afcondon/purescript-hylograph-d3-kernel">hylograph-d3-kernel</a>,
+which is now deprecated: this library replaces it. This package depends
+on neither it nor <code>hylograph-wasm-kernel</code>.</p>
 <h2 id="features">Features</h2>
 <ul>
-<li><strong>Replaceable kernel</strong> - Same API over
-<code>d3-force</code>’s force functions or a Rust/WASM kernel</li>
+<li><strong>Replaceable kernel</strong> - Same API over a PureScript
+kernel or a Rust/WASM kernel</li>
+<li><strong>Repeatable</strong> - The same nodes, links and setup give
+the same layout every time</li>
 <li><strong>Framework Agnostic</strong> - Works with Halogen, React, or
 vanilla JS</li>
 <li><strong>Declarative Forces</strong> - Compose forces with a fluent
@@ -149,6 +250,10 @@ class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>}<span class="op">,</span> [])<span class="op">;</span></span></code></pre></div>
 <h2 id="available-forces">Available Forces</h2>
 <table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 65%" />
+</colgroup>
 <thead>
 <tr>
 <th>Force</th>
@@ -184,21 +289,128 @@ class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-
 <td><code>radial</code></td>
 <td>Pulls nodes toward a circle</td>
 </tr>
+<tr>
+<td><code>towards</code></td>
+<td>Pulls each node toward its own target point</td>
+</tr>
+<tr>
+<td><code>rectCollide</code></td>
+<td>Prevents rectangles (labels) overlapping</td>
+</tr>
+<tr>
+<td><code>contain</code></td>
+<td>Keeps nodes inside a rectangle, circle or convex polygon</td>
+</tr>
+<tr>
+<td><code>cohesion</code></td>
+<td>Pulls each node toward the centroid of its group</td>
+</tr>
+<tr>
+<td><code>directional</code></td>
+<td>Keeps each link’s target a gap beyond its source along an axis</td>
+</tr>
 </tbody>
 </table>
+<p><code>manyBody</code> can be scoped to pairs within a group or
+between groups, and <code>collide</code> can take a filter and a
+strength that follows alpha.</p>
+<p><code>rectCollide</code> takes a filter (<code>withFilter</code>) and
+the same scoping by group (<code>withinGroups</code>,
+<code>betweenGroups</code>: labels against dots, say, and not each
+other). A pinned rectangle is never moved by it, and what overlaps a
+pinned rectangle takes the whole push. With
+<code>withThroughSqueeze true</code>, a rectangle pushed from both sides
+on an axis goes through one of them instead of staying where the pushes
+cancel, which is what resolves crowded wide rectangles (labels among
+dots); it wants nothing else pressing them together, so let any pull
+cool to nothing. <code>contain</code> keeps a rectangle inside by its
+half-extents (<code>withHalfWidth</code>, <code>withHalfHeight</code>)
+as well as a circle by its radius. <code>directional</code> with
+<code>withHardLimit true</code> keeps exactly the gap asked for: after
+each tick a link short of its gap has its target moved along the axis by
+the shortfall. The rules in full are with the kernels
+(<code>Hylograph.Forces.RectCollide</code>, <code>.Contain</code>,
+<code>.Directional</code>).</p>
+<h2 id="stepping-it-yourself-one-handle-either-engine">Stepping it
+yourself: one handle, either engine</h2>
+<p><code>runSimulation</code> owns the clock. When you do (a timeline to
+scrub, a layout computed before anything is drawn, a test), use
+<code>Hylograph.Simulation.Stepped</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode purescript"><code class="sourceCode purescript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Hylograph.Simulation.Stepped</span> <span class="kw">as</span> <span class="dt">Stepped</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> Stepped.create <span class="dt">Stepped.Default</span> setup nodes links   <span class="co">-- or Stepped.Rust, after initWasm</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>nodes1 <span class="ot">&lt;-</span> sim<span class="op">.</span>step                       <span class="co">-- one tick; the nodes where it left them</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>still <span class="ot">&lt;-</span> sim<span class="op">.</span>settled { step<span class="op">:</span> <span class="fl">0.05</span>, acceleration<span class="op">:</span> <span class="fl">0.05</span> }</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>moment <span class="ot">&lt;-</span> sim<span class="op">.</span>snapshot                   <span class="co">-- carries its tick, the nodes, the links, the setup</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>sim<span class="op">.</span>pin <span class="dv">7</span> (<span class="dt">Just</span> { x<span class="op">:</span> <span class="fl">100.0</span>, y<span class="op">:</span> <span class="fl">50.0</span> })   <span class="co">-- hold node 7; Nothing lets it go</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>_ <span class="ot">&lt;-</span> sim<span class="op">.</span>retarget <span class="st">&quot;home&quot;</span> newTargets      <span class="co">-- a Towards force&#39;s targets</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>_ <span class="ot">&lt;-</span> sim<span class="op">.</span>reradius <span class="st">&quot;bump&quot;</span> newRadius       <span class="co">-- a Collide, Radial or Contain force&#39;s radii</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>sim<span class="op">.</span>relink otherLinks                    <span class="co">-- other links between the same nodes</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>sim<span class="op">.</span>reheat                               <span class="co">-- alpha back to one</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>nodes10 <span class="ot">&lt;-</span> sim<span class="op">.</span>advance <span class="dv">10</span>                <span class="co">-- ten ticks, exactly as ten steps</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>sim<span class="op">.</span>applySetup otherSetup                <span class="co">-- other forces and parameters, still moving</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>nodes2 <span class="ot">&lt;-</span> sim<span class="op">.</span>restore moment             <span class="co">-- the ticks that follow are the ones that followed</span></span></code></pre></div>
+<p>The record is the same on both engines and means the same:
+<code>step</code>, <code>advance</code>, <code>nodes</code>,
+<code>links</code>, <code>alpha</code>, <code>tick</code>,
+<code>cooled</code>, <code>settled</code>, <code>kineticEnergy</code>,
+<code>maxDisplacement</code>, <code>maxAcceleration</code>,
+<code>applySetup</code>, <code>retarget</code>, <code>reradius</code>,
+<code>relink</code>, <code>reheat</code>, <code>pin</code>,
+<code>snapshot</code>, <code>restore</code>, <code>free</code>.
+<code>test/stepped.mjs</code> runs every one on both.</p>
+<p><strong>Whose records are the nodes?</strong> Through this handle
+they are values: <code>create</code> copies what it is given and never
+writes into it, and every <code>step</code> returns new records. A pin
+written on the records most recently returned (<code>fx</code>,
+<code>fy</code>, as a drag does) is read by the next step. Underneath,
+the engines differ, on purpose:
+<code>Hylograph.ForceEngine.Simulation</code> (the default engine’s own
+loop) adopts the records passed to <code>setNodes</code>, moves them in
+place and returns the same records from <code>getNodes</code> every
+time, as d3 does, which is what drag and a DOM bound to the nodes rely
+on; <code>Hylograph.ForceEngine.Setup.WASM</code> keeps its numbers in
+the kernel and returns new records after each tick. If you use those
+modules directly, that is the difference to mind; <code>Stepped</code>
+is where they are made the same.</p>
+<p><code>applySetup</code> applies all of a setup’s parameters on both
+engines (alpha, alphaMin, alphaDecay, alphaTarget, velocityRetention),
+and through the handle alpha is zero once it has cooled below
+<code>alphaMin</code> on both.</p>
 <h2 id="modules">Modules</h2>
 <ul>
 <li><code>Hylograph.Simulation</code> - High-level API
 (recommended)</li>
+<li><code>Hylograph.Simulation.Stepped</code> - One caller-stepped
+handle over both engines: step, settle, snapshot, restore, pin</li>
 <li><code>Hylograph.Simulation.Emitter</code> - Framework-agnostic event
 system</li>
 <li><code>Hylograph.ForceEngine.Setup</code> - Declarative force
 configuration</li>
 <li><code>Hylograph.ForceEngine.Simulation</code> - Low-level simulation
 control (the library’s own loop)</li>
+<li><code>Hylograph.ForceEngine.Core</code> - Force recipes and handles,
+the tick’s parts, dragging</li>
 <li><code>Hylograph.ForceEngine.WASM</code> - WASM engine
 integration</li>
 </ul>
+<h2 id="tests">Tests</h2>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">spago</span> test                      <span class="co"># the pure computations</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> test/engine-parity.mjs     <span class="co"># one Setup through both engines, compared</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> test/wasm-engine-api.mjs   <span class="co"># the WASM engine&#39;s PureScript API</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> test/stepped.mjs           <span class="co"># the stepped handle, every function on both engines</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> test/browser-check.mjs     <span class="co"># headless Chrome: the Force Playground demo, and the three drags</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> test/timing.mjs            <span class="co"># ms per tick on each engine</span></span></code></pre></div>
+<p>The last five read the compiled <code>output/</code> and the WASM
+kernel: set <code>KERNEL_PKG</code> to a <code>pkg/</code> directory
+built from <a
+href="https://github.com/afcondon/hylograph-force-kernel">hylograph-force-kernel</a>
+(without it they look where the author’s workspace keeps one). The
+browser check also needs the bundled Force Playground from <a
+href="https://github.com/afcondon/purescript-hylograph-demos">purescript-hylograph-demos</a>
+checked out beside this repository, and puppeteer-core.</p>
 <h2 id="part-of-hylograph">Part of Hylograph</h2>
 <p>This package is part of the Hylograph visualization ecosystem: -
 <strong>hylograph-selection</strong> - HATS trees and DOM rendering -
